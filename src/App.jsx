@@ -6,6 +6,7 @@ import Home from './pages/Home';
 import ProductDetail from './pages/ProductDetail';
 import Reviews from './pages/Reviews';
 import Checkout from './pages/Checkout';
+import AdminDashboard from './pages/AdminDashboard';
 
 function App() {
   const [currentTab, setCurrentTab] = useState(() => {
@@ -34,19 +35,20 @@ function App() {
     return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   });
 
+  const fetchProducts = async () => {
+    try {
+      const res = await fetch('/api/products');
+      if (res.ok) {
+        const data = await res.json();
+        setProductsList(data);
+      }
+    } catch (err) {
+      console.error('Erreur de chargement des produits :', err);
+    }
+  };
+
   // Fetch products catalogue
   useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const res = await fetch('/api/products');
-        if (res.ok) {
-          const data = await res.json();
-          setProductsList(data);
-        }
-      } catch (err) {
-        console.error('Erreur de chargement des produits :', err);
-      }
-    };
     fetchProducts();
   }, []);
 
@@ -143,6 +145,9 @@ function App() {
   const handleLogout = () => {
     localStorage.removeItem('dynace_jwt');
     setCurrentUser(null);
+    if (currentTab === 'admin') {
+      setCurrentTab('home');
+    }
   };
 
   const cartCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
@@ -214,6 +219,10 @@ function App() {
             currentUser={currentUser}
             onLogin={handleLoginSuccess}
           />
+        )}
+
+        {currentTab === 'admin' && currentUser?.isAdmin && (
+          <AdminDashboard onRefreshProducts={fetchProducts} />
         )}
       </main>
 

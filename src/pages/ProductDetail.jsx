@@ -80,7 +80,34 @@ export default function ProductDetail({ product, onBack, onAddToCart, onBuyNow }
         <div className="detail-info">
           <span className="detail-category">{product.category}</span>
           <h1 className="detail-title">{product.name}</h1>
-          <span className="detail-price">{product.price.toFixed(2)} €</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: '0.5rem', marginBottom: '1.25rem' }}>
+            <span className="detail-price" style={{ margin: 0 }}>{product.price.toFixed(2)} €</span>
+            {product.stock !== undefined && product.stock <= 0 ? (
+              <span style={{
+                backgroundColor: 'var(--danger-bg)',
+                color: 'var(--danger)',
+                padding: '0.25rem 0.75rem',
+                borderRadius: '50px',
+                fontSize: '0.85rem',
+                fontWeight: '600',
+                border: '1px solid var(--danger)'
+              }}>
+                Rupture de Stock
+              </span>
+            ) : (
+              <span style={{
+                backgroundColor: 'var(--success-bg)',
+                color: 'var(--success)',
+                padding: '0.25rem 0.75rem',
+                borderRadius: '50px',
+                fontSize: '0.85rem',
+                fontWeight: '600',
+                border: '1px solid var(--success)'
+              }}>
+                En stock ({product.stock !== undefined ? product.stock : 50} disponibles)
+              </span>
+            )}
+          </div>
           
           <div className="detail-divider" />
 
@@ -111,34 +138,53 @@ export default function ProductDetail({ product, onBack, onAddToCart, onBuyNow }
           <div className="detail-divider" />
 
           {/* Sélecteur de quantité */}
-          <div className="detail-quantity-wrapper">
-            <span className="quantity-label">Quantité</span>
-            <div className="quantity-selector">
-              <button onClick={handleDecrement} aria-label="Diminuer la quantité" className="qty-btn">
-                <Minus size={16} />
-              </button>
-              <span className="qty-value">{quantity}</span>
-              <button onClick={handleIncrement} aria-label="Augmenter la quantité" className="qty-btn">
-                <Plus size={16} />
-              </button>
+          {!(product.stock !== undefined && product.stock <= 0) && (
+            <div className="detail-quantity-wrapper">
+              <span className="quantity-label">Quantité</span>
+              <div className="quantity-selector">
+                <button onClick={handleDecrement} aria-label="Diminuer la quantité" className="qty-btn">
+                  <Minus size={16} />
+                </button>
+                <span className="qty-value">{quantity}</span>
+                <button onClick={handleIncrement} aria-label="Augmenter la quantité" className="qty-btn">
+                  <Plus size={16} />
+                </button>
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Boutons d'achats */}
           <div className="detail-actions">
             <button 
               className="add-cart-large-btn"
-              onClick={() => onAddToCart(product, quantity)}
+              onClick={() => !(product.stock !== undefined && product.stock <= 0) && onAddToCart(product, quantity)}
+              disabled={product.stock !== undefined && product.stock <= 0}
+              style={product.stock !== undefined && product.stock <= 0 ? {
+                backgroundColor: 'var(--bg-secondary)',
+                color: 'var(--text-secondary)',
+                cursor: 'not-allowed',
+                border: '1px solid var(--border-color)',
+                opacity: 0.6
+              } : {}}
             >
               <ShoppingBag size={18} />
-              <span>Ajouter au panier</span>
+              <span>{product.stock !== undefined && product.stock <= 0 ? 'Épuisé' : 'Ajouter au panier'}</span>
             </button>
             <button 
               className="buy-now-btn"
-              onClick={() => onBuyNow(product, quantity)}
+              onClick={() => !(product.stock !== undefined && product.stock <= 0) && onBuyNow(product, quantity)}
+              disabled={product.stock !== undefined && product.stock <= 0}
+              style={product.stock !== undefined && product.stock <= 0 ? {
+                backgroundColor: 'var(--bg-secondary)',
+                color: 'var(--text-secondary)',
+                cursor: 'not-allowed',
+                border: '1px solid var(--border-color)',
+                opacity: 0.6,
+                boxShadow: 'none'
+              } : {}}
             >
               <CreditCard size={18} />
-              <span>Acheter immédiatement</span>
+              <span>{product.stock !== undefined && product.stock <= 0 ? 'Rupture de stock' : 'Acheter immédiatement'}</span>
             </button>
           </div>
         </div>

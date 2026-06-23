@@ -39,6 +39,17 @@ export default function Navbar({
             Avis Clients
           </a>
         </li>
+        {currentUser?.isAdmin && (
+          <li>
+            <a
+              className={currentTab === 'admin' ? 'active' : ''}
+              onClick={() => setCurrentTab('admin')}
+              style={{ color: 'var(--accent-gold)', fontWeight: 'bold' }}
+            >
+              Admin
+            </a>
+          </li>
+        )}
       </ul>
 
       <div className="nav-actions">

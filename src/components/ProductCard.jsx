@@ -17,7 +17,11 @@ export default function ProductCard({ product, onSelect, onAddToCart }) {
             <span>Visuel bientôt disponible</span>
           </div>
         )}
-        <span className="product-tag">{product.category}</span>
+        {product.stock !== undefined && product.stock <= 0 ? (
+          <span className="product-tag" style={{ backgroundColor: 'var(--danger)', color: 'white' }}>Rupture</span>
+        ) : (
+          <span className="product-tag">{product.category}</span>
+        )}
       </div>
       
       <div className="product-info">
@@ -37,13 +41,23 @@ export default function ProductCard({ product, onSelect, onAddToCart }) {
             className="product-action-btn"
             onClick={(e) => {
               e.stopPropagation();
-              onAddToCart(product);
+              if (!(product.stock !== undefined && product.stock <= 0)) {
+                onAddToCart(product);
+              }
             }}
-            title="Ajouter au panier"
-            aria-label={`Ajouter ${product.name} au panier`}
+            disabled={product.stock !== undefined && product.stock <= 0}
+            style={product.stock !== undefined && product.stock <= 0 ? {
+              backgroundColor: 'var(--bg-secondary)',
+              color: 'var(--text-secondary)',
+              cursor: 'not-allowed',
+              border: '1px solid var(--border-color)',
+              boxShadow: 'none'
+            } : {}}
+            title={product.stock !== undefined && product.stock <= 0 ? "Rupture de stock" : "Ajouter au panier"}
+            aria-label={product.stock !== undefined && product.stock <= 0 ? `${product.name} est en rupture de stock` : `Ajouter ${product.name} au panier`}
           >
             <ShoppingCart size={15} />
-            <span>Ajouter</span>
+            <span>{product.stock !== undefined && product.stock <= 0 ? 'Épuisé' : 'Ajouter'}</span>
           </button>
         </div>
       </div>
