@@ -630,13 +630,17 @@ app.post('/api/payment/create-checkout-session', async (req, res) => {
 
   try {
     const lineItems = [];
+    let backendSubtotal = 0;
 
     // Récupérer et recalculer le prix réel des produits dans MongoDB
     for (const item of items) {
       const dbProduct = await Product.findById(item.id);
       if (!dbProduct) {
-        return res.status(404).json({ error: `Produit ${item.name} non trouvé.` });
+        return res.status(404).json({ error: `Produit ${item.name || item.id} non trouvé.` });
       }
+
+      const itemTotal = dbProduct.price * item.quantity;
+      backendSubtotal += itemTotal;
 
       lineItems.push({
         price_data: {
@@ -652,9 +656,17 @@ app.post('/api/payment/create-checkout-session', async (req, res) => {
       });
     }
 
-    // Calculer les frais de livraison (ex: gratuit dès 60 €)
-    const subtotal = items.reduce((acc, item) => acc + (item.price * item.quantity), 0);
-    const shippingCost = subtotal >= 60 ? 0 : 6.90;
+    // Récupérer les paramètres de livraison depuis la base de données
+    let threshold = 60;
+    let cost = 6.90;
+    const shippingSetting = await Setting.findOne({ key: 'shipping' });
+    if (shippingSetting && shippingSetting.value) {
+      threshold = shippingSetting.value.threshold;
+      cost = shippingSetting.value.cost;
+    }
+
+    // Calculer les frais de livraison avec le sous-total du backend
+    const shippingCost = backendSubtotal >= threshold ? 0 : cost;
 
     if (shippingCost > 0) {
       lineItems.push({
@@ -688,10 +700,10 @@ app.post('/api/payment/create-checkout-session', async (req, res) => {
         address,
         postalCode,
         city,
-        subtotal: subtotal.toFixed(2),
+        subtotal: backendSubtotal.toFixed(2),
         shipping: shippingCost.toFixed(2),
-        total: (subtotal + shippingCost).toFixed(2),
-        items: JSON.stringify(items.map(i => ({ id: i.id, name: i.name, price: i.price, quantity: i.quantity })))
+        total: (backendSubtotal + shippingCost).toFixed(2),
+        items: JSON.stringify(items.map(i => ({ id: i.id, quantity: i.quantity }))) // Ne pas stocker le prix frontend
       }
     });
 

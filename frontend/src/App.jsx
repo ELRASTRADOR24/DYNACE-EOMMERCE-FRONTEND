@@ -89,7 +89,25 @@ function App() {
     verifySession();
   }, []);
 
-  // Sync cart to localStorage
+  // Synchronize cart with latest product prices and names from DB
+  useEffect(() => {
+    if (productsList.length > 0 && cartItems.length > 0) {
+      setCartItems(prev => {
+        let changed = false;
+        const newCart = prev.map(item => {
+          const dbProduct = productsList.find(p => p.id === item.id);
+          if (dbProduct && (dbProduct.price !== item.price || dbProduct.name !== item.name)) {
+            changed = true;
+            return { ...item, price: dbProduct.price, name: dbProduct.name, image: dbProduct.image };
+          }
+          return item;
+        });
+        return changed ? newCart : prev;
+      });
+    }
+  }, [productsList]);
+
+  // Persist cart
   useEffect(() => {
     localStorage.setItem('dynace_cart', JSON.stringify(cartItems));
   }, [cartItems]);
