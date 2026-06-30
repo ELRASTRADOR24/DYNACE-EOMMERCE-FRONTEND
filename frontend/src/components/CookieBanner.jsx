@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Cookie } from 'lucide-react';
+import { X, Cookie, Check } from 'lucide-react';
 
 export default function CookieBanner() {
   const [isVisible, setIsVisible] = useState(false);
@@ -16,78 +16,85 @@ export default function CookieBanner() {
     setIsVisible(false);
   };
 
+  const handleDecline = () => {
+    localStorage.setItem('dynace_cookie_consent', 'false');
+    setIsVisible(false);
+  };
+
   if (!isVisible) return null;
 
   return (
     <div style={{
       position: 'fixed',
-      bottom: 0,
-      left: 0,
-      right: 0,
+      bottom: '20px',
+      left: '20px',
       backgroundColor: 'var(--bg-primary)',
-      borderTop: '1px solid var(--border-color)',
-      padding: '1.5rem',
+      border: '1px solid var(--border-color)',
+      borderRadius: '12px',
+      padding: '1.25rem',
       display: 'flex',
       flexDirection: 'column',
-      gap: '1rem',
+      gap: '0.75rem',
       zIndex: 9999,
-      boxShadow: '0 -4px 20px rgba(0,0,0,0.1)'
+      maxWidth: '320px',
+      boxShadow: '0 10px 25px rgba(0,0,0,0.1)'
     }}>
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '1rem', maxWidth: '1200px', margin: '0 auto', width: '100%' }}>
-        
-        <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
-          <div style={{ 
-            backgroundColor: 'var(--bg-secondary)', 
-            padding: '0.75rem', 
-            borderRadius: '50%',
-            color: 'var(--primary-gold)'
-          }}>
-            <Cookie size={24} />
-          </div>
-          <div>
-            <h3 style={{ margin: '0 0 0.5rem 0', color: 'var(--text-primary)', fontSize: '1.1rem' }}>Vos préférences de cookies</h3>
-            <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '0.9rem', lineHeight: '1.5' }}>
-              Nous utilisons des cookies pour assurer le bon fonctionnement de votre panier d'achat, sécuriser vos paiements via Stripe et améliorer votre expérience sur le site. En continuant votre navigation, vous acceptez notre politique de cookies.
-            </p>
-          </div>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--primary-gold)' }}>
+          <Cookie size={20} />
+          <h3 style={{ margin: 0, color: 'var(--text-primary)', fontSize: '1rem' }}>Cookies</h3>
         </div>
+        <button 
+          onClick={() => setIsVisible(false)}
+          style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', padding: '0.25rem' }}
+        >
+          <X size={16} />
+        </button>
+      </div>
 
-        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-          <button 
-            onClick={handleAccept}
-            style={{
-              padding: '0.75rem 2rem',
-              backgroundColor: 'var(--primary-gold)',
-              color: 'var(--bg-primary)',
-              border: 'none',
-              borderRadius: '25px',
-              fontWeight: '600',
-              cursor: 'pointer',
-              whiteSpace: 'nowrap',
-              transition: 'all 0.2s ease'
-            }}
-            onMouseOver={(e) => e.target.style.transform = 'scale(1.05)'}
-            onMouseOut={(e) => e.target.style.transform = 'scale(1)'}
-          >
-            J'accepte
-          </button>
-          <button 
-            onClick={() => setIsVisible(false)}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: 'var(--text-secondary)',
-              cursor: 'pointer',
-              padding: '0.5rem',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}
-          >
-            <X size={24} />
-          </button>
-        </div>
+      <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '0.85rem', lineHeight: '1.4' }}>
+        Nous utilisons des cookies essentiels au panier et au paiement sécurisé.
+      </p>
 
+      <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.25rem' }}>
+        <button 
+          onClick={handleAccept}
+          style={{
+            flex: 1,
+            padding: '0.5rem',
+            backgroundColor: 'var(--primary-gold)',
+            color: 'var(--bg-primary)',
+            border: 'none',
+            borderRadius: '6px',
+            fontWeight: '600',
+            fontSize: '0.85rem',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '0.25rem',
+            transition: 'background-color 0.2s'
+          }}
+        >
+          <Check size={14} /> J'accepte
+        </button>
+        <button 
+          onClick={handleDecline}
+          style={{
+            flex: 1,
+            padding: '0.5rem',
+            backgroundColor: 'var(--bg-secondary)',
+            color: 'var(--text-primary)',
+            border: '1px solid var(--border-color)',
+            borderRadius: '6px',
+            fontWeight: '500',
+            fontSize: '0.85rem',
+            cursor: 'pointer',
+            transition: 'background-color 0.2s'
+          }}
+        >
+          Je refuse
+        </button>
       </div>
     </div>
   );

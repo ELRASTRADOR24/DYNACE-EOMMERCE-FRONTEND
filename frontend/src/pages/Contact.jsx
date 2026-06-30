@@ -85,7 +85,7 @@ export default function Contact() {
               <div style={{ backgroundColor: 'var(--bg-secondary)', padding: '0.75rem', borderRadius: '50%' }}>
                 <Mail size={20} style={{ color: 'var(--primary-green)' }} />
               </div>
-              <span>contact@dynaceglobal.com</span>
+              <span>dynaceglogal@gmail.com</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', color: 'var(--text-secondary)' }}>
               <div style={{ backgroundColor: 'var(--bg-secondary)', padding: '0.75rem', borderRadius: '50%' }}>

@@ -176,7 +176,13 @@ const initialProducts = [
 
 export const seedProducts = async () => {
   try {
-    // Vider la collection products dans MongoDB
+    const count = await Product.countDocuments();
+    if (count > 0) {
+      console.log('Catalogue déjà présent dans MongoDB, on ignore le seeding initial.');
+      return;
+    }
+
+    // Vider la collection products dans MongoDB au cas où
     await Product.deleteMany({});
     console.log('Remplissage de la table products (MongoDB) avec le catalogue Dynace Global...');
     
