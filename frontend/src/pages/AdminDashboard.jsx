@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2, Package, ShoppingCart, RefreshCw, Save, X, Check, Truck, AlertCircle } from 'lucide-react';
+import { Plus, Edit2, Trash2, Package, ShoppingCart, RefreshCw, Save, X, Check, Truck, AlertCircle, Settings } from 'lucide-react';
 
 export default function AdminDashboard({ onRefreshProducts }) {
   const [activeSubTab, setActiveSubTab] = useState('products'); // 'products' or 'orders'
@@ -32,6 +32,11 @@ export default function AdminDashboard({ onRefreshProducts }) {
   // Notification states
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
+
+  // Settings State
+  const [shippingThreshold, setShippingThreshold] = useState(60);
+  const [shippingCost, setShippingCost] = useState(6.90);
+  const [settingsLoading, setSettingsLoading] = useState(false);
 
   // Fetch products
   const fetchProducts = async () => {
@@ -74,9 +79,24 @@ export default function AdminDashboard({ onRefreshProducts }) {
     }
   };
 
+  // Fetch settings
+  const fetchSettings = async () => {
+    try {
+      const res = await fetch('/api/settings/shipping');
+      if (res.ok) {
+        const data = await res.json();
+        setShippingThreshold(data.threshold);
+        setShippingCost(data.cost);
+      }
+    } catch (err) {
+      console.error('Erreur paramètres', err);
+    }
+  };
+
   useEffect(() => {
     fetchProducts();
     fetchOrders();
+    fetchSettings();
   }, []);
 
   const showError = (msg) => {
@@ -232,14 +252,40 @@ export default function AdminDashboard({ onRefreshProducts }) {
         body: JSON.stringify({ status: newStatus })
       });
       if (res.ok) {
-        showSuccess('Statut de la commande mis à jour.');
+        showSuccess('Statut de commande mis à jour.');
         fetchOrders();
       } else {
         const data = await res.json();
-        showError(data.error || 'Erreur lors de la mise à jour du statut.');
+        showError(data.error || 'Erreur mise à jour commande.');
       }
     } catch (err) {
-      showError('Erreur réseau lors de la mise à jour.');
+      showError('Erreur de connexion.');
+    }
+  };
+
+  // Save Settings
+  const handleSaveSettings = async (e) => {
+    e.preventDefault();
+    setSettingsLoading(true);
+    const token = localStorage.getItem('dynace_jwt');
+    try {
+      const res = await fetch('/api/admin/settings/shipping', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ threshold: shippingThreshold, cost: shippingCost })
+      });
+      if (res.ok) {
+        showSuccess('Paramètres de livraison mis à jour.');
+      } else {
+        showError('Erreur lors de la mise à jour des paramètres.');
+      }
+    } catch (err) {
+      showError('Erreur de connexion.');
+    } finally {
+      setSettingsLoading(false);
     }
   };
 
@@ -338,6 +384,26 @@ export default function AdminDashboard({ onRefreshProducts }) {
               {orders.filter(o => o.status === 'Payé').length} nouv.
             </span>
           )}
+        </button>
+        <button 
+          onClick={() => setActiveSubTab('settings')}
+          style={{
+            background: 'none',
+            border: 'none',
+            padding: '1rem 0',
+            fontSize: '1.1rem',
+            fontWeight: '600',
+            color: activeSubTab === 'settings' ? 'var(--primary-green)' : 'var(--text-secondary)',
+            borderBottom: activeSubTab === 'settings' ? '3px solid var(--primary-green)' : '3px solid transparent',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            transition: 'all 0.2s'
+          }}
+        >
+          <Settings size={18} />
+          Paramètres
         </button>
       </div>
 
@@ -591,6 +657,88 @@ export default function AdminDashboard({ onRefreshProducts }) {
               </table>
             </div>
           )}
+        </div>
+      )}
+
+      {/* SETTINGS PANEL */}
+      {activeSubTab === 'settings' && (
+        <div style={{ maxWidth: '600px' }}>
+          <h3 style={{ fontSize: '1.5rem', fontFamily: 'var(--serif)', color: 'var(--text-primary)', marginBottom: '1.5rem' }}>
+            Paramètres de Livraison
+          </h3>
+          
+          <form onSubmit={handleSaveSettings} style={{ background: 'rgba(255, 255, 255, 0.7)', backdropFilter: 'blur(10px)', padding: '2rem', borderRadius: '15px', border: '1px solid rgba(255, 255, 255, 0.5)', boxShadow: '0 8px 32px rgba(31, 38, 135, 0.05)' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+              
+              <div>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500', color: 'var(--text-primary)' }}>
+                  Frais de livraison de base (€)
+                </label>
+                <input 
+                  type="number" 
+                  step="0.01"
+                  min="0"
+                  value={shippingCost}
+                  onChange={(e) => setShippingCost(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem 1rem',
+                    borderRadius: '8px',
+                    border: '1px solid var(--border-color)',
+                    background: 'white',
+                    fontSize: '1rem',
+                    color: 'var(--text-primary)'
+                  }}
+                  required
+                />
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.5rem' }}>
+                  Coût fixe appliqué si le sous-total est inférieur au seuil de gratuité. (Ex: 6.90)
+                </p>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500', color: 'var(--text-primary)' }}>
+                  Seuil de livraison gratuite (€)
+                </label>
+                <input 
+                  type="number" 
+                  step="0.01"
+                  min="0"
+                  value={shippingThreshold}
+                  onChange={(e) => setShippingThreshold(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem 1rem',
+                    borderRadius: '8px',
+                    border: '1px solid var(--border-color)',
+                    background: 'white',
+                    fontSize: '1rem',
+                    color: 'var(--text-primary)'
+                  }}
+                  required
+                />
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.5rem' }}>
+                  Le montant à partir duquel la livraison devient offerte. (Ex: 60.00)
+                </p>
+              </div>
+
+              <button 
+                type="submit" 
+                disabled={settingsLoading}
+                className="btn-primary"
+                style={{ 
+                  marginTop: '1rem',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  gap: '0.5rem'
+                }}
+              >
+                {settingsLoading ? <RefreshCw size={20} className="spin" /> : <Save size={20} />}
+                Enregistrer les paramètres
+              </button>
+            </div>
+          </form>
         </div>
       )}
 

@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
-import { connectDatabase, User, Product, Order, Review } from './database.js';
+import { connectDatabase, User, Product, Order, Review, Setting } from './database.js';
 import { seedProducts } from './seed.js';
 import Stripe from 'stripe';
 import multer from 'multer';
@@ -943,6 +943,44 @@ app.delete('/api/admin/products/:id', authenticateToken, verifyAdmin, async (req
   } catch (err) {
     console.error('Erreur suppression produit :', err.message);
     res.status(500).json({ error: 'Erreur lors de la suppression du produit.' });
+  }
+});
+
+// --- SETTINGS ROUTES ---
+
+// GET /api/settings/shipping (Public)
+app.get('/api/settings/shipping', async (req, res) => {
+  try {
+    const setting = await Setting.findOne({ key: 'shipping' });
+    if (setting && setting.value) {
+      res.json(setting.value);
+    } else {
+      res.json({ threshold: 60, cost: 6.90 }); // Default values
+    }
+  } catch (err) {
+    console.error('Erreur lecture paramètres de livraison:', err.message);
+    res.status(500).json({ error: 'Erreur serveur.' });
+  }
+});
+
+// PUT /api/admin/settings/shipping (Admin)
+app.put('/api/admin/settings/shipping', authenticateToken, verifyAdmin, async (req, res) => {
+  const { threshold, cost } = req.body;
+  if (threshold === undefined || cost === undefined) {
+    return res.status(400).json({ error: 'Données manquantes (threshold, cost).' });
+  }
+  
+  try {
+    const value = { threshold: Number(threshold), cost: Number(cost) };
+    const updatedSetting = await Setting.findOneAndUpdate(
+      { key: 'shipping' },
+      { key: 'shipping', value },
+      { upsert: true, new: true }
+    );
+    res.json({ success: true, setting: updatedSetting.value });
+  } catch (err) {
+    console.error('Erreur mise à jour paramètres de livraison:', err.message);
+    res.status(500).json({ error: 'Erreur serveur.' });
   }
 });
 

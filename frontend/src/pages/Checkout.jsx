@@ -32,9 +32,21 @@ export default function Checkout({ cartItems, onClearCart, onBackToShopping, cur
   const [regPostalCode, setRegPostalCode] = useState('');
   const [regCity, setRegCity] = useState('');
 
+  const [shippingThreshold, setShippingThreshold] = useState(60);
+  const [shippingCostBase, setShippingCostBase] = useState(6.90);
+
+  useEffect(() => {
+    fetch('/api/settings/shipping')
+      .then(res => res.json())
+      .then(data => {
+        if (data.threshold !== undefined) setShippingThreshold(data.threshold);
+        if (data.cost !== undefined) setShippingCostBase(data.cost);
+      })
+      .catch(err => console.error(err));
+  }, []);
+
   const subtotal = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
-  const shippingThreshold = 60;
-  const shippingCost = subtotal >= shippingThreshold || subtotal === 0 ? 0 : 6.90;
+  const shippingCost = subtotal >= shippingThreshold || subtotal === 0 ? 0 : shippingCostBase;
   const grandTotal = subtotal + shippingCost;
 
   // Effect to automatically set registered mode if currentUser logs in

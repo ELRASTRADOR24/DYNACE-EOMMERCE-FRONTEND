@@ -78,3 +78,10 @@ const reviewSchema = new mongoose.Schema({
 
 export const Review = mongoose.model('Review', reviewSchema);
 
+// Schéma Configuration (Setting)
+const settingSchema = new mongoose.Schema({
+  key: { type: String, required: true, unique: true },
+  value: { type: mongoose.Schema.Types.Mixed, required: true }
+});
+
+export const Setting = mongoose.model('Setting', settingSchema);
