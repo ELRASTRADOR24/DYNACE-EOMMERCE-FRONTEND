@@ -11,204 +11,7 @@ import path from 'path';
 import nodemailer from 'nodemailer';
 import { v2 as cloudinary } from 'cloudinary';
 import { CloudinaryStorage } from 'multer-storage-cloudinary';
-import { sendContactEmail, sendOrderNotificationEmail } from './utils/email.js';
-
-// Configuration de Nodemailer pour les confirmations de commandes
-const createMailTransporter = async () => {
-  if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
-    return nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
-      port: parseInt(process.env.SMTP_PORT || '587'),
-      secure: process.env.SMTP_SECURE === 'true',
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS
-      }
-    });
-  }
-  
-  // Mode développement : Ethereal Mail (compte temporaire gratuit)
-  try {
-    const testAccount = await nodemailer.createTestAccount();
-    return nodemailer.createTransport({
-      host: "smtp.ethereal.email",
-      port: 587,
-      secure: false,
-      auth: {
-        user: testAccount.user,
-        pass: testAccount.pass
-      }
-    });
-  } catch (err) {
-    console.warn("⚠️ Nodemailer: Impossible de créer un compte Ethereal de test (pas d'internet ?). Fallback sur console.log :", err.message);
-    return null;
-  }
-};
-
-const sendOrderConfirmationEmail = async (order) => {
-  const transporter = await createMailTransporter();
-  
-  const itemsText = order.items.map(item => `- ${item.name} x${item.quantity} (${item.price.toFixed(2)} €)`).join('\n');
-  const itemsHtml = order.items.map(item => `
-    <tr>
-      <td style="padding: 10px; border-bottom: 1px solid #eee;">${item.name}</td>
-      <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: center;">x${item.quantity}</td>
-      <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">${item.price.toFixed(2)} €</td>
-    </tr>
-  `).join('');
-
-  const emailHtml = `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 8px;">
-      <div style="text-align: center; margin-bottom: 20px;">
-        <h2 style="color: #153A89;">Dynace Global</h2>
-        <p style="font-size: 1.1rem; color: #475569;">Merci pour votre commande !</p>
-      </div>
-      <p>Bonjour <strong>${order.first_name} ${order.last_name}</strong>,</p>
-      <p>Votre paiement a été validé avec succès. Voici le récapitulatif de votre commande <strong>${order.order_number}</strong> :</p>
-      
-      <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
-        <thead>
-          <tr style="background-color: #f8fafc;">
-            <th style="padding: 10px; text-align: left; border-bottom: 2px solid #ddd;">Produit</th>
-            <th style="padding: 10px; text-align: center; border-bottom: 2px solid #ddd;">Quantité</th>
-            <th style="padding: 10px; text-align: right; border-bottom: 2px solid #ddd;">Prix</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${itemsHtml}
-        </tbody>
-      </table>
-      
-      <div style="text-align: right; font-size: 1.1rem; margin-top: 20px;">
-        <p>Sous-total : ${order.subtotal.toFixed(2)} €</p>
-        <p>Livraison : ${order.shipping === 0 ? 'Gratuit' : '${order.shipping.toFixed(2)} €'}</p>
-        <p style="font-size: 1.3rem; color: #153A89; font-weight: bold;">Total : ${order.total.toFixed(2)} €</p>
-      </div>
-      
-      <div style="margin-top: 30px; padding: 15px; background-color: #f1f5f9; border-radius: 6px;">
-        <h4 style="margin-top: 0; color: #153A89;">Adresse de livraison :</h4>
-        <p style="margin-bottom: 0; color: #475569;">
-          ${order.first_name} ${order.last_name}<br/>
-          ${order.address}<br/>
-          ${order.postal_code} ${order.city}
-        </p>
-      </div>
-      
-      <p style="margin-top: 30px; font-size: 0.9rem; color: #94a3b8; text-align: center;">
-        Cet e-mail a été envoyé automatiquement. Pour toute question, contactez notre support.
-      </p>
-    </div>
-  `;
-
-  if (!transporter) {
-    console.log("=== EMAIL CONFIRMATION LOG (Simulé) ===");
-    console.log(`Destinataire : ${order.email}`);
-    console.log(`Sujet : Confirmation de votre commande ${order.order_number} - Dynace Global`);
-    console.log(itemsText);
-    console.log("=========================================");
-    return;
-  }
-
-  try {
-    const info = await transporter.sendMail({
-      from: '"Dynace Global" <noreply@dynaceglobal.com>',
-      to: order.email,
-      subject: `Confirmation de votre commande ${order.order_number} - Dynace Global`,
-      text: `Merci pour votre commande !\n\nNuméro de commande : ${order.order_number}\n\nArticles :\n${itemsText}\n\nTotal : ${order.total.toFixed(2)} €`,
-      html: emailHtml
-    });
-    
-    console.log(`✉️ E-mail de confirmation envoyé à ${order.email}`);
-    if (nodemailer.getTestMessageUrl(info)) {
-      console.log(`🔗 Lien de prévisualisation de l'e-mail : ${nodemailer.getTestMessageUrl(info)}`);
-    }
-  } catch (err) {
-    console.error("❌ Erreur lors de l'envoi de l'e-mail de confirmation :", err.message);
-  }
-};
-
-const sendAdminNotificationEmail = async (order) => {
-  const transporter = await createMailTransporter();
-  const adminEmail = process.env.EMAIL_USER || 'dynaceglogal@gmail.com';
-  
-  // Estimation du poids : environ 300g par article
-  const totalItems = order.items.reduce((sum, item) => sum + item.quantity, 0);
-  const estimatedWeightKg = (totalItems * 0.3).toFixed(2);
-  
-  const itemsHtml = order.items.map(item => `
-    <tr>
-      <td style="padding: 10px; border-bottom: 1px solid #eee;">${item.name}</td>
-      <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: center;">x${item.quantity}</td>
-    </tr>
-  `).join('');
-
-  const emailHtml = `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 8px;">
-      <h2 style="color: #d97706;">Nouvelle Commande ! 🎉</h2>
-      <p>Vous avez reçu une nouvelle commande (<strong>${order.order_number}</strong>).</p>
-      
-      <div style="margin-top: 20px; padding: 15px; background-color: #f8fafc; border-radius: 6px;">
-        <h3 style="margin-top: 0; color: #0f172a;">Infos Client :</h3>
-        <p style="margin-bottom: 0;">
-          <strong>Nom :</strong> ${order.first_name} ${order.last_name}<br/>
-          <strong>E-mail :</strong> ${order.email}<br/>
-          <strong>Total payé :</strong> ${order.total.toFixed(2)} €
-        </p>
-      </div>
-
-      <div style="margin-top: 20px; padding: 15px; background-color: #f0fdf4; border-radius: 6px;">
-        <h3 style="margin-top: 0; color: #166534;">À préparer et expédier :</h3>
-        <table style="width: 100%; border-collapse: collapse; margin-bottom: 15px;">
-          <thead>
-            <tr>
-              <th style="text-align: left; border-bottom: 1px solid #ccc; padding-bottom: 5px;">Produit</th>
-              <th style="text-align: center; border-bottom: 1px solid #ccc; padding-bottom: 5px;">Quantité</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${itemsHtml}
-          </tbody>
-        </table>
-        
-        <h4 style="margin-bottom: 5px;">Adresse d'expédition :</h4>
-        <p style="margin-top: 0; padding: 10px; background: #fff; border: 1px solid #ccc; border-radius: 4px;">
-          ${order.first_name} ${order.last_name}<br/>
-          ${order.address}<br/>
-          ${order.postal_code} ${order.city}
-        </p>
-      </div>
-
-      <div style="margin-top: 20px; padding: 15px; background-color: #eff6ff; border-radius: 6px;">
-        <h3 style="margin-top: 0; color: #1e3a8a;">Préparation Colissimo (La Poste) 📦</h3>
-        <p><strong>Poids estimé total :</strong> ~${estimatedWeightKg} kg (${totalItems} article(s) à ~300g chacun)</p>
-        <p>Les frais de port payés par le client étaient de : <strong>${order.shipping === 0 ? 'Gratuit' : order.shipping.toFixed(2) + ' €'}</strong>.</p>
-        <a href="https://www.laposte.fr/colissimo-en-ligne" target="_blank" style="display: inline-block; margin-top: 10px; padding: 10px 15px; background-color: #1e3a8a; color: #fff; text-decoration: none; border-radius: 4px; font-weight: bold;">
-          Acheter l'étiquette sur La Poste
-        </a>
-      </div>
-    </div>
-  `;
-
-  if (!transporter) {
-    console.log("=== EMAIL NOTIFICATION ADMIN (Simulé) ===");
-    console.log(`Destinataire : ${adminEmail}`);
-    console.log(`Sujet : 🔔 Nouvelle Commande : ${order.order_number}`);
-    console.log("=========================================");
-    return;
-  }
-
-  try {
-    await transporter.sendMail({
-      from: '"Dynace Global" <noreply@dynaceglobal.com>',
-      to: adminEmail,
-      subject: `🔔 Nouvelle Commande : ${order.order_number}`,
-      html: emailHtml
-    });
-    console.log(`✉️ Notification admin envoyée à ${adminEmail}`);
-  } catch (err) {
-    console.error("❌ Erreur lors de l'envoi de la notification admin :", err.message);
-  }
-};
+import { sendContactEmail, sendOrderNotificationEmail, sendCustomerOrderConfirmationEmail } from './utils/email.js';
 
 // Charge les variables d'environnement depuis le fichier .env
 try {
@@ -618,6 +421,25 @@ app.get('/api/orders/user', authenticateToken, async (req, res) => {
   }
 });
 
+// Track Order Public Endpoint
+app.get('/api/orders/track/:orderNumber', async (req, res) => {
+  try {
+    const order = await Order.findOne({ order_number: req.params.orderNumber });
+    if (!order) {
+      return res.status(404).json({ error: 'Commande non trouvée.' });
+    }
+    res.json({
+      orderNumber: order.order_number,
+      status: order.status,
+      date: order.created_at,
+      total: order.total
+    });
+  } catch (err) {
+    console.error('Erreur suivi commande :', err.message);
+    res.status(500).json({ error: 'Erreur lors de la récupération du suivi.' });
+  }
+});
+
 // --- PAYMENT ROUTES ---
 
 // 1. Create Checkout Session
@@ -787,9 +609,8 @@ app.post('/api/payment/confirm-order', async (req, res) => {
       }
     }
 
-    // Envoi de l'e-mail de confirmation en arrière-plan
-    sendOrderConfirmationEmail(newOrder);
-    sendAdminNotificationEmail(newOrder);
+    // Envoi de l'e-mail de confirmation au client
+    await sendCustomerOrderConfirmationEmail(newOrder);
 
     res.status(201).json({ success: true, orderNumber });
   } catch (err) {

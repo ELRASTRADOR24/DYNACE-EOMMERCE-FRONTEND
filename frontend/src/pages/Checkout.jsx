@@ -106,15 +106,34 @@ export default function Checkout({ cartItems, onClearCart, onBackToShopping, cur
     }
   }, [onClearCart]);
 
-  // Simulate tracker steps progression
+  // Fetch real tracker status
   useEffect(() => {
-    if (isOrdered && trackerStep < 3) {
-      const timer = setTimeout(() => {
-        setTrackerStep(prev => prev + 1);
-      }, 4000);
-      return () => clearTimeout(timer);
+    let intervalId;
+    if (isOrdered && orderNumber) {
+      const fetchStatus = async () => {
+        try {
+          const res = await fetch(`/api/orders/track/${orderNumber}`);
+          const data = await res.json();
+          if (res.ok) {
+            // Mapping statuses to tracker steps
+            if (data.status === 'Payé') setTrackerStep(0);
+            else if (data.status === 'En préparation') setTrackerStep(1);
+            else if (data.status === 'Expédié') setTrackerStep(2);
+            else if (data.status === 'Livré') setTrackerStep(3);
+          }
+        } catch (err) {
+          console.error("Erreur récupération suivi:", err);
+        }
+      };
+      
+      // Fetch immédiatement puis toutes les 10 secondes
+      fetchStatus();
+      intervalId = setInterval(fetchStatus, 10000);
     }
-  }, [isOrdered, trackerStep]);
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [isOrdered, orderNumber]);
 
   const handleInlineLogin = async (e) => {
     e.preventDefault();
