@@ -60,7 +60,7 @@ export default function Footer({ setCurrentTab }) {
           <h4>Liens Utiles</h4>
           <a onClick={() => setCurrentTab('about')}>À propos de Dynace</a>
           <a onClick={() => setCurrentTab('contact')}>Contact & FAQ</a>
-          <a onClick={() => setCurrentTab('orders')}>Suivre ma commande</a>
+          <a onClick={() => setCurrentTab('track')}>Suivre ma commande</a>
         </div>
 
         <div className="footer-col">

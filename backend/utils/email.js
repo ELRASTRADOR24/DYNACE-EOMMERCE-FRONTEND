@@ -168,6 +168,13 @@ export const sendCustomerOrderConfirmationEmail = async (order) => {
           </p>
         </div>
         
+        <div style="margin-top: 30px; text-align: center;">
+          <a href="https://dynace-shop.vercel.app/track?order=${order.order_number}&email=${encodeURIComponent(order.email)}" 
+             style="display: inline-block; padding: 12px 24px; background-color: #153A89; color: white; text-decoration: none; border-radius: 25px; font-weight: bold; font-size: 1.1rem;">
+             Suivre ma commande
+          </a>
+        </div>
+        
         <p style="margin-top: 30px; font-size: 0.9rem; color: #94a3b8; text-align: center;">
           Cet e-mail a été envoyé automatiquement. Pour toute question, contactez notre support.
         </p>

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Star, Play, Pause, AlertCircle, MessageSquare } from 'lucide-react';
+import { Star, Play, Pause, AlertCircle, MessageSquare, CheckCircle } from 'lucide-react';
 import { reviews } from '../data/products';
 
 export default function Reviews() {
@@ -143,6 +143,9 @@ export default function Reviews() {
                         month: 'short',
                         year: 'numeric'
                       })}
+                    </span>
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', color: 'var(--primary-green)', fontSize: '0.75rem', fontWeight: 'bold', marginTop: '0.25rem' }}>
+                      <CheckCircle size={12} /> Achat vérifié
                     </span>
                   </div>
                   <div className="review-stars-feed-card">

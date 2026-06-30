@@ -14,10 +14,12 @@ import Checkout from './pages/Checkout';
 import Orders from './pages/Orders';
 import Contact from './pages/Contact';
 import Footer from './components/Footer';
+import OrderTracking from './pages/OrderTracking';
 
 function App() {
   const [currentTab, setCurrentTab] = useState(() => {
     const params = new URLSearchParams(window.location.search);
+    if (window.location.pathname === '/track') return 'track';
     return params.get('payment') ? 'checkout' : 'home';
   });
   const [selectedProductId, setSelectedProductId] = useState(null);
@@ -268,6 +270,7 @@ function App() {
         {currentTab === 'legal' && <Legal />}
         {currentTab === 'terms' && <Terms />}
         {currentTab === 'contact' && <Contact />}
+        {currentTab === 'track' && <OrderTracking />}
       </main>
 
       <CartDrawer

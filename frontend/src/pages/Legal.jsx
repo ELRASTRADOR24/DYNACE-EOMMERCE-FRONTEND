@@ -12,7 +12,7 @@ export default function Legal() {
         </p>
         <ul style={{ color: 'var(--text-secondary)', lineHeight: '1.6', marginLeft: '1.5rem' }}>
           <li><strong>Adresse :</strong> 78300 Poissy, Yvelines, France</li>
-          <li><strong>Email :</strong> dynaceglogal@gmail.com</li>
+          <li><strong>Email :</strong> dynaceglobal@gmail.com</li>
           <li><strong>Immatriculation :</strong> [SIRET en cours d'attribution]</li>
         </ul>
       </section>

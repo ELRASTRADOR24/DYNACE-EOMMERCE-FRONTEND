@@ -461,6 +461,10 @@ app.post('/api/payment/create-checkout-session', async (req, res) => {
         return res.status(404).json({ error: `Produit ${item.name || item.id} non trouvé.` });
       }
 
+      if (dbProduct.stock < item.quantity) {
+        return res.status(400).json({ error: `Stock insuffisant pour ${dbProduct.name}. (En stock: ${dbProduct.stock})` });
+      }
+
       const itemTotal = dbProduct.price * item.quantity;
       backendSubtotal += itemTotal;
 
