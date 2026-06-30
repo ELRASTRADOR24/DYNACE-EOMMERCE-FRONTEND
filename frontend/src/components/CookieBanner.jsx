@@ -12,12 +12,9 @@ export default function CookieBanner() {
   }, []);
 
   const handleAccept = () => {
+    const analyticsChecked = document.getElementById('analytics-cookie')?.checked;
     localStorage.setItem('dynace_cookie_consent', 'true');
-    setIsVisible(false);
-  };
-
-  const handleDecline = () => {
-    localStorage.setItem('dynace_cookie_consent', 'false');
+    localStorage.setItem('dynace_cookie_analytics', analyticsChecked ? 'true' : 'false');
     setIsVisible(false);
   };
 
@@ -53,49 +50,39 @@ export default function CookieBanner() {
       </div>
 
       <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '0.85rem', lineHeight: '1.4' }}>
-        Nous utilisons des cookies essentiels au panier et au paiement sécurisé.
+        Gérez vos préférences en matière de cookies.
       </p>
 
-      <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.25rem' }}>
-        <button 
-          onClick={handleAccept}
-          style={{
-            flex: 1,
-            padding: '0.5rem',
-            backgroundColor: 'var(--primary-gold)',
-            color: 'var(--bg-primary)',
-            border: 'none',
-            borderRadius: '6px',
-            fontWeight: '600',
-            fontSize: '0.85rem',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '0.25rem',
-            transition: 'background-color 0.2s'
-          }}
-        >
-          <Check size={14} /> J'accepte
-        </button>
-        <button 
-          onClick={handleDecline}
-          style={{
-            flex: 1,
-            padding: '0.5rem',
-            backgroundColor: 'var(--bg-secondary)',
-            color: 'var(--text-primary)',
-            border: '1px solid var(--border-color)',
-            borderRadius: '6px',
-            fontWeight: '500',
-            fontSize: '0.85rem',
-            cursor: 'pointer',
-            transition: 'background-color 0.2s'
-          }}
-        >
-          Je refuse
-        </button>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: '0.5rem' }}>
+        <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.9rem', color: 'var(--text-primary)', cursor: 'not-allowed' }}>
+          <span>Cookies essentiels (Panier)</span>
+          <input type="checkbox" checked disabled style={{ accentColor: 'var(--primary-gold)', width: '16px', height: '16px' }} />
+        </label>
+        
+        <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.9rem', color: 'var(--text-primary)', cursor: 'pointer' }}>
+          <span>Cookies analytiques</span>
+          <input type="checkbox" id="analytics-cookie" defaultChecked style={{ accentColor: 'var(--primary-gold)', width: '16px', height: '16px', cursor: 'pointer' }} />
+        </label>
       </div>
+
+      <button 
+        onClick={handleAccept}
+        style={{
+          marginTop: '0.5rem',
+          padding: '0.75rem',
+          backgroundColor: 'var(--primary-gold)',
+          color: 'var(--bg-primary)',
+          border: 'none',
+          borderRadius: '8px',
+          fontWeight: '600',
+          fontSize: '0.9rem',
+          cursor: 'pointer',
+          width: '100%',
+          transition: 'background-color 0.2s'
+        }}
+      >
+        Enregistrer mes choix
+      </button>
     </div>
   );
 }

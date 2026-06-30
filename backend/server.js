@@ -213,6 +213,7 @@ app.get('/api/auth/me', authenticateToken, async (req, res) => {
 
 // Get all products
 app.get('/api/products', async (req, res) => {
+  res.setHeader('Cache-Control', 'no-store, max-age=0');
   try {
     const rows = await Product.find({});
     const productsList = await Promise.all(rows.map(async (row) => {
@@ -280,8 +281,9 @@ app.get('/api/products/:id', async (req, res) => {
 
 // --- REVIEWS ROUTES ---
 
-// Get all recent reviews (across all products)
+// Get all reviews
 app.get('/api/reviews', async (req, res) => {
+  res.setHeader('Cache-Control', 'no-store, max-age=0');
   try {
     const reviews = await Review.find({}).sort({ created_at: -1 }).limit(10);
     res.json(reviews);
@@ -429,10 +431,16 @@ app.get('/api/orders/track/:orderNumber', async (req, res) => {
       return res.status(404).json({ error: 'Commande non trouvée.' });
     }
     res.json({
-      orderNumber: order.order_number,
+      order_number: order.order_number,
       status: order.status,
-      date: order.created_at,
-      total: order.total
+      createdAt: order.created_at,
+      total: order.total,
+      email: order.email,
+      first_name: order.first_name,
+      last_name: order.last_name,
+      address: order.address,
+      postal_code: order.postal_code,
+      city: order.city
     });
   } catch (err) {
     console.error('Erreur suivi commande :', err.message);
@@ -787,6 +795,7 @@ app.delete('/api/admin/products/:id', authenticateToken, verifyAdmin, async (req
 
 // GET /api/settings/shipping (Public)
 app.get('/api/settings/shipping', async (req, res) => {
+  res.setHeader('Cache-Control', 'no-store, max-age=0');
   try {
     const setting = await Setting.findOne({ key: 'shipping' });
     if (setting && setting.value) {
