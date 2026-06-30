@@ -710,7 +710,7 @@ app.post('/api/payment/create-checkout-session', async (req, res) => {
     res.json({ url: session.url, session_id: session.id });
   } catch (err) {
     console.error('Erreur création session Stripe :', err.message);
-    res.status(500).json({ error: 'Impossible d\'initialiser le paiement sécurisé.' });
+    res.status(500).json({ error: err.message || 'Impossible d\'initialiser le paiement sécurisé.' });
   }
 });
 
