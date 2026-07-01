@@ -91,7 +91,7 @@ export default function Contact() {
               <div style={{ backgroundColor: 'var(--bg-secondary)', padding: '0.75rem', borderRadius: '50%' }}>
                 <Phone size={20} style={{ color: 'var(--primary-green)' }} />
               </div>
-              <span>+33 1 23 45 67 89</span>
+              <a href="tel:0641110020" style={{ color: 'inherit', textDecoration: 'none' }}>06 41 11 00 20</a>
             </div>
           </div>
 
