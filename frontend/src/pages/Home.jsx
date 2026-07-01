@@ -29,8 +29,8 @@ export default function Home({ products, onSelectProduct, onAddToCart }) {
         <p className="hero-subtitle">
           Une sélection de produits naturels formulés avec précision pour soutenir votre vitalité cellulaire, votre équilibre et votre éclat au quotidien.
         </p>
-        <div className="hero-disclaimer">
-          Complément alimentaire / produit fonctionnel. Ce produit n'est pas destiné à diagnostiquer, traiter, guérir ou prévenir une maladie. Les résultats individuels peuvent varier.
+        <div className="hero-disclaimer" style={{ color: 'var(--primary-green)', fontWeight: 'bold', fontSize: '0.95rem' }}>
+          ✨ Garantie Distributeur Officiel • Ingrédients 100% Naturels Certifiés Haute Qualité
         </div>
       </section>
 
