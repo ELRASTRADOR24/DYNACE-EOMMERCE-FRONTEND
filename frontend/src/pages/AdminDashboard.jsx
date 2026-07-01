@@ -37,7 +37,8 @@ export default function AdminDashboard({ onRefreshProducts }) {
   const [shippingThreshold, setShippingThreshold] = useState(60);
   const [shippingCost, setShippingCost] = useState(6.90);
   const [settingsLoading, setSettingsLoading] = useState(false);
-  const [testUserEmail, setTestUserEmail] = useState('');
+  const [users, setUsers] = useState([]);
+  const [usersLoading, setUsersLoading] = useState(false);
 
   // Fetch products
   const fetchProducts = async () => {
@@ -98,7 +99,14 @@ export default function AdminDashboard({ onRefreshProducts }) {
     fetchProducts();
     fetchOrders();
     fetchSettings();
+    fetchUsers();
   }, []);
+
+  useEffect(() => {
+    if (activeSubTab === 'users') {
+      fetchUsers();
+    }
+  }, [activeSubTab]);
 
   const showError = (msg) => {
     setErrorMsg(msg);
@@ -290,32 +298,49 @@ export default function AdminDashboard({ onRefreshProducts }) {
     }
   };
 
-  // Authorize test payment for user
-  const handleAuthorizeTestPayment = async (e) => {
-    e.preventDefault();
-    if (!testUserEmail) {
-      showError("Veuillez entrer une adresse e-mail.");
-      return;
-    }
+  // Fetch all registered users
+  const fetchUsers = async () => {
+    setUsersLoading(true);
     const token = localStorage.getItem('dynace_jwt');
     try {
-      const res = await fetch('/api/admin/users/authorize-test-payment', {
-        method: 'POST',
+      const res = await fetch('/api/admin/users', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setUsers(data);
+      } else {
+        const errData = await res.json();
+        showError(errData.error || 'Erreur lors de la récupération des utilisateurs.');
+      }
+    } catch (err) {
+      showError('Erreur de connexion avec le serveur.');
+    } finally {
+      setUsersLoading(false);
+    }
+  };
+
+  // Toggle allow_test_payment for a user
+  const handleToggleTestPayment = async (userId, currentVal) => {
+    const token = localStorage.getItem('dynace_jwt');
+    try {
+      const res = await fetch(`/api/admin/users/${userId}/toggle-test-payment`, {
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ email: testUserEmail })
+        body: JSON.stringify({ allowTestPayment: !currentVal })
       });
       const data = await res.json();
       if (res.ok) {
-        showSuccess(data.message || "Utilisateur autorisé avec succès.");
-        setTestUserEmail('');
+        showSuccess('Permissions de test mises à jour.');
+        fetchUsers();
       } else {
-        showError(data.error || "Impossible d'autoriser l'utilisateur.");
+        showError(data.error || 'Erreur lors de la modification des permissions.');
       }
     } catch (err) {
-      showError("Erreur lors de l'autorisation.");
+      showError('Erreur de connexion.');
     }
   };
 
@@ -436,6 +461,26 @@ export default function AdminDashboard({ onRefreshProducts }) {
         >
           <Settings size={18} />
           Paramètres
+        </button>
+        <button 
+          onClick={() => setActiveSubTab('users')}
+          style={{
+            background: 'none',
+            border: 'none',
+            padding: '1rem 0',
+            fontSize: '1.1rem',
+            fontWeight: '600',
+            color: activeSubTab === 'users' ? 'var(--primary-green)' : 'var(--text-secondary)',
+            borderBottom: activeSubTab === 'users' ? '3px solid var(--primary-green)' : '3px solid transparent',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            transition: 'all 0.2s'
+          }}
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+          Utilisateurs
         </button>
       </div>
 
@@ -825,54 +870,78 @@ export default function AdminDashboard({ onRefreshProducts }) {
             </div>
           </form>
 
-          <h3 style={{ fontSize: '1.5rem', fontFamily: 'var(--serif)', color: 'var(--text-primary)', marginTop: '3rem', marginBottom: '1.5rem' }}>
-            Mode Test (Bypass Stripe)
+          </form>
+        </div>
+      )}
+
+      {/* USERS PANEL */}
+      {activeSubTab === 'users' && (
+        <div>
+          <h3 style={{ fontSize: '1.5rem', fontFamily: 'var(--serif)', color: 'var(--text-primary)', marginBottom: '1.5rem' }}>
+            Gestion des Utilisateurs ({users.length})
           </h3>
           
-          <form onSubmit={handleAuthorizeTestPayment} style={{ background: 'var(--bg-secondary)', backdropFilter: 'blur(10px)', padding: '2rem', borderRadius: '15px', border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-premium)' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-              <div>
-                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500', color: 'var(--text-primary)' }}>
-                  Adresse e-mail du compte client à autoriser
-                </label>
-                <div style={{ display: 'flex', gap: '1rem' }}>
-                  <input 
-                    type="email" 
-                    placeholder="client.test@exemple.com"
-                    value={testUserEmail}
-                    onChange={(e) => setTestUserEmail(e.target.value)}
-                    style={{
-                      flex: 1,
-                      padding: '0.75rem 1rem',
-                      borderRadius: '8px',
-                      border: '1px solid var(--border-color)',
-                      background: 'var(--bg-primary)',
-                      fontSize: '1rem',
-                      color: 'var(--text-primary)'
-                    }}
-                    required
-                  />
-                  <button 
-                    type="submit" 
-                    className="btn-primary"
-                    style={{ 
-                      padding: '0.75rem 1.5rem',
-                      margin: 0,
-                      backgroundColor: 'var(--primary-green)',
-                      borderColor: 'var(--primary-green)',
-                      color: 'white',
-                      whiteSpace: 'nowrap'
-                    }}
-                  >
-                    Donner l'autorisation
-                  </button>
-                </div>
-                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.5rem' }}>
-                  Ce client pourra passer commande sans carte bancaire réelle (bypasser Stripe) pour valider et tester les e-mails.
-                </p>
-              </div>
+          {usersLoading && users.length === 0 ? (
+            <div style={{ display: 'flex', justifyContent: 'center', padding: '3rem' }}>
+              <RefreshCw size={36} className="spin" style={{ color: 'var(--primary-green)' }} />
             </div>
-          </form>
+          ) : (
+            <div style={{ background: 'var(--bg-secondary)', backdropFilter: 'blur(10px)', borderRadius: '15px', border: '1px solid var(--border-color)', overflow: 'hidden', boxShadow: 'var(--shadow-premium)' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                <thead>
+                  <tr style={{ borderBottom: '1px solid var(--border-color)', backgroundColor: 'rgba(0,0,0,0.02)' }}>
+                    <th style={{ padding: '1.25rem 1.5rem', color: 'var(--text-secondary)', fontWeight: '700', fontSize: '0.85rem', textTransform: 'uppercase' }}>Utilisateur</th>
+                    <th style={{ padding: '1.25rem 1.5rem', color: 'var(--text-secondary)', fontWeight: '700', fontSize: '0.85rem', textTransform: 'uppercase' }}>Adresse E-mail</th>
+                    <th style={{ padding: '1.25rem 1.5rem', color: 'var(--text-secondary)', fontWeight: '700', fontSize: '0.85rem', textTransform: 'uppercase' }}>Rôle</th>
+                    <th style={{ padding: '1.25rem 1.5rem', color: 'var(--text-secondary)', fontWeight: '700', fontSize: '0.85rem', textTransform: 'uppercase', textAlign: 'center' }}>Mode Test (Bypass Stripe)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {users.map((u) => (
+                    <tr key={u._id} style={{ borderBottom: '1px solid var(--border-color)', transition: 'background 0.2s' }}>
+                      <td style={{ padding: '1.25rem 1.5rem', color: 'var(--text-primary)', fontWeight: '600' }}>
+                        {u.first_name} {u.last_name}
+                      </td>
+                      <td style={{ padding: '1.25rem 1.5rem', color: 'var(--text-secondary)' }}>
+                        {u.email}
+                      </td>
+                      <td style={{ padding: '1.25rem 1.5rem' }}>
+                        <span style={{ 
+                          fontSize: '0.8rem', 
+                          fontWeight: 'bold', 
+                          padding: '0.25rem 0.6rem', 
+                          borderRadius: '20px', 
+                          backgroundColor: u.is_admin ? 'rgba(212, 175, 55, 0.15)' : 'rgba(0,0,0,0.05)', 
+                          color: u.is_admin ? 'var(--primary-gold)' : 'var(--text-secondary)' 
+                        }}>
+                          {u.is_admin ? 'Administrateur' : 'Client'}
+                        </span>
+                      </td>
+                      <td style={{ padding: '1.25rem 1.5rem', textAlign: 'center' }}>
+                        <button
+                          onClick={() => handleToggleTestPayment(u._id, u.allow_test_payment)}
+                          style={{
+                            padding: '0.5rem 1.25rem',
+                            borderRadius: '30px',
+                            border: '1px solid',
+                            fontSize: '0.85rem',
+                            fontWeight: 'bold',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s',
+                            borderColor: u.allow_test_payment ? 'var(--success)' : 'var(--border-color)',
+                            backgroundColor: u.allow_test_payment ? 'rgba(16, 185, 129, 0.1)' : 'transparent',
+                            color: u.allow_test_payment ? 'var(--success)' : 'var(--text-secondary)'
+                          }}
+                        >
+                          {u.allow_test_payment ? 'Autorisé 🧪' : 'Interdit 🔒'}
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       )}
 

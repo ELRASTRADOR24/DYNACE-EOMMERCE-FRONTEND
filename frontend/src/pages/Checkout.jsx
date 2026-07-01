@@ -60,8 +60,10 @@ export default function Checkout({ cartItems, onClearCart, onBackToShopping, cur
       setAddress(currentUser.address || '');
       setPostalCode(currentUser.postalCode || '');
       setCity(currentUser.city || '');
+      setUseTestPayment(currentUser.allowTestPayment || false);
     } else if (checkoutMode === 'registered') {
       setCheckoutMode(null);
+      setUseTestPayment(false);
     }
   }, [currentUser]);
 
