@@ -310,8 +310,13 @@ export default function AdminDashboard({ onRefreshProducts }) {
         const data = await res.json();
         setUsers(data);
       } else {
-        const errData = await res.json();
-        showError(errData.error || 'Erreur lors de la récupération des utilisateurs.');
+        const contentType = res.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          const errData = await res.json();
+          showError(errData.error || 'Erreur lors de la récupération des utilisateurs.');
+        } else {
+          showError(`Erreur serveur (${res.status}). Déploiement en cours sur Render, veuillez patienter.`);
+        }
       }
     } catch (err) {
       showError('Erreur de connexion avec le serveur.');
