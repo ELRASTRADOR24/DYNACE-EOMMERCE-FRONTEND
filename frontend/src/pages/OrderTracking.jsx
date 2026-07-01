@@ -179,6 +179,21 @@ export default function OrderTracking() {
             </div>
           </div>
 
+          {trackingData.tracking_number && (
+            <div style={{ backgroundColor: 'rgba(16, 185, 129, 0.08)', border: '1px solid rgba(16, 185, 129, 0.2)', padding: '1.5rem', borderRadius: '8px', marginBottom: '2rem', textAlign: 'center' }}>
+              <span style={{ display: 'block', fontSize: '0.8rem', textTransform: 'uppercase', color: 'var(--primary-green)', fontWeight: 'bold', letterSpacing: '0.5px', marginBottom: '0.5rem' }}>Livraison en cours par La Poste (Colissimo)</span>
+              <span style={{ display: 'block', fontSize: '1.3rem', fontFamily: 'monospace', fontWeight: 'bold', color: 'var(--text-primary)', marginBottom: '1rem' }}>{trackingData.tracking_number}</span>
+              <a 
+                href={`https://www.laposte.fr/outils/suivre-un-envoi?code=${trackingData.tracking_number}`} 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                style={{ display: 'inline-block', backgroundColor: 'var(--primary-green)', color: 'white', textDecoration: 'none', padding: '0.75rem 2rem', borderRadius: '50px', fontWeight: 'bold', fontSize: '0.95rem', transition: 'all 0.2s ease' }}
+              >
+                Suivre mon colis en direct sur La Poste
+              </a>
+            </div>
+          )}
+
           <div style={{ backgroundColor: 'var(--bg-secondary)', padding: '1.5rem', borderRadius: '8px' }}>
             <h4 style={{ margin: '0 0 1rem 0', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <MapPin size={18} /> Adresse de livraison

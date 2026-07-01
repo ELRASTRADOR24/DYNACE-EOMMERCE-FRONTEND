@@ -149,10 +149,17 @@ export default function Orders({ onBackToShopping }) {
               </div>
 
               {/* Order Card Footer */}
-              <div className="order-card-footer">
-                <div className="order-shipping-address">
-                  <MapPin size={14} style={{ color: 'var(--text-secondary)', marginRight: '0.25rem' }} />
-                  <span>Livré à : {order.address || 'N/A'}, {order.postalCode || ''} {order.city || ''}</span>
+              <div className="order-card-footer" style={{ flexDirection: 'column', alignItems: 'stretch', gap: '1rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+                  <div className="order-shipping-address">
+                    <MapPin size={14} style={{ color: 'var(--text-secondary)', marginRight: '0.25rem' }} />
+                    <span>Livré à : {order.address || 'N/A'}, {order.postalCode || ''} {order.city || ''}</span>
+                  </div>
+                  {order.trackingNumber && (
+                    <div style={{ fontSize: '0.85rem', color: 'var(--text-primary)' }}>
+                      Colissimo : <a href={`https://www.laposte.fr/outils/suivre-un-envoi?code=${order.trackingNumber}`} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary-green)', fontWeight: 'bold', textDecoration: 'none', marginLeft: '0.25rem' }}>{order.trackingNumber} ↗</a>
+                    </div>
+                  )}
                 </div>
                 
                 <div className="order-financials">

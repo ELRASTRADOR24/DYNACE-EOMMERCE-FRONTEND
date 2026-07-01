@@ -240,7 +240,7 @@ export default function AdminDashboard({ onRefreshProducts }) {
   };
 
   // Update order status
-  const handleUpdateOrderStatus = async (orderId, newStatus) => {
+  const handleUpdateOrderStatus = async (orderId, newStatus, trackingNumber = '') => {
     const token = localStorage.getItem('dynace_jwt');
     try {
       const res = await fetch(`/api/admin/orders/${orderId}/status`, {
@@ -249,7 +249,7 @@ export default function AdminDashboard({ onRefreshProducts }) {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ status: newStatus })
+        body: JSON.stringify({ status: newStatus, trackingNumber })
       });
       if (res.ok) {
         showSuccess('Statut de commande mis à jour.');
@@ -655,7 +655,16 @@ export default function AdminDashboard({ onRefreshProducts }) {
                         <div style={{ position: 'relative' }}>
                           <select
                             value={o.status || 'Payé'}
-                            onChange={(e) => handleUpdateOrderStatus(o._id, e.target.value)}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              if (val === 'Expédié') {
+                                const tracking = prompt('Veuillez saisir le numéro de suivi Colissimo :', o.tracking_number || '');
+                                if (tracking === null) return; // User cancelled prompt
+                                handleUpdateOrderStatus(o._id, val, tracking);
+                              } else {
+                                handleUpdateOrderStatus(o._id, val);
+                              }
+                            }}
                             style={{
                               width: '100%',
                               padding: '1rem 1.5rem',
@@ -686,6 +695,14 @@ export default function AdminDashboard({ onRefreshProducts }) {
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
                           </div>
                         </div>
+                        
+                        {o.tracking_number && (
+                          <div style={{ marginTop: '1rem', padding: '0.75rem', backgroundColor: 'var(--bg-secondary)', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '0.85rem', color: 'var(--text-primary)', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                            <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-secondary)', fontWeight: 'bold' }}>Numéro de suivi Colissimo</span>
+                            <span style={{ fontFamily: 'monospace', fontWeight: 'bold', fontSize: '0.95rem' }}>{o.tracking_number}</span>
+                            <a href={`https://www.laposte.fr/outils/suivre-un-envoi?code=${o.tracking_number}`} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary-green)', fontWeight: 'bold', textDecoration: 'none', marginTop: '0.25rem', display: 'inline-block' }}>Suivre sur La Poste →</a>
+                          </div>
+                        )}
                         
                       </div>
                     </div>
