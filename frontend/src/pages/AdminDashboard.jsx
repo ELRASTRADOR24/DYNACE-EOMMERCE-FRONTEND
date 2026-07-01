@@ -631,69 +631,75 @@ export default function AdminDashboard({ onRefreshProducts }) {
       {/* ORDERS PANEL */}
       {activeSubTab === 'orders' && (
         <div>
-          <h3 style={{ fontSize: '1.5rem', fontFamily: 'var(--serif)', color: 'var(--text-primary)', marginBottom: '1.5rem' }}>
-            Commandes clients ({orders.length})
+          <h3 style={{ fontSize: '1.8rem', fontFamily: 'var(--serif)', color: 'var(--primary-green)', marginBottom: '1.5rem', borderBottom: '2px solid var(--primary-gold)', paddingBottom: '0.5rem' }}>
+            📦 Commandes clients ({orders.length})
           </h3>
 
           {ordersLoading ? (
-            <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-secondary)' }}>Chargement des commandes...</div>
+            <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-secondary)' }}>
+              <RefreshCw size={36} className="spin" style={{ color: 'var(--primary-green)' }} />
+            </div>
           ) : orders.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '3rem', backgroundColor: 'var(--bg-secondary)', borderRadius: '16px', color: 'var(--text-secondary)' }}>
               Aucune commande enregistrée pour le moment.
             </div>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(400px, 1fr))', gap: '2rem' }}>
               {orders.map(o => (
                 <div key={o._id} style={{ 
                   backgroundColor: 'var(--bg-secondary)', 
-                  borderRadius: '16px', 
+                  borderRadius: '20px', 
                   border: '1px solid var(--border-color)', 
                   boxShadow: 'var(--shadow-premium)', 
                   overflow: 'hidden',
                   display: 'flex',
-                  flexDirection: 'column'
-                }}>
+                  flexDirection: 'column',
+                  transition: 'transform 0.2s ease, box-shadow 0.2s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-4px)';
+                  e.currentTarget.style.boxShadow = '0 12px 30px rgba(0,0,0,0.15)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'none';
+                  e.currentTarget.style.boxShadow = 'var(--shadow-premium)';
+                }}
+                >
                   {/* Card Header */}
                   <div style={{ 
-                    backgroundColor: 'rgba(21, 58, 137, 0.04)', 
+                    backgroundColor: 'rgba(21, 58, 137, 0.05)', 
                     padding: '1.25rem 1.5rem', 
                     borderBottom: '1px solid var(--border-color)',
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
                     flexWrap: 'wrap',
-                    gap: '1rem'
+                    gap: '0.75rem'
                   }}>
                     <div>
-                      <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: '700', letterSpacing: '0.5px' }}>Commande n°</span>
-                      <div style={{ fontFamily: 'monospace', fontWeight: 'bold', fontSize: '1.1rem', color: 'var(--primary-green)', marginTop: '0.2rem' }}>{o.order_number}</div>
+                      <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: '700', letterSpacing: '0.5px' }}>Commande n°</span>
+                      <div style={{ fontFamily: 'monospace', fontWeight: 'bold', fontSize: '1.2rem', color: 'var(--primary-green)', marginTop: '0.1rem' }}>{o.order_number}</div>
                     </div>
                     <div>
-                      <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: '700', letterSpacing: '0.5px' }}>Date</span>
-                      <div style={{ fontSize: '1rem', color: 'var(--text-primary)', marginTop: '0.2rem', fontWeight: '500' }}>
+                      <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: '700', letterSpacing: '0.5px' }}>Date</span>
+                      <div style={{ fontSize: '0.95rem', color: 'var(--text-primary)', marginTop: '0.1rem', fontWeight: '600' }}>
                         {new Date(o.created_at || o.createdAt).toLocaleDateString('fr-FR', {
                           day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
                         })}
                       </div>
                     </div>
-                    <div style={{ textAlign: 'right' }}>
-                      <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: '700', letterSpacing: '0.5px' }}>Total Payé</span>
-                      <div style={{ fontSize: '1.3rem', fontWeight: '800', color: 'var(--primary-green)', marginTop: '0.2rem' }}>
-                        {(o.total || 0).toFixed(2)} €
-                      </div>
-                    </div>
                   </div>
 
                   {/* Card Body */}
-                  <div style={{ padding: '1.5rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2rem' }}>
+                  <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.5rem', flex: 1 }}>
                     
                     {/* Client Info */}
                     <div>
-                      <h4 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: '700', marginBottom: '0.75rem', letterSpacing: '0.5px' }}>Informations Client</h4>
-                      <div style={{ fontSize: '1rem', color: 'var(--text-primary)', backgroundColor: 'var(--bg-primary)', padding: '1rem', borderRadius: '12px', border: '1px solid rgba(0,0,0,0.03)' }}>
-                        <strong style={{ fontSize: '1.1rem', display: 'block', marginBottom: '0.25rem', color: 'var(--primary-green)' }}>{o.first_name || 'N/A'} {o.last_name || ''}</strong>
-                        <a href={\`mailto:\${o.email}\`} style={{ color: 'var(--text-secondary)', display: 'block', marginBottom: '0.75rem', textDecoration: 'none' }}>{o.email || 'N/A'}</a>
-                        <div style={{ lineHeight: '1.5', color: 'var(--text-primary)' }}>
+                      <h4 style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: '700', marginBottom: '0.5rem', letterSpacing: '0.5px' }}>Informations Client</h4>
+                      <div style={{ fontSize: '0.95rem', color: 'var(--text-primary)', backgroundColor: 'var(--bg-primary)', padding: '1rem', borderRadius: '12px', border: '1px solid rgba(0,0,0,0.03)' }}>
+                        <strong style={{ fontSize: '1.05rem', display: 'block', marginBottom: '0.25rem', color: 'var(--primary-green)' }}>{o.first_name || 'N/A'} {o.last_name || ''}</strong>
+                        <a href={`mailto:${o.email}`} style={{ color: 'var(--primary-gold)', display: 'block', marginBottom: '0.5rem', textDecoration: 'none', fontWeight: '600' }}>{o.email || 'N/A'}</a>
+                        <div style={{ lineHeight: '1.4', color: 'var(--text-primary)' }}>
                           {o.address || 'N/A'}<br/>
                           {o.postal_code || ''} {o.city || ''}
                         </div>
@@ -702,32 +708,34 @@ export default function AdminDashboard({ onRefreshProducts }) {
 
                     {/* Order Items */}
                     <div>
-                      <h4 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: '700', marginBottom: '0.75rem', letterSpacing: '0.5px' }}>Produits Achetés</h4>
+                      <h4 style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: '700', marginBottom: '0.5rem', letterSpacing: '0.5px' }}>Produits Achetés</h4>
                       <div style={{ backgroundColor: 'var(--bg-primary)', padding: '1rem', borderRadius: '12px', border: '1px solid rgba(0,0,0,0.03)' }}>
                         <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                           {(o.items || []).map((item, idx) => (
-                            <li key={idx} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem 0', borderBottom: idx !== (o.items || []).length - 1 ? '1px solid var(--border-color)' : 'none', color: 'var(--text-primary)' }}>
+                            <li key={idx} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem 0', borderBottom: idx !== (o.items || []).length - 1 ? '1px solid var(--border-color)' : 'none', color: 'var(--text-primary)', fontSize: '0.95rem' }}>
                               <span style={{ fontWeight: '500' }}>{item.name || 'Produit'}</span>
-                              <span style={{ fontWeight: '800', color: 'var(--primary-green)', backgroundColor: 'rgba(21, 58, 137, 0.1)', padding: '0.1rem 0.6rem', borderRadius: '20px' }}>x{item.quantity || 1}</span>
+                              <span style={{ fontWeight: '800', color: 'var(--primary-green)', backgroundColor: 'rgba(21, 58, 137, 0.1)', padding: '0.1rem 0.5rem', borderRadius: '20px', fontSize: '0.8rem' }}>x{item.quantity || 1}</span>
                             </li>
                           ))}
                         </ul>
                         {(o.shipping > 0) && (
-                          <div style={{ marginTop: '0.75rem', paddingTop: '0.75rem', borderTop: '2px dashed var(--border-color)', display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+                          <div style={{ marginTop: '0.5rem', paddingTop: '0.5rem', borderTop: '1px dashed var(--border-color)', display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
                             <span>Frais de livraison</span>
                             <span>{(o.shipping || 0).toFixed(2)} €</span>
                           </div>
                         )}
+                        <div style={{ marginTop: '0.75rem', paddingTop: '0.75rem', borderTop: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', fontSize: '1rem', fontWeight: '800', color: 'var(--primary-green)' }}>
+                          <span>Total Payé</span>
+                          <span>{(o.total || 0).toFixed(2)} €</span>
+                        </div>
                       </div>
                     </div>
 
                     {/* Status Management */}
-                    <div>
-                      <h4 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: '700', marginBottom: '0.75rem', letterSpacing: '0.5px' }}>Gestion du Statut</h4>
-                      <div style={{ backgroundColor: 'var(--bg-primary)', padding: '1rem', borderRadius: '12px', border: '1px solid rgba(0,0,0,0.03)', height: '100%' }}>
-                        <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '1rem' }}>Mettez à jour l'étape de livraison pour informer le client du suivi de sa commande.</p>
-                        
-                        <div style={{ position: 'relative' }}>
+                    <div style={{ marginTop: 'auto' }}>
+                      <h4 style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: '700', marginBottom: '0.5rem', letterSpacing: '0.5px' }}>Gestion du Statut</h4>
+                      <div style={{ backgroundColor: 'var(--bg-primary)', padding: '1rem', borderRadius: '12px', border: '1px solid rgba(0,0,0,0.03)' }}>
+                        <div style={{ position: 'relative', marginBottom: '1rem' }}>
                           <select
                             value={o.status || 'Payé'}
                             onChange={(e) => {
@@ -742,17 +750,17 @@ export default function AdminDashboard({ onRefreshProducts }) {
                             }}
                             style={{
                               width: '100%',
-                              padding: '1rem 1.5rem',
-                              borderRadius: '12px',
+                              padding: '0.75rem 1.25rem',
+                              borderRadius: '8px',
                               border: '2px solid',
                               borderColor: o.status === 'Livré' ? 'var(--success)' : 
-                                         o.status === 'Expédié' ? '#8b5cf6' : 
-                                         o.status === 'En préparation' ? 'var(--warning)' : 'var(--border-color)',
+                                           o.status === 'Expédié' ? '#8b5cf6' : 
+                                           o.status === 'En préparation' ? 'var(--warning)' : 'var(--border-color)',
                               backgroundColor: o.status === 'Livré' ? 'rgba(16, 185, 129, 0.05)' : 
                                              o.status === 'Expédié' ? 'rgba(139, 92, 246, 0.05)' : 
                                              o.status === 'En préparation' ? 'rgba(245, 158, 11, 0.05)' : 'var(--bg-secondary)',
                               color: 'var(--text-primary)',
-                              fontSize: '1rem',
+                              fontSize: '0.95rem',
                               fontWeight: '700',
                               cursor: 'pointer',
                               outline: 'none',
@@ -766,19 +774,18 @@ export default function AdminDashboard({ onRefreshProducts }) {
                             <option value="Livré">✅ Livré au client</option>
                           </select>
                           {/* Dropdown chevron icon */}
-                          <div style={{ position: 'absolute', right: '1.25rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', opacity: 0.5 }}>
+                          <div style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', opacity: 0.5 }}>
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
                           </div>
                         </div>
                         
                         {o.tracking_number && (
-                          <div style={{ marginTop: '1rem', padding: '0.75rem', backgroundColor: 'var(--bg-secondary)', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '0.85rem', color: 'var(--text-primary)', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                          <div style={{ padding: '0.75rem', backgroundColor: 'var(--bg-secondary)', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '0.85rem', color: 'var(--text-primary)', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
                             <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-secondary)', fontWeight: 'bold' }}>Numéro de suivi Colissimo</span>
                             <span style={{ fontFamily: 'monospace', fontWeight: 'bold', fontSize: '0.95rem' }}>{o.tracking_number}</span>
                             <a href={`https://www.laposte.fr/outils/suivre-un-envoi?code=${o.tracking_number}`} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary-green)', fontWeight: 'bold', textDecoration: 'none', marginTop: '0.25rem', display: 'inline-block' }}>Suivre sur La Poste →</a>
                           </div>
                         )}
-                        
                       </div>
                     </div>
 
@@ -792,16 +799,16 @@ export default function AdminDashboard({ onRefreshProducts }) {
 
       {/* SETTINGS PANEL */}
       {activeSubTab === 'settings' && (
-        <div style={{ maxWidth: '600px' }}>
-          <h3 style={{ fontSize: '1.5rem', fontFamily: 'var(--serif)', color: 'var(--text-primary)', marginBottom: '1.5rem' }}>
-            Paramètres de Livraison
+        <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+          <h3 style={{ fontSize: '1.8rem', fontFamily: 'var(--serif)', color: 'var(--primary-green)', marginBottom: '1.5rem', borderBottom: '2px solid var(--primary-gold)', paddingBottom: '0.5rem' }}>
+            ⚙️ Paramètres de Livraison
           </h3>
           
-          <form onSubmit={handleSaveSettings} style={{ background: 'var(--bg-secondary)', backdropFilter: 'blur(10px)', padding: '2rem', borderRadius: '15px', border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-premium)' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          <form onSubmit={handleSaveSettings} style={{ background: 'var(--bg-secondary)', backdropFilter: 'blur(10px)', padding: '2.5rem', borderRadius: '20px', border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-premium)' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
               
               <div>
-                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500', color: 'var(--text-primary)' }}>
+                <label style={{ display: 'block', marginBottom: '0.75rem', fontWeight: '700', color: 'var(--text-primary)', fontSize: '1.1rem' }}>
                   Frais de livraison de base (€)
                 </label>
                 <input 
@@ -812,22 +819,26 @@ export default function AdminDashboard({ onRefreshProducts }) {
                   onChange={(e) => setShippingCost(e.target.value)}
                   style={{
                     width: '100%',
-                    padding: '0.75rem 1rem',
-                    borderRadius: '8px',
-                    border: '1px solid var(--border-color)',
+                    padding: '1rem 1.25rem',
+                    borderRadius: '12px',
+                    border: '2px solid var(--border-color)',
                     background: 'var(--bg-primary)',
-                    fontSize: '1rem',
-                    color: 'var(--text-primary)'
+                    fontSize: '1.1rem',
+                    color: 'var(--text-primary)',
+                    fontWeight: '600',
+                    outline: 'none',
+                    transition: 'all 0.3s ease',
+                    boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)'
                   }}
                   required
                 />
-                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.5rem' }}>
-                  Coût fixe appliqué si le sous-total est inférieur au seuil de gratuité. (Ex: 6.90)
+                <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginTop: '0.5rem', fontStyle: 'italic' }}>
+                  Coût fixe appliqué si le sous-total du panier est inférieur au seuil de gratuité (ex : 6.90 €).
                 </p>
               </div>
 
               <div>
-                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500', color: 'var(--text-primary)' }}>
+                <label style={{ display: 'block', marginBottom: '0.75rem', fontWeight: '700', color: 'var(--text-primary)', fontSize: '1.1rem' }}>
                   Seuil de livraison gratuite (€)
                 </label>
                 <input 
@@ -838,38 +849,50 @@ export default function AdminDashboard({ onRefreshProducts }) {
                   onChange={(e) => setShippingThreshold(e.target.value)}
                   style={{
                     width: '100%',
-                    padding: '0.75rem 1rem',
-                    borderRadius: '8px',
-                    border: '1px solid var(--border-color)',
+                    padding: '1rem 1.25rem',
+                    borderRadius: '12px',
+                    border: '2px solid var(--border-color)',
                     background: 'var(--bg-primary)',
-                    fontSize: '1rem',
-                    color: 'var(--text-primary)'
+                    fontSize: '1.1rem',
+                    color: 'var(--text-primary)',
+                    fontWeight: '600',
+                    outline: 'none',
+                    transition: 'all 0.3s ease',
+                    boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)'
                   }}
                   required
                 />
-                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.5rem' }}>
-                  Le montant à partir duquel la livraison devient offerte. (Ex: 60.00)
+                <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginTop: '0.5rem', fontStyle: 'italic' }}>
+                  Le montant minimum d'achat pour lequel la livraison devient gratuite (ex : 60.00 €).
                 </p>
               </div>
 
               <button 
                 type="submit" 
                 disabled={settingsLoading}
-                className="btn-primary"
                 style={{ 
-                  marginTop: '1rem',
+                  marginTop: '1.5rem',
                   display: 'flex',
                   justifyContent: 'center',
                   alignItems: 'center',
-                  gap: '0.5rem'
+                  gap: '0.75rem',
+                  backgroundColor: 'var(--primary-green)',
+                  border: 'none',
+                  padding: '1rem 2rem',
+                  borderRadius: '12px',
+                  color: '#ffffff',
+                  fontWeight: '800',
+                  fontSize: '1.1rem',
+                  cursor: settingsLoading ? 'not-allowed' : 'pointer',
+                  boxShadow: '0 4px 15px rgba(21, 58, 137, 0.2)',
+                  transition: 'all 0.2s ease',
+                  width: '100%'
                 }}
               >
-                {settingsLoading ? <RefreshCw size={20} className="spin" /> : <Save size={20} />}
+                {settingsLoading ? <RefreshCw size={22} className="spin" /> : <Save size={22} />}
                 Enregistrer les paramètres
               </button>
             </div>
-          </form>
-
           </form>
         </div>
       )}

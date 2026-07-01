@@ -70,15 +70,16 @@ export default function CookieBanner() {
         style={{
           marginTop: '0.5rem',
           padding: '0.75rem',
-          backgroundColor: 'var(--primary-gold)',
-          color: 'var(--bg-primary)',
+          backgroundColor: 'var(--primary-green)',
+          color: '#ffffff',
           border: 'none',
           borderRadius: '8px',
-          fontWeight: '600',
+          fontWeight: '700',
           fontSize: '0.9rem',
           cursor: 'pointer',
           width: '100%',
-          transition: 'background-color 0.2s'
+          boxShadow: '0 4px 6px rgba(21, 58, 137, 0.1)',
+          transition: 'all 0.2s ease'
         }}
       >
         Enregistrer mes choix
