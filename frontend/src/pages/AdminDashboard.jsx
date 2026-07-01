@@ -567,97 +567,132 @@ export default function AdminDashboard({ onRefreshProducts }) {
               Aucune commande enregistrée pour le moment.
             </div>
           ) : (
-            <div style={{ overflowX: 'auto', backgroundColor: 'var(--bg-secondary)', borderRadius: '16px', border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-premium)' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '800px' }}>
-                <thead>
-                  <tr style={{ borderBottom: '1px solid var(--border-color)', backgroundColor: 'rgba(21, 58, 137, 0.03)' }}>
-                    <th style={{ padding: '1.25rem 1.5rem', color: 'var(--text-secondary)', fontWeight: '600' }}>Commande</th>
-                    <th style={{ padding: '1.25rem 1.5rem', color: 'var(--text-secondary)', fontWeight: '600' }}>Date</th>
-                    <th style={{ padding: '1.25rem 1.5rem', color: 'var(--text-secondary)', fontWeight: '600' }}>Client</th>
-                    <th style={{ padding: '1.25rem 1.5rem', color: 'var(--text-secondary)', fontWeight: '600' }}>Articles</th>
-                    <th style={{ padding: '1.25rem 1.5rem', color: 'var(--text-secondary)', fontWeight: '600' }}>Total</th>
-                    <th style={{ padding: '1.25rem 1.5rem', color: 'var(--text-secondary)', fontWeight: '600' }}>Statut</th>
-                    <th style={{ padding: '1.25rem 1.5rem', color: 'var(--text-secondary)', fontWeight: '600' }}>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {orders.map(o => (
-                    <tr key={o._id} style={{ borderBottom: '1px solid var(--border-color)', verticalAlign: 'top' }}>
-                      {/* Order Ref */}
-                      <td style={{ padding: '1.25rem 1.5rem' }}>
-                        <span style={{ fontFamily: 'monospace', fontWeight: 'bold', fontSize: '0.95rem' }}>{o.order_number}</span>
-                      </td>
-                      {/* Date */}
-                      <td style={{ padding: '1.25rem 1.5rem', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+              {orders.map(o => (
+                <div key={o._id} style={{ 
+                  backgroundColor: 'var(--bg-secondary)', 
+                  borderRadius: '16px', 
+                  border: '1px solid var(--border-color)', 
+                  boxShadow: 'var(--shadow-premium)', 
+                  overflow: 'hidden',
+                  display: 'flex',
+                  flexDirection: 'column'
+                }}>
+                  {/* Card Header */}
+                  <div style={{ 
+                    backgroundColor: 'rgba(21, 58, 137, 0.04)', 
+                    padding: '1.25rem 1.5rem', 
+                    borderBottom: '1px solid var(--border-color)',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    flexWrap: 'wrap',
+                    gap: '1rem'
+                  }}>
+                    <div>
+                      <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: '700', letterSpacing: '0.5px' }}>Commande n°</span>
+                      <div style={{ fontFamily: 'monospace', fontWeight: 'bold', fontSize: '1.1rem', color: 'var(--primary-green)', marginTop: '0.2rem' }}>{o.order_number}</div>
+                    </div>
+                    <div>
+                      <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: '700', letterSpacing: '0.5px' }}>Date</span>
+                      <div style={{ fontSize: '1rem', color: 'var(--text-primary)', marginTop: '0.2rem', fontWeight: '500' }}>
                         {new Date(o.created_at || o.createdAt).toLocaleDateString('fr-FR', {
                           day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
                         })}
-                      </td>
-                      {/* Client */}
-                      <td style={{ padding: '1.25rem 1.5rem', fontSize: '0.9rem' }}>
-                        <strong style={{ display: 'block' }}>{o.first_name} {o.last_name}</strong>
-                        <span style={{ color: 'var(--text-secondary)', display: 'block', fontSize: '0.8rem' }}>{o.email}</span>
-                        <div style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', marginTop: '0.25rem', maxWidth: '220px', lineHeight: '1.3' }}>
-                          {o.address}, {o.postal_code} {o.city}
+                      </div>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: '700', letterSpacing: '0.5px' }}>Total Payé</span>
+                      <div style={{ fontSize: '1.3rem', fontWeight: '800', color: 'var(--primary-green)', marginTop: '0.2rem' }}>
+                        {o.total.toFixed(2)} €
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Card Body */}
+                  <div style={{ padding: '1.5rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2rem' }}>
+                    
+                    {/* Client Info */}
+                    <div>
+                      <h4 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: '700', marginBottom: '0.75rem', letterSpacing: '0.5px' }}>Informations Client</h4>
+                      <div style={{ fontSize: '1rem', color: 'var(--text-primary)', backgroundColor: 'var(--bg-primary)', padding: '1rem', borderRadius: '12px', border: '1px solid rgba(0,0,0,0.03)' }}>
+                        <strong style={{ fontSize: '1.1rem', display: 'block', marginBottom: '0.25rem', color: 'var(--primary-green)' }}>{o.first_name} {o.last_name}</strong>
+                        <a href={\`mailto:\${o.email}\`} style={{ color: 'var(--text-secondary)', display: 'block', marginBottom: '0.75rem', textDecoration: 'none' }}>{o.email}</a>
+                        <div style={{ lineHeight: '1.5', color: 'var(--text-primary)' }}>
+                          {o.address}<br/>
+                          {o.postal_code} {o.city}
                         </div>
-                      </td>
-                      {/* Items */}
-                      <td style={{ padding: '1.25rem 1.5rem', fontSize: '0.9rem' }}>
+                      </div>
+                    </div>
+
+                    {/* Order Items */}
+                    <div>
+                      <h4 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: '700', marginBottom: '0.75rem', letterSpacing: '0.5px' }}>Produits Achetés</h4>
+                      <div style={{ backgroundColor: 'var(--bg-primary)', padding: '1rem', borderRadius: '12px', border: '1px solid rgba(0,0,0,0.03)' }}>
                         <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                           {(o.items || []).map((item, idx) => (
-                            <li key={idx} style={{ marginBottom: '0.25rem', color: 'var(--text-primary)' }}>
-                              • {item.name} <strong style={{ color: 'var(--primary-green)' }}>x{item.quantity}</strong>
+                            <li key={idx} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem 0', borderBottom: idx !== o.items.length - 1 ? '1px solid var(--border-color)' : 'none', color: 'var(--text-primary)' }}>
+                              <span style={{ fontWeight: '500' }}>{item.name}</span>
+                              <span style={{ fontWeight: '800', color: 'var(--primary-green)', backgroundColor: 'rgba(21, 58, 137, 0.1)', padding: '0.1rem 0.6rem', borderRadius: '20px' }}>x{item.quantity}</span>
                             </li>
                           ))}
                         </ul>
-                      </td>
-                      {/* Total */}
-                      <td style={{ padding: '1.25rem 1.5rem', fontSize: '1rem', fontWeight: 'bold' }}>
-                        {o.total.toFixed(2)} €
-                        <span style={{ display: 'block', fontSize: '0.75rem', fontWeight: 'normal', color: 'var(--text-secondary)' }}>
-                          (Port: {o.shipping === 0 ? 'Offert' : `${o.shipping.toFixed(2)} €`})
-                        </span>
-                      </td>
-                      {/* Status */}
-                      <td style={{ padding: '1.25rem 1.5rem' }}>
-                        <span style={{
-                          padding: '0.25rem 0.75rem',
-                          borderRadius: '50px',
-                          fontSize: '0.8rem',
-                          fontWeight: '600',
-                          display: 'inline-block',
-                          ...getStatusBadgeStyle(o.status)
-                        }}>
-                          {o.status || 'Payé'}
-                        </span>
-                      </td>
-                      {/* Actions */}
-                      <td style={{ padding: '1.25rem 1.5rem' }}>
-                        <select
-                          value={o.status || 'Payé'}
-                          onChange={(e) => handleUpdateOrderStatus(o._id, e.target.value)}
-                          style={{
-                            padding: '0.4rem 0.6rem',
-                            borderRadius: '8px',
-                            border: '1px solid var(--border-color)',
-                            backgroundColor: 'var(--bg-primary)',
-                            color: 'var(--text-primary)',
-                            fontSize: '0.85rem',
-                            fontWeight: '500',
-                            cursor: 'pointer',
-                            outline: 'none'
-                          }}
-                        >
-                          <option value="Payé">Payé</option>
-                          <option value="En préparation">En préparation</option>
-                          <option value="Expédié">Expédié</option>
-                          <option value="Livré">Livré</option>
-                        </select>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                        {o.shipping > 0 && (
+                          <div style={{ marginTop: '0.75rem', paddingTop: '0.75rem', borderTop: '2px dashed var(--border-color)', display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+                            <span>Frais de livraison</span>
+                            <span>{o.shipping.toFixed(2)} €</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Status Management */}
+                    <div>
+                      <h4 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: '700', marginBottom: '0.75rem', letterSpacing: '0.5px' }}>Gestion du Statut</h4>
+                      <div style={{ backgroundColor: 'var(--bg-primary)', padding: '1rem', borderRadius: '12px', border: '1px solid rgba(0,0,0,0.03)', height: '100%' }}>
+                        <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '1rem' }}>Mettez à jour l'étape de livraison pour informer le client du suivi de sa commande.</p>
+                        
+                        <div style={{ position: 'relative' }}>
+                          <select
+                            value={o.status || 'Payé'}
+                            onChange={(e) => handleUpdateOrderStatus(o._id, e.target.value)}
+                            style={{
+                              width: '100%',
+                              padding: '1rem 1.5rem',
+                              borderRadius: '12px',
+                              border: '2px solid',
+                              borderColor: o.status === 'Livré' ? 'var(--success)' : 
+                                         o.status === 'Expédié' ? '#8b5cf6' : 
+                                         o.status === 'En préparation' ? 'var(--warning)' : 'var(--border-color)',
+                              backgroundColor: o.status === 'Livré' ? 'rgba(16, 185, 129, 0.05)' : 
+                                             o.status === 'Expédié' ? 'rgba(139, 92, 246, 0.05)' : 
+                                             o.status === 'En préparation' ? 'rgba(245, 158, 11, 0.05)' : 'var(--bg-secondary)',
+                              color: 'var(--text-primary)',
+                              fontSize: '1rem',
+                              fontWeight: '700',
+                              cursor: 'pointer',
+                              outline: 'none',
+                              appearance: 'none',
+                              boxShadow: '0 4px 6px rgba(0,0,0,0.02)'
+                            }}
+                          >
+                            <option value="Payé">Payé (En attente)</option>
+                            <option value="En préparation">📦 En préparation</option>
+                            <option value="Expédié">🚚 Expédié au transporteur</option>
+                            <option value="Livré">✅ Livré au client</option>
+                          </select>
+                          {/* Dropdown chevron icon */}
+                          <div style={{ position: 'absolute', right: '1.25rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', opacity: 0.5 }}>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                          </div>
+                        </div>
+                        
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </div>
