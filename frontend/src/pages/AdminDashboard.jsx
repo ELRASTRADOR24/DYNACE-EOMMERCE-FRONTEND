@@ -297,6 +297,8 @@ export default function AdminDashboard({ onRefreshProducts }) {
         return { backgroundColor: 'rgba(253, 185, 19, 0.15)', color: 'var(--accent-gold)', border: '1px solid var(--accent-gold)' };
       case 'Expédié':
         return { backgroundColor: 'rgba(21, 58, 137, 0.1)', color: 'var(--primary-green)', border: '1px solid var(--primary-green)' };
+      case 'Livré':
+        return { backgroundColor: 'var(--success-bg)', color: 'var(--success)', border: '1px solid var(--success)' };
       default:
         return { backgroundColor: 'var(--bg-secondary)', color: 'var(--text-secondary)' };
     }
@@ -649,6 +651,7 @@ export default function AdminDashboard({ onRefreshProducts }) {
                           <option value="Payé">Payé</option>
                           <option value="En préparation">En préparation</option>
                           <option value="Expédié">Expédié</option>
+                          <option value="Livré">Livré</option>
                         </select>
                       </td>
                     </tr>

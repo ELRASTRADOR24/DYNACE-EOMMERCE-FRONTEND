@@ -399,7 +399,15 @@ app.post('/api/orders', async (req, res) => {
 // Get user orders (Route protégée)
 app.get('/api/orders/user', authenticateToken, async (req, res) => {
   try {
-    const rows = await Order.find({ user_id: req.userId }).sort({ created_at: -1 });
+    const user = await User.findById(req.userId);
+    if (!user) return res.status(404).json({ error: 'Utilisateur introuvable.' });
+
+    const rows = await Order.find({ 
+      $or: [
+        { user_id: req.userId },
+        { email: user.email }
+      ]
+    }).sort({ created_at: -1 });
     const ordersList = rows.map(row => ({
       id: row._id,
       orderNumber: row.order_number,
@@ -591,7 +599,7 @@ app.post('/api/payment/confirm-order', async (req, res) => {
       subtotal: parseFloat(subtotal),
       shipping: parseFloat(shipping),
       total: parseFloat(total),
-      status: 'En préparation'
+      status: 'Payé'
     });
 
     await newOrder.save();
