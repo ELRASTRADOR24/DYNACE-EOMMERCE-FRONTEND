@@ -34,6 +34,7 @@ export default function Checkout({ cartItems, onClearCart, onBackToShopping, cur
 
   const [shippingThreshold, setShippingThreshold] = useState(60);
   const [shippingCostBase, setShippingCostBase] = useState(6.90);
+  const [useTestPayment, setUseTestPayment] = useState(false);
 
   useEffect(() => {
     fetch('/api/settings/shipping')
@@ -200,35 +201,72 @@ export default function Checkout({ cartItems, onClearCart, onBackToShopping, cur
     setConfirmError('');
 
     try {
-      const res = await fetch('/api/payment/create-checkout-session', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email,
-          firstName,
-          lastName,
-          address,
-          postalCode,
-          city,
-          items: cartItems.map(item => ({
-            id: item.id,
-            name: item.name,
-            price: item.price,
-            quantity: item.quantity
-          }))
-        })
-      });
+      if (useTestPayment) {
+        const token = localStorage.getItem('dynace_jwt');
+        const res = await fetch('/api/payment/create-test-order', {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            email,
+            firstName,
+            lastName,
+            address,
+            postalCode,
+            city,
+            items: cartItems.map(item => ({
+              id: item.id,
+              name: item.name,
+              price: item.price,
+              quantity: item.quantity
+            }))
+          })
+        });
 
-      const data = await res.json();
+        const data = await res.json();
 
-      if (!res.ok) {
-        throw new Error(data.error || "Impossible d'initialiser le paiement sécurisé.");
-      }
+        if (!res.ok) {
+          throw new Error(data.error || "Erreur lors de la validation de la commande de test.");
+        }
 
-      if (data.url) {
-        window.location.href = data.url;
+        setIsConfirming(false);
+        setIsOrdered(true);
+        setOrderNumber(data.orderNumber);
+        setTrackerStep(0);
+        onClearCart();
       } else {
-        throw new Error("Aucun lien de paiement reçu du serveur.");
+        const res = await fetch('/api/payment/create-checkout-session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email,
+            firstName,
+            lastName,
+            address,
+            postalCode,
+            city,
+            items: cartItems.map(item => ({
+              id: item.id,
+              name: item.name,
+              price: item.price,
+              quantity: item.quantity
+            }))
+          })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.error || "Impossible d'initialiser le paiement sécurisé.");
+        }
+
+        if (data.url) {
+          window.location.href = data.url;
+        } else {
+          throw new Error("Aucun lien de paiement reçu du serveur.");
+        }
       }
     } catch (err) {
       setConfirmError(err.message);
@@ -789,6 +827,23 @@ export default function Checkout({ cartItems, onClearCart, onBackToShopping, cur
             </div>
           </div>
 
+          {currentUser && currentUser.allowTestPayment && (
+            <div style={{ padding: '1.25rem', borderRadius: '16px', backgroundColor: 'rgba(212, 175, 55, 0.05)', border: '1px solid rgba(212, 175, 55, 0.3)', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', width: '100%' }}>
+                <input 
+                  type="checkbox" 
+                  id="useTestPayment" 
+                  checked={useTestPayment}
+                  onChange={(e) => setUseTestPayment(e.target.checked)}
+                  style={{ width: '1.25rem', height: '1.25rem', cursor: 'pointer', accentColor: 'var(--primary-gold)' }}
+                />
+                <label htmlFor="useTestPayment" style={{ fontWeight: '700', fontSize: '0.95rem', color: 'var(--text-primary)', cursor: 'pointer', flex: 1 }}>
+                  🧪 Activer le Paiement de Test (Bypass Stripe)
+                </label>
+              </div>
+            </div>
+          )}
+
           <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem' }}>
             {!currentUser && (
               <button 
@@ -801,7 +856,7 @@ export default function Checkout({ cartItems, onClearCart, onBackToShopping, cur
               </button>
             )}
             <button type="submit" className="place-order-btn" style={{ flex: 2 }}>
-              Procéder au paiement - {grandTotal.toFixed(2)} €
+              {useTestPayment ? `Valider la commande test - ${grandTotal.toFixed(2)} €` : `Procéder au paiement - ${grandTotal.toFixed(2)} €`}
             </button>
           </div>
         </form>

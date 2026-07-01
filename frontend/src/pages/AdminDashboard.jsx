@@ -37,6 +37,7 @@ export default function AdminDashboard({ onRefreshProducts }) {
   const [shippingThreshold, setShippingThreshold] = useState(60);
   const [shippingCost, setShippingCost] = useState(6.90);
   const [settingsLoading, setSettingsLoading] = useState(false);
+  const [testUserEmail, setTestUserEmail] = useState('');
 
   // Fetch products
   const fetchProducts = async () => {
@@ -286,6 +287,35 @@ export default function AdminDashboard({ onRefreshProducts }) {
       showError('Erreur de connexion.');
     } finally {
       setSettingsLoading(false);
+    }
+  };
+
+  // Authorize test payment for user
+  const handleAuthorizeTestPayment = async (e) => {
+    e.preventDefault();
+    if (!testUserEmail) {
+      showError("Veuillez entrer une adresse e-mail.");
+      return;
+    }
+    const token = localStorage.getItem('dynace_jwt');
+    try {
+      const res = await fetch('/api/admin/users/authorize-test-payment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ email: testUserEmail })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        showSuccess(data.message || "Utilisateur autorisé avec succès.");
+        setTestUserEmail('');
+      } else {
+        showError(data.error || "Impossible d'autoriser l'utilisateur.");
+      }
+    } catch (err) {
+      showError("Erreur lors de l'autorisation.");
     }
   };
 
@@ -792,6 +822,55 @@ export default function AdminDashboard({ onRefreshProducts }) {
                 {settingsLoading ? <RefreshCw size={20} className="spin" /> : <Save size={20} />}
                 Enregistrer les paramètres
               </button>
+            </div>
+          </form>
+
+          <h3 style={{ fontSize: '1.5rem', fontFamily: 'var(--serif)', color: 'var(--text-primary)', marginTop: '3rem', marginBottom: '1.5rem' }}>
+            Mode Test (Bypass Stripe)
+          </h3>
+          
+          <form onSubmit={handleAuthorizeTestPayment} style={{ background: 'var(--bg-secondary)', backdropFilter: 'blur(10px)', padding: '2rem', borderRadius: '15px', border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-premium)' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+              <div>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500', color: 'var(--text-primary)' }}>
+                  Adresse e-mail du compte client à autoriser
+                </label>
+                <div style={{ display: 'flex', gap: '1rem' }}>
+                  <input 
+                    type="email" 
+                    placeholder="client.test@exemple.com"
+                    value={testUserEmail}
+                    onChange={(e) => setTestUserEmail(e.target.value)}
+                    style={{
+                      flex: 1,
+                      padding: '0.75rem 1rem',
+                      borderRadius: '8px',
+                      border: '1px solid var(--border-color)',
+                      background: 'var(--bg-primary)',
+                      fontSize: '1rem',
+                      color: 'var(--text-primary)'
+                    }}
+                    required
+                  />
+                  <button 
+                    type="submit" 
+                    className="btn-primary"
+                    style={{ 
+                      padding: '0.75rem 1.5rem',
+                      margin: 0,
+                      backgroundColor: 'var(--primary-green)',
+                      borderColor: 'var(--primary-green)',
+                      color: 'white',
+                      whiteSpace: 'nowrap'
+                    }}
+                  >
+                    Donner l'autorisation
+                  </button>
+                </div>
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.5rem' }}>
+                  Ce client pourra passer commande sans carte bancaire réelle (bypasser Stripe) pour valider et tester les e-mails.
+                </p>
+              </div>
             </div>
           </form>
         </div>
