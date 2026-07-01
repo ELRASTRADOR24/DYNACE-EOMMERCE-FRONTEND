@@ -112,7 +112,7 @@ export default function Checkout({ cartItems, onClearCart, onBackToShopping, cur
     if (isOrdered && orderNumber) {
       const fetchStatus = async () => {
         try {
-          const res = await fetch(`/api/orders/track/${orderNumber}`);
+          const res = await fetch(`/api/orders/track/${orderNumber}?email=${encodeURIComponent(email)}`);
           const data = await res.json();
           if (res.ok) {
             // Mapping statuses to tracker steps
