@@ -604,7 +604,7 @@ export default function AdminDashboard({ onRefreshProducts }) {
                     <div style={{ textAlign: 'right' }}>
                       <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: '700', letterSpacing: '0.5px' }}>Total Payé</span>
                       <div style={{ fontSize: '1.3rem', fontWeight: '800', color: 'var(--primary-green)', marginTop: '0.2rem' }}>
-                        {o.total.toFixed(2)} €
+                        {(o.total || 0).toFixed(2)} €
                       </div>
                     </div>
                   </div>
@@ -616,11 +616,11 @@ export default function AdminDashboard({ onRefreshProducts }) {
                     <div>
                       <h4 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: '700', marginBottom: '0.75rem', letterSpacing: '0.5px' }}>Informations Client</h4>
                       <div style={{ fontSize: '1rem', color: 'var(--text-primary)', backgroundColor: 'var(--bg-primary)', padding: '1rem', borderRadius: '12px', border: '1px solid rgba(0,0,0,0.03)' }}>
-                        <strong style={{ fontSize: '1.1rem', display: 'block', marginBottom: '0.25rem', color: 'var(--primary-green)' }}>{o.first_name} {o.last_name}</strong>
-                        <a href={\`mailto:\${o.email}\`} style={{ color: 'var(--text-secondary)', display: 'block', marginBottom: '0.75rem', textDecoration: 'none' }}>{o.email}</a>
+                        <strong style={{ fontSize: '1.1rem', display: 'block', marginBottom: '0.25rem', color: 'var(--primary-green)' }}>{o.first_name || 'N/A'} {o.last_name || ''}</strong>
+                        <a href={\`mailto:\${o.email}\`} style={{ color: 'var(--text-secondary)', display: 'block', marginBottom: '0.75rem', textDecoration: 'none' }}>{o.email || 'N/A'}</a>
                         <div style={{ lineHeight: '1.5', color: 'var(--text-primary)' }}>
-                          {o.address}<br/>
-                          {o.postal_code} {o.city}
+                          {o.address || 'N/A'}<br/>
+                          {o.postal_code || ''} {o.city || ''}
                         </div>
                       </div>
                     </div>
@@ -631,16 +631,16 @@ export default function AdminDashboard({ onRefreshProducts }) {
                       <div style={{ backgroundColor: 'var(--bg-primary)', padding: '1rem', borderRadius: '12px', border: '1px solid rgba(0,0,0,0.03)' }}>
                         <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                           {(o.items || []).map((item, idx) => (
-                            <li key={idx} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem 0', borderBottom: idx !== o.items.length - 1 ? '1px solid var(--border-color)' : 'none', color: 'var(--text-primary)' }}>
-                              <span style={{ fontWeight: '500' }}>{item.name}</span>
-                              <span style={{ fontWeight: '800', color: 'var(--primary-green)', backgroundColor: 'rgba(21, 58, 137, 0.1)', padding: '0.1rem 0.6rem', borderRadius: '20px' }}>x{item.quantity}</span>
+                            <li key={idx} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem 0', borderBottom: idx !== (o.items || []).length - 1 ? '1px solid var(--border-color)' : 'none', color: 'var(--text-primary)' }}>
+                              <span style={{ fontWeight: '500' }}>{item.name || 'Produit'}</span>
+                              <span style={{ fontWeight: '800', color: 'var(--primary-green)', backgroundColor: 'rgba(21, 58, 137, 0.1)', padding: '0.1rem 0.6rem', borderRadius: '20px' }}>x{item.quantity || 1}</span>
                             </li>
                           ))}
                         </ul>
-                        {o.shipping > 0 && (
+                        {(o.shipping > 0) && (
                           <div style={{ marginTop: '0.75rem', paddingTop: '0.75rem', borderTop: '2px dashed var(--border-color)', display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
                             <span>Frais de livraison</span>
-                            <span>{o.shipping.toFixed(2)} €</span>
+                            <span>{(o.shipping || 0).toFixed(2)} €</span>
                           </div>
                         )}
                       </div>

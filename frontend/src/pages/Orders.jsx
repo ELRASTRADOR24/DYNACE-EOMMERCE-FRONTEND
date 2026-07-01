@@ -124,23 +124,23 @@ export default function Orders({ onBackToShopping }) {
 
               {/* Order Card Items */}
               <div className="order-card-items">
-                {order.items.map((item, idx) => (
+                {(order.items || []).map((item, idx) => (
                   <div className="order-item-row" key={idx}>
                     <div className="order-item-img-wrapper">
                       <img 
                         src={item.image || "/images/logo.svg"} 
-                        alt={item.name} 
+                        alt={item.name || 'Produit'} 
                         className="order-item-img" 
                       />
                     </div>
                     <div className="order-item-details">
-                      <h4 className="order-item-name">{item.name}</h4>
+                      <h4 className="order-item-name">{item.name || 'Produit inconnu'}</h4>
                       <p className="order-item-price-qty">
-                        {item.quantity} x {item.price.toFixed(2)} €
+                        {item.quantity || 1} x {(item.price || 0).toFixed(2)} €
                       </p>
                     </div>
                     <div className="order-item-subtotal">
-                      {(item.price * item.quantity).toFixed(2)} €
+                      {((item.price || 0) * (item.quantity || 1)).toFixed(2)} €
                     </div>
                   </div>
                 ))}
@@ -150,21 +150,21 @@ export default function Orders({ onBackToShopping }) {
               <div className="order-card-footer">
                 <div className="order-shipping-address">
                   <MapPin size={14} style={{ color: 'var(--text-secondary)', marginRight: '0.25rem' }} />
-                  <span>Livré à : {order.address}, {order.postalCode} {order.city}</span>
+                  <span>Livré à : {order.address || 'N/A'}, {order.postalCode || ''} {order.city || ''}</span>
                 </div>
                 
                 <div className="order-financials">
                   <div className="financials-row-order">
                     <span>Sous-total :</span>
-                    <span>{order.subtotal.toFixed(2)} €</span>
+                    <span>{(order.subtotal || 0).toFixed(2)} €</span>
                   </div>
                   <div className="financials-row-order">
                     <span>Livraison :</span>
-                    <span>{order.shipping === 0 ? 'Gratuite' : `${order.shipping.toFixed(2)} €`}</span>
+                    <span>{(order.shipping || 0) === 0 ? 'Gratuite' : `${(order.shipping || 0).toFixed(2)} €`}</span>
                   </div>
                   <div className="financials-row-order grand-total-order">
                     <span>Total :</span>
-                    <span className="total-amount-order">{order.total.toFixed(2)} €</span>
+                    <span className="total-amount-order">{(order.total || 0).toFixed(2)} €</span>
                   </div>
                 </div>
               </div>
