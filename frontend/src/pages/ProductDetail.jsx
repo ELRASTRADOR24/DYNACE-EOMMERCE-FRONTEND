@@ -2,9 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ArrowLeft, CheckCircle, FlameKindling, ShoppingBag, CreditCard, Minus, Plus, ImageOff, Star } from 'lucide-react';
 
 export default function ProductDetail({ product, onBack, onAddToCart, onBuyNow, currentUser, onOpenAuth }) {
-  if (!product) return null;
-
-  const [activeImage, setActiveImage] = useState(product.image || "");
+  const [activeImage, setActiveImage] = useState(product?.image || "");
   const [quantity, setQuantity] = useState(1);
 
   // États pour la gestion des avis
@@ -19,6 +17,7 @@ export default function ProductDetail({ product, onBack, onAddToCart, onBuyNow, 
   const [submitError, setSubmitError] = useState(null);
 
   const fetchReviews = async () => {
+    if (!product?.id) return;
     setReviewsLoading(true);
     setReviewsError(null);
     try {
@@ -38,10 +37,13 @@ export default function ProductDetail({ product, onBack, onAddToCart, onBuyNow, 
   };
 
   useEffect(() => {
+    if (!product) return;
     setActiveImage(product.image || "");
     setQuantity(1); // Réinitialise la quantité au chargement du produit
     fetchReviews(); // Charge les avis du produit
   }, [product]);
+
+  if (!product) return null;
 
   const handleReviewSubmit = async (e) => {
     e.preventDefault();

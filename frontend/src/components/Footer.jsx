@@ -5,11 +5,24 @@ export default function Footer({ setCurrentTab }) {
   const [email, setEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
 
-  const handleSubscribe = (e) => {
+  const handleSubscribe = async (e) => {
     e.preventDefault();
     if (email) {
-      setSubscribed(true);
-      setEmail('');
+      try {
+        const res = await fetch('/api/newsletter/subscribe', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email }),
+        });
+        if (res.ok) {
+          setSubscribed(true);
+          setEmail('');
+        }
+      } catch (err) {
+        console.error("Erreur d'inscription à la newsletter :", err);
+      }
     }
   };
 

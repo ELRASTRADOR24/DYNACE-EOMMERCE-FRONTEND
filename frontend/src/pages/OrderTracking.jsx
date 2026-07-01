@@ -25,20 +25,18 @@ export default function OrderTracking() {
   };
 
   const fetchTracking = async (searchOrder, searchEmail) => {
-    if (!searchOrder) return;
+    if (!searchOrder || !searchEmail) {
+      setError("Le numéro de commande et l'adresse e-mail sont obligatoires.");
+      return;
+    }
     setIsLoading(true);
     setError('');
     try {
-      const res = await fetch(`/api/orders/track/${searchOrder}`);
+      const res = await fetch(`/api/orders/track/${searchOrder}?email=${encodeURIComponent(searchEmail)}`);
       const data = await res.json();
       
       if (!res.ok) {
         throw new Error(data.error || "Commande introuvable.");
-      }
-
-      // Verify email if provided in the search
-      if (searchEmail && data.email.toLowerCase() !== searchEmail.toLowerCase()) {
-        throw new Error("L'adresse e-mail ne correspond pas à cette commande.");
       }
 
       setTrackingData(data);
@@ -52,23 +50,23 @@ export default function OrderTracking() {
   };
 
   useEffect(() => {
-    if (initialOrder) {
+    if (initialOrder && initialEmail) {
       fetchTracking(initialOrder, initialEmail);
     }
   }, [initialOrder, initialEmail]);
 
-  // Real-time polling if an order is found
+  // Real-time polling if an order is found (only if not yet delivered)
   useEffect(() => {
     let intervalId;
-    if (trackingData && trackingData.order_number) {
+    if (trackingData && trackingData.order_number && trackingData.status !== 'Livré') {
       intervalId = setInterval(() => {
         fetchTracking(trackingData.order_number, email);
-      }, 15000); // Poll every 15s
+      }, 60000); // Poll every 60s
     }
     return () => {
       if (intervalId) clearInterval(intervalId);
     }
-  }, [trackingData?.order_number]);
+  }, [trackingData?.order_number, trackingData?.status, email]);
 
   const handleSubmit = (e) => {
     e.preventDefault();

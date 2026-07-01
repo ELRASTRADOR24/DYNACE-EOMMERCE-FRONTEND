@@ -38,8 +38,13 @@ function App() {
 
   // Cart state with localStorage persistence
   const [cartItems, setCartItems] = useState(() => {
-    const localCart = localStorage.getItem('dynace_cart');
-    return localCart ? JSON.parse(localCart) : [];
+    try {
+      const localCart = localStorage.getItem('dynace_cart');
+      return localCart ? JSON.parse(localCart) : [];
+    } catch (e) {
+      console.error("Erreur parsing localStorage cart :", e);
+      return [];
+    }
   });
 
   // Theme state with localStorage persistence

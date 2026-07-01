@@ -705,7 +705,7 @@ export default function AdminDashboard({ onRefreshProducts }) {
             Paramètres de Livraison
           </h3>
           
-          <form onSubmit={handleSaveSettings} style={{ background: 'rgba(255, 255, 255, 0.7)', backdropFilter: 'blur(10px)', padding: '2rem', borderRadius: '15px', border: '1px solid rgba(255, 255, 255, 0.5)', boxShadow: '0 8px 32px rgba(31, 38, 135, 0.05)' }}>
+          <form onSubmit={handleSaveSettings} style={{ background: 'var(--bg-secondary)', backdropFilter: 'blur(10px)', padding: '2rem', borderRadius: '15px', border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-premium)' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
               
               <div>
@@ -723,7 +723,7 @@ export default function AdminDashboard({ onRefreshProducts }) {
                     padding: '0.75rem 1rem',
                     borderRadius: '8px',
                     border: '1px solid var(--border-color)',
-                    background: 'white',
+                    background: 'var(--bg-primary)',
                     fontSize: '1rem',
                     color: 'var(--text-primary)'
                   }}
@@ -749,7 +749,7 @@ export default function AdminDashboard({ onRefreshProducts }) {
                     padding: '0.75rem 1rem',
                     borderRadius: '8px',
                     border: '1px solid var(--border-color)',
-                    background: 'white',
+                    background: 'var(--bg-primary)',
                     fontSize: '1rem',
                     color: 'var(--text-primary)'
                   }}

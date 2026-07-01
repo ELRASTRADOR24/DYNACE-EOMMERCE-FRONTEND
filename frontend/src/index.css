@@ -18,6 +18,8 @@
   --danger-bg: #FFF5F5;
   --success: #137333;
   --success-bg: #E6F4EA;
+  --warning: #F59E0B;
+  --warning-bg: #FEF3C7;
 
   --sans: 'Outfit', sans-serif;
   --serif: 'Playfair Display', serif;
@@ -43,6 +45,8 @@
   --danger-bg: rgba(255, 107, 107, 0.1);
   --success: #81C784;
   --success-bg: rgba(129, 199, 132, 0.1);
+  --warning: #FBBF24;
+  --warning-bg: rgba(251, 191, 36, 0.1);
 }
 
 * {
@@ -1790,6 +1794,27 @@ body {
 .animate-spin {
   animation: spin 1s linear infinite;
 }
+.spin {
+  animation: spin 1s linear infinite;
+  display: inline-block;
+}
+.btn-primary {
+  background-color: var(--primary-green);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.btn-primary:hover {
+  background-color: var(--primary-green-hover);
+}
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
 
 /* ==========================================================================
    DROPDOWN & MOBILE MENU DRAWER STYLES
@@ -2685,7 +2710,7 @@ body {
   color: var(--text-primary);
 }
 .reviewer-meta-feed .review-date-feed {
-  font-size: 0.7;
+  font-size: 0.7rem;
   color: var(--text-secondary);
 }
 .review-stars-feed-card {

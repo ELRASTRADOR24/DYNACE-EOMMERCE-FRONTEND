@@ -85,3 +85,11 @@ const settingSchema = new mongoose.Schema({
 });
 
 export const Setting = mongoose.model('Setting', settingSchema);
+
+// Schéma Newsletter (Newsletter)
+const newsletterSchema = new mongoose.Schema({
+  email: { type: String, required: true, unique: true },
+  created_at: { type: Date, default: Date.now }
+});
+
+export const Newsletter = mongoose.model('Newsletter', newsletterSchema);

@@ -69,7 +69,6 @@ export default function Navbar({
               À propos
             </a>
           </li>
-          {/*
           <li>
             <a
               className={currentTab === 'reviews' ? 'active' : ''}
@@ -78,7 +77,6 @@ export default function Navbar({
               Avis Clients
             </a>
           </li>
-          */}
           {currentUser && (
             <li>
               <a
@@ -209,7 +207,6 @@ export default function Navbar({
                 À propos
               </button>
             </li>
-            {/*
             <li>
               <button 
                 className={`drawer-link-btn ${currentTab === 'reviews' ? 'active' : ''}`}
@@ -218,7 +215,6 @@ export default function Navbar({
                 Avis Clients
               </button>
             </li>
-            */}
             {currentUser && (
               <li>
                 <button 

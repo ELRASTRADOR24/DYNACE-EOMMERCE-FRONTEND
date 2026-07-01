@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
-import { connectDatabase, User, Product, Order, Review, Setting } from './database.js';
+import { connectDatabase, User, Product, Order, Review, Setting, Newsletter } from './database.js';
 import { seedProducts } from './seed.js';
 import Stripe from 'stripe';
 import multer from 'multer';
@@ -361,40 +361,30 @@ app.post('/api/contact', async (req, res) => {
     res.status(500).json({ error: 'Erreur lors de l\'envoi du message.' });
   }
 });
+// --- NEWSLETTER ROUTE ---
 
-// --- ORDERS ROUTES ---
-
-// Create Order (Public/Registered)
-app.post('/api/orders', async (req, res) => {
-  const { orderNumber, userId, firstName, lastName, email, address, postalCode, city, items, subtotal, shipping, total } = req.body;
-
-  if (!orderNumber || !firstName || !lastName || !email || !address || !postalCode || !city || !items || !subtotal || !total) {
-    return res.status(400).json({ error: 'Données de commande incomplètes.' });
+app.post('/api/newsletter/subscribe', async (req, res) => {
+  const { email } = req.body;
+  if (!email) {
+    return res.status(400).json({ error: 'L\'adresse e-mail est obligatoire.' });
   }
 
   try {
-    const newOrder = new Order({
-      order_number: orderNumber,
-      user_id: userId || null,
-      first_name: firstName,
-      last_name: lastName,
-      email,
-      address,
-      postal_code: postalCode,
-      city,
-      items,
-      subtotal,
-      shipping,
-      total
-    });
-    await newOrder.save();
-
-    res.status(201).json({ success: true, orderNumber });
+    const existing = await Newsletter.findOne({ email });
+    if (existing) {
+      return res.status(200).json({ success: true, message: 'Déjà inscrit !' });
+    }
+    const newSubscription = new Newsletter({ email });
+    await newSubscription.save();
+    res.status(200).json({ success: true, message: 'Inscription validée.' });
   } catch (err) {
-    console.error('Erreur création commande :', err.message);
-    res.status(500).json({ error: 'Erreur de base de données lors de la création de la commande.' });
+    console.error('Erreur inscription newsletter :', err);
+    res.status(500).json({ error: 'Erreur serveur lors de l\'inscription.' });
   }
 });
+
+
+// --- ORDERS ROUTES ---
 
 // Get user orders (Route protégée)
 app.get('/api/orders/user', authenticateToken, async (req, res) => {
@@ -433,11 +423,21 @@ app.get('/api/orders/user', authenticateToken, async (req, res) => {
 
 // Track Order Public Endpoint
 app.get('/api/orders/track/:orderNumber', async (req, res) => {
+  const { email } = req.query;
+  if (!email) {
+    return res.status(400).json({ error: 'Adresse e-mail requise pour le suivi.' });
+  }
+
   try {
     const order = await Order.findOne({ order_number: req.params.orderNumber });
     if (!order) {
       return res.status(404).json({ error: 'Commande non trouvée.' });
     }
+
+    if (order.email.toLowerCase() !== email.toLowerCase()) {
+      return res.status(403).json({ error: 'L\'adresse e-mail ne correspond pas à cette commande.' });
+    }
+
     res.json({
       order_number: order.order_number,
       status: order.status,

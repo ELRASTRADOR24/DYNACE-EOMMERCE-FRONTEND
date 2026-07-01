@@ -51,11 +51,13 @@ export default function Orders({ onBackToShopping }) {
   const getStatusStyle = (status) => {
     switch (status) {
       case 'Payé':
-        return { backgroundColor: 'var(--success-bg)', color: 'var(--success)', border: '1px solid var(--success)' };
+        return { backgroundColor: 'rgba(21, 58, 137, 0.05)', color: 'var(--text-primary)', border: '1px solid var(--border-color)' };
       case 'En préparation':
-        return { backgroundColor: '#FFF7ED', color: '#EA580C', border: '1px solid #FFEDD5' };
+        return { backgroundColor: 'var(--warning-bg)', color: 'var(--warning)', border: '1px solid var(--warning)' };
       case 'Expédié':
-        return { backgroundColor: '#EFF6FF', color: '#2563EB', border: '1px solid #DBEAFE' };
+        return { backgroundColor: 'rgba(139, 92, 246, 0.1)', color: '#8b5cf6', border: '1px solid rgba(139, 92, 246, 0.3)' };
+      case 'Livré':
+        return { backgroundColor: 'var(--success-bg)', color: 'var(--success)', border: '1px solid var(--success)' };
       default:
         return { backgroundColor: 'var(--bg-secondary)', color: 'var(--text-secondary)', border: '1px solid var(--border-color)' };
     }

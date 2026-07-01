@@ -120,7 +120,13 @@ export default function Contact() {
             </div>
 
             {submitMessage && (
-              <div style={{ padding: '1rem', backgroundColor: 'var(--success-bg)', color: 'var(--success)', borderRadius: '8px', fontSize: '0.9rem' }}>
+              <div style={{ 
+                padding: '1rem', 
+                backgroundColor: submitMessage.type === 'error' ? 'var(--danger-bg)' : 'var(--success-bg)', 
+                color: submitMessage.type === 'error' ? 'var(--danger)' : 'var(--success)', 
+                borderRadius: '8px', 
+                fontSize: '0.9rem' 
+              }}>
                 {submitMessage.text}
               </div>
             )}

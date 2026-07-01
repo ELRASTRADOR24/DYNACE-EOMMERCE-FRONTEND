@@ -2,6 +2,19 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Star, Play, Pause, AlertCircle, MessageSquare, CheckCircle } from 'lucide-react';
 import { reviews } from '../data/products';
 
+const getProductName = (id) => {
+  const mapping = {
+    rocenta: "Dynace Rocenta",
+    dynafuel: "Dynace Dynafuel",
+    urbanism: "Dynace Urbanism",
+    acebrew: "Dynace Ace Brew",
+    fitmax: "Dynace FitMax",
+    aceguard: "Dynace Ace Guard",
+    tripleroot: "Dynace Triple Root Coffee"
+  };
+  return mapping[id] || id;
+};
+
 export default function Reviews() {
   const [playingId, setPlayingId] = useState(null);
   const videoRefs = useRef({});
@@ -161,7 +174,7 @@ export default function Reviews() {
                 </div>
                 <p className="written-card-comment">"{rev.comment}"</p>
                 <div className="written-card-product-tag">
-                  Produit évalué : <span className="product-id-tag">{rev.product_id}</span>
+                  Produit évalué : <span className="product-id-tag">{getProductName(rev.product_id)}</span>
                 </div>
               </div>
             ))}
