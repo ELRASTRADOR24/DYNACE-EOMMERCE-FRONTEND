@@ -375,8 +375,12 @@ app.get('/api/test-email-error', async (req, res) => {
   }
 
   const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: { user, pass }
+    host: 'smtp.gmail.com',
+    port: 587,
+    secure: false,
+    family: 4,
+    auth: { user, pass },
+    tls: { rejectUnauthorized: false }
   });
 
   const mailOptions = {
