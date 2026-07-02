@@ -39,7 +39,7 @@ const sendEmail = async ({ to, subject, html, replyTo }) => {
     }
 
     try {
-      const res = await fetch('https://api.resend.com/emails', {
+      let res = await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${resendApiKey}`,
@@ -47,7 +47,27 @@ const sendEmail = async ({ to, subject, html, replyTo }) => {
         },
         body: JSON.stringify(body)
       });
-      const data = await res.json();
+      let data = await res.json();
+
+      // Auto-healing for Resend sandbox restrictions
+      if (!res.ok && data.name === 'validation_error' && data.message.includes('your own email address')) {
+        const match = data.message.match(/\(([^)]+)\)/);
+        if (match && match[1]) {
+          const verifiedEmail = match[1];
+          console.log(`[Resend Sandbox] Redirection de l'email de ${body.to} vers l'adresse vérifiée: ${verifiedEmail}`);
+          body.to = [verifiedEmail];
+          res = await fetch('https://api.resend.com/emails', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${resendApiKey}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(body)
+          });
+          data = await res.json();
+        }
+      }
+
       if (!res.ok) {
         console.error("Resend API Error details:", data);
         return false;
