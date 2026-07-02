@@ -404,10 +404,13 @@ export const sendCustomerOrderConfirmationEmail = async (order) => {
     </html>
   `;
 
+  const adminEmail = process.env.EMAIL_USER || 'dynaceglogal@gmail.com';
+
   return sendEmail({
     to: order.email,
     subject: `Commande confirmée : ${order.order_number} - Dynace Global`,
-    html
+    html,
+    replyTo: adminEmail
   });
 };
 
@@ -465,9 +468,12 @@ export const sendShippingConfirmationEmail = async (order, trackingNumber) => {
     </html>
   `;
 
+  const adminEmail = process.env.EMAIL_USER || 'dynaceglogal@gmail.com';
+
   return sendEmail({
     to: order.email,
     subject: `Votre commande #${order.order_number} a été expédiée ! 🚀`,
-    html
+    html,
+    replyTo: adminEmail
   });
 };
