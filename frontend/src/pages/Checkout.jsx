@@ -287,9 +287,13 @@ export default function Checkout({ cartItems, onClearCart, onBackToShopping, cur
     return (
       <div className="success-card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '4rem 2rem', gap: '1.5rem', textAlign: 'center' }}>
         <Loader className="animate-spin" size={48} style={{ color: 'var(--primary-green)' }} />
-        <h1 className="success-title" style={{ fontSize: '1.8rem' }}>Validation du paiement...</h1>
+        <h1 className="success-title" style={{ fontSize: '1.8rem' }}>
+          {useTestPayment ? "Validation de la commande..." : "Validation du paiement..."}
+        </h1>
         <p className="success-text" style={{ color: 'var(--text-secondary)' }}>
-          Nous vérifions la transaction auprès de Stripe. Veuillez ne pas actualiser ni fermer cette page.
+          {useTestPayment 
+            ? "Nous enregistrons votre commande de test. Veuillez patienter..." 
+            : "Nous vérifions la transaction auprès de Stripe. Veuillez ne pas actualiser ni fermer cette page."}
         </p>
       </div>
     );

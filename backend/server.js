@@ -355,12 +355,12 @@ app.post('/api/contact', async (req, res) => {
     return res.status(400).json({ error: 'Tous les champs sont obligatoires.' });
   }
 
-  const success = await sendContactEmail({ name, email, subject, message });
-  if (success) {
-    res.status(200).json({ success: true, message: 'Message envoyé avec succès.' });
-  } else {
-    res.status(500).json({ error: 'Erreur lors de l\'envoi du message.' });
-  }
+  // Send email in background to prevent hanging
+  sendContactEmail({ name, email, subject, message }).catch(err => {
+    console.error("Erreur lors de l'envoi de l'email de contact:", err.message);
+  });
+
+  res.status(200).json({ success: true, message: 'Message envoyé avec succès.' });
 });
 
 app.get('/api/test-email-error', async (req, res) => {
@@ -671,15 +671,16 @@ app.post('/api/payment/create-test-order', authenticateToken, async (req, res) =
       }
     }
 
-    await sendOrderNotificationEmail({
+    // Send emails in background to prevent request hanging due to SMTP port blocks
+    sendOrderNotificationEmail({
       orderId: orderNumber,
       user: { firstName, lastName, email: user.email },
       items: finalItems,
       totalAmount,
       shippingAddress: { fullName: `${firstName} ${lastName}`, address, postalCode, city, country: 'France', phone: '' }
-    });
+    }).catch(err => console.error("Admin order notification email error:", err.message));
 
-    await sendCustomerOrderConfirmationEmail(newOrder);
+    sendCustomerOrderConfirmationEmail(newOrder).catch(err => console.error("Customer order confirmation email error:", err.message));
 
     res.status(201).json({ success: true, orderNumber });
   } catch (err) {
@@ -737,13 +738,14 @@ app.post('/api/payment/confirm-order', async (req, res) => {
     await newOrder.save();
     
     // Notification email to admin
-    await sendOrderNotificationEmail({
+    // Send emails in background to prevent request hanging due to SMTP port blocks
+    sendOrderNotificationEmail({
       orderId: orderNumber,
       user: { firstName, lastName, email },
       items: JSON.parse(items),
       totalAmount: parseFloat(total),
       shippingAddress: { fullName: `${firstName} ${lastName}`, address, postalCode, city, country: 'France', phone: '' }
-    });
+    }).catch(err => console.error("Admin order notification email error:", err.message));
 
     console.log(`✅ Commande confirmée et enregistrée : ${orderNumber}`);
 
@@ -762,7 +764,7 @@ app.post('/api/payment/confirm-order', async (req, res) => {
     }
 
     // Envoi de l'e-mail de confirmation au client
-    await sendCustomerOrderConfirmationEmail(newOrder);
+    sendCustomerOrderConfirmationEmail(newOrder).catch(err => console.error("Customer order confirmation email error:", err.message));
 
     res.status(201).json({ success: true, orderNumber });
   } catch (err) {
