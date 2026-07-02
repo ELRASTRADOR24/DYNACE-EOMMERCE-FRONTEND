@@ -6,11 +6,17 @@ dotenv.config();
 // Create a transporter
 // We use a safe fallback so that the server doesn't crash if EMAIL_USER is not set yet
 const transporter = nodemailer.createTransport({
-  service: 'gmail', // or your preferred email service
+  host: 'smtp.gmail.com',
+  port: 587,
+  secure: false, // Use STARTTLS
+  family: 4, // Force IPv4 to bypass Render's IPv6 reachability issues (ENETUNREACH)
   auth: {
     user: process.env.EMAIL_USER || 'votre.email@gmail.com', // Will be set in .env
     pass: process.env.EMAIL_PASS || process.env.SMTP_PASS || 'votre_mot_de_passe_application', // App password
   },
+  tls: {
+    rejectUnauthorized: false
+  }
 });
 
 export const sendContactEmail = async ({ name, email, subject, message }) => {
