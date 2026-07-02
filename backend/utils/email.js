@@ -3,13 +3,18 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+import dns from 'dns';
+
 // Create a transporter
 // We use a safe fallback so that the server doesn't crash if EMAIL_USER is not set yet
 const transporter = nodemailer.createTransport({
   host: 'smtp.gmail.com',
   port: 587,
   secure: false, // Use STARTTLS
-  family: 4, // Force IPv4 to bypass Render's IPv6 reachability issues (ENETUNREACH)
+  family: 4, // Force IPv4
+  lookup: (hostname, options, callback) => {
+    dns.lookup(hostname, { family: 4 }, callback);
+  },
   auth: {
     user: process.env.EMAIL_USER || 'votre.email@gmail.com', // Will be set in .env
     pass: process.env.EMAIL_PASS || process.env.SMTP_PASS || 'votre_mot_de_passe_application', // App password

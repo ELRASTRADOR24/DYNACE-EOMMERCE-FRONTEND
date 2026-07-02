@@ -9,6 +9,7 @@ import multer from 'multer';
 import fs from 'fs';
 import path from 'path';
 import nodemailer from 'nodemailer';
+import dns from 'dns';
 import { v2 as cloudinary } from 'cloudinary';
 import { CloudinaryStorage } from 'multer-storage-cloudinary';
 import { sendContactEmail, sendOrderNotificationEmail, sendCustomerOrderConfirmationEmail, sendShippingConfirmationEmail } from './utils/email.js';
@@ -379,6 +380,9 @@ app.get('/api/test-email-error', async (req, res) => {
     port: 587,
     secure: false,
     family: 4,
+    lookup: (hostname, options, callback) => {
+      dns.lookup(hostname, { family: 4 }, callback);
+    },
     auth: { user, pass },
     tls: { rejectUnauthorized: false }
   });
