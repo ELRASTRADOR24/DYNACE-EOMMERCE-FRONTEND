@@ -23,7 +23,7 @@ const transporter = nodemailer.createTransport({
 });
 
 // Unified mail sender supporting Resend API in production and Nodemailer in development
-const sendEmail = async ({ to, subject, html, replyTo }) => {
+export const sendEmail = async ({ to, subject, html, replyTo }) => {
   const resendApiKey = process.env.RESEND_API_KEY;
 
   if (resendApiKey) {

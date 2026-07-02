@@ -12,7 +12,7 @@ import nodemailer from 'nodemailer';
 import dns from 'dns';
 import { v2 as cloudinary } from 'cloudinary';
 import { CloudinaryStorage } from 'multer-storage-cloudinary';
-import { sendContactEmail, sendOrderNotificationEmail, sendCustomerOrderConfirmationEmail, sendShippingConfirmationEmail } from './utils/email.js';
+import { sendContactEmail, sendOrderNotificationEmail, sendCustomerOrderConfirmationEmail, sendShippingConfirmationEmail, sendEmail } from './utils/email.js';
 
 // Charge les variables d'environnement depuis le fichier .env
 try {
@@ -376,26 +376,16 @@ app.get('/api/test-email-error', async (req, res) => {
   }
 
   if (process.env.RESEND_API_KEY) {
-    const fromEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
     try {
-      const resendRes = await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          from: `Dynace Global <${fromEmail}>`,
-          to: [user || 'johansonzoda@gmail.com'],
-          subject: 'Dynace Test Resend Email',
-          html: '<p>Si vous recevez ce message, Resend est configuré correctement !</p>'
-        })
+      const emailSent = await sendEmail({
+        to: user || 'johansonzoda@gmail.com',
+        subject: 'Dynace Test Resend Email',
+        html: '<p>Si vous recevez ce message, Resend est configuré correctement !</p>'
       });
-      const resendData = await resendRes.json();
-      if (!resendRes.ok) {
-        return res.status(500).json({ success: false, error: resendData });
+      if (!emailSent) {
+        return res.status(500).json({ success: false, error: 'Failed to send email via Resend helper' });
       }
-      return res.json({ success: true, provider: 'resend', messageId: resendData.id, emailUser: user });
+      return res.json({ success: true, provider: 'resend', emailUser: user });
     } catch (err) {
       return res.status(500).json({ success: false, error: err.message, provider: 'resend' });
     }
