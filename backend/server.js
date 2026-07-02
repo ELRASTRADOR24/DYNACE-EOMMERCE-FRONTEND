@@ -532,6 +532,151 @@ app.get('/api/orders/track/:orderNumber', async (req, res) => {
   }
 });
 
+// Printable Packing Slip (Bordereau de livraison / Fiche d'expédition) HTML endpoint
+app.get('/api/orders/packing-slip/:orderNumber', async (req, res) => {
+  try {
+    const order = await Order.findOne({ order_number: req.params.orderNumber });
+    if (!order) {
+      return res.status(404).send('<h1>Commande non trouvée</h1>');
+    }
+
+    const itemsHtml = order.items.map(item => `
+      <tr>
+        <td style="padding: 12px 10px; border-bottom: 1px solid #e2e8f0; font-size: 14px; font-weight: 500;">${item.name}</td>
+        <td style="padding: 12px 10px; border-bottom: 1px solid #e2e8f0; text-align: center; font-size: 14px;">x${item.quantity}</td>
+        <td style="padding: 12px 10px; border-bottom: 1px solid #e2e8f0; text-align: right; font-size: 14px; font-weight: 600;">${item.price.toFixed(2)} €</td>
+      </tr>
+    `).join('');
+
+    res.send(`
+      <!DOCTYPE html>
+      <html lang="fr">
+      <head>
+        <meta charset="UTF-8">
+        <title>Fiche d'Expédition - #${order.order_number}</title>
+        <style>
+          body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; color: #1e293b; margin: 0; padding: 20px; background-color: #f8fafc; }
+          .container { max-width: 800px; margin: 0 auto; border: 1px solid #e2e8f0; padding: 40px; border-radius: 12px; background-color: #fff; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+          
+          .header { text-align: center; border-bottom: 3px solid #153A89; padding-bottom: 20px; margin-bottom: 30px; }
+          .header h1 { color: #153A89; margin: 0; font-size: 28px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; }
+          .header p { color: #64748b; margin: 5px 0 0 0; font-size: 14px; font-weight: 500; }
+          
+          .grid { display: flex; justify-content: space-between; margin-bottom: 30px; }
+          .col { width: 48%; }
+          .col-title { font-size: 12px; text-transform: uppercase; color: #94a3b8; font-weight: 700; margin-bottom: 8px; border-bottom: 2px solid #f1f5f9; padding-bottom: 6px; letter-spacing: 0.5px; }
+          .col-content { font-size: 15px; line-height: 1.6; color: #334155; }
+          
+          .label-box { border: 3px dashed #153A89; border-radius: 12px; padding: 25px; margin: 30px 0; background-color: #fafbff; position: relative; }
+          .label-box-title { position: absolute; top: -12px; left: 20px; background-color: #153A89; color: #fff; padding: 3px 12px; font-size: 11px; font-weight: 800; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+          .label-grid { display: flex; justify-content: space-between; }
+          .label-col { width: 48%; }
+          
+          .order-table { width: 100%; border-collapse: collapse; margin: 25px 0; }
+          .order-table th { background-color: #f8fafc; border-bottom: 2px solid #e2e8f0; padding: 12px 10px; text-align: left; font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: 700; }
+          .order-table td { padding: 12px 10px; }
+          
+          .print-btn-container { text-align: center; margin-bottom: 25px; }
+          .btn-print { background-color: #10b981; color: #fff; border: none; padding: 14px 28px; font-size: 15px; font-weight: 700; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; box-shadow: 0 4px 6px -1px rgba(16,185,129,0.2); transition: all 0.2s; }
+          .btn-print:hover { background-color: #059669; transform: translateY(-1px); }
+          
+          @media print {
+            .print-btn-container { display: none; }
+            body { margin: 0; padding: 0; background-color: #fff; }
+            .container { border: none; box-shadow: none; padding: 0; max-width: 100%; }
+            .label-box { border: 3px dashed #000; background-color: #fff; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="print-btn-container">
+          <button onclick="window.print()" class="btn-print">🖨️ Imprimer la Fiche d'Expédition / Enregistrer en PDF</button>
+        </div>
+        <div class="container">
+          <div class="header">
+            <h1>DYNACE GLOBAL</h1>
+            <p>Bordereau de livraison & Fiche d'expédition</p>
+          </div>
+          
+          <div class="grid">
+            <div class="col">
+              <div class="col-title">Informations de la Commande</div>
+              <div class="col-content">
+                <strong>N° de Commande :</strong> <span style="font-family: monospace; font-size: 16px; font-weight: 700; color: #153A89;">${order.order_number}</span><br>
+                <strong>Date de commande :</strong> ${new Date(order.created_at).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}<br>
+                <strong>Statut du paiement :</strong> Payé (Stripe)<br>
+                <strong>Montant total payé :</strong> ${order.total.toFixed(2)} €
+              </div>
+            </div>
+            <div class="col">
+              <div class="col-title">Contact Destinataire</div>
+              <div class="col-content">
+                <strong>Client :</strong> ${order.first_name} ${order.last_name}<br>
+                <strong>Email :</strong> ${order.email}<br>
+              </div>
+            </div>
+          </div>
+          
+          <div class="label-box">
+            <div class="label-box-title">Étiquette Colis (À découper et coller sur le carton)</div>
+            <div class="label-grid">
+              <div class="label-col">
+                <div class="col-title">Expéditeur</div>
+                <div class="col-content" style="font-size: 13px;">
+                  <strong>DYNACE GLOBAL</strong><br>
+                  (Votre adresse d'expédition)<br>
+                  France
+                </div>
+              </div>
+              <div class="label-col" style="border-left: 2px solid #e2e8f0; padding-left: 20px;">
+                <div class="col-title">Destinataire</div>
+                <div class="col-content" style="font-size: 16px; font-weight: 700; color: #1e293b;">
+                  ${order.first_name} ${order.last_name}<br>
+                  <span style="font-weight: 500; font-size: 14px; color: #475569;">
+                    ${order.address}<br>
+                    ${order.postal_code} ${order.city}<br>
+                    France
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="col-title" style="margin-top: 40px;">Détail des Produits Inclus dans le Colis</div>
+          <table class="order-table">
+            <thead>
+              <tr>
+                <th>Produit</th>
+                <th style="text-align: center; width: 80px;">Quantité</th>
+                <th style="text-align: right; width: 120px;">Prix Unitaire</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${itemsHtml}
+              <tr>
+                <td colspan="2" style="text-align: right; font-weight: 600; border-top: 2px solid #e2e8f0; padding-top: 15px; color: #64748b;">Sous-total :</td>
+                <td style="text-align: right; font-weight: 600; border-top: 2px solid #e2e8f0; padding-top: 15px; color: #334155;">${order.subtotal.toFixed(2)} €</td>
+              </tr>
+              <tr>
+                <td colspan="2" style="text-align: right; color: #64748b; padding: 5px 10px;">Frais de livraison :</td>
+                <td style="text-align: right; color: #64748b; padding: 5px 10px;">${order.shipping === 0 ? 'Gratuit' : `${order.shipping.toFixed(2)} €`}</td>
+              </tr>
+              <tr>
+                <td colspan="2" style="text-align: right; font-size: 18px; font-weight: 800; color: #153A89; padding: 12px 10px 0 10px;">Montant total :</td>
+                <td style="text-align: right; font-size: 18px; font-weight: 800; color: #153A89; padding: 12px 10px 0 10px;">${order.total.toFixed(2)} €</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </body>
+      </html>
+    `);
+  } catch (err) {
+    console.error('Erreur génération fiche expédition :', err.message);
+    res.status(500).send('<h1>Erreur lors de la génération de la fiche d\'expédition</h1>');
+  }
+});
+
 // --- PAYMENT ROUTES ---
 
 // 1. Create Checkout Session

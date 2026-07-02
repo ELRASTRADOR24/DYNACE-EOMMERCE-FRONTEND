@@ -239,6 +239,12 @@ export const sendOrderNotificationEmail = async ({ orderId, user, items, totalAm
             </div>
           </div>
           
+          <div style="margin-top: 25px; text-align: center; margin-bottom: 25px;">
+            <a href="${process.env.BACKEND_URL || 'https://dynace-ecommerce-backend.onrender.com'}/api/orders/packing-slip/${orderId}" target="_blank" style="display: inline-block; background-color: #10b981; color: #ffffff !important; padding: 15px 35px; border-radius: 8px; text-decoration: none; font-size: 15px; font-weight: 800; letter-spacing: 0.5px; box-shadow: 0 4px 12px rgba(16,185,129,0.2); border: 2px solid #10b981;">
+              🖨️ Imprimer la Fiche d'Expédition / Coller sur le carton →
+            </a>
+          </div>
+          
           <div style="margin-top: 30px; background: linear-gradient(135deg, #fafbff 0%, #f0f4ff 100%); border: 2px solid #153A89; border-radius: 14px; padding: 25px; ">
             <h3 style="font-size: 17px; color: #153A89; margin: 0 0 18px 0; text-transform: uppercase; font-weight: 800; letter-spacing: 1px; text-align: center;">🚚 Envoyer le colis en 3 étapes</h3>
             
