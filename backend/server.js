@@ -11,7 +11,7 @@ import path from 'path';
 import nodemailer from 'nodemailer';
 import { v2 as cloudinary } from 'cloudinary';
 import { CloudinaryStorage } from 'multer-storage-cloudinary';
-import { sendContactEmail, sendOrderNotificationEmail, sendCustomerOrderConfirmationEmail } from './utils/email.js';
+import { sendContactEmail, sendOrderNotificationEmail, sendCustomerOrderConfirmationEmail, sendShippingConfirmationEmail } from './utils/email.js';
 
 // Charge les variables d'environnement depuis le fichier .env
 try {
@@ -202,7 +202,8 @@ app.get('/api/auth/me', authenticateToken, async (req, res) => {
       address: user.address,
       postalCode: user.postal_code,
       city: user.city,
-      isAdmin: user.is_admin || false
+      isAdmin: user.is_admin || false,
+      allowTestPayment: user.allow_test_payment || false
     });
   } catch (err) {
     res.status(500).json({ error: 'Erreur lors de la récupération du profil.' });
@@ -361,6 +362,44 @@ app.post('/api/contact', async (req, res) => {
     res.status(500).json({ error: 'Erreur lors de l\'envoi du message.' });
   }
 });
+
+app.get('/api/test-email-error', async (req, res) => {
+  const user = process.env.EMAIL_USER;
+  const pass = process.env.EMAIL_PASS || process.env.SMTP_PASS;
+
+  if (!user || !pass) {
+    return res.status(400).json({ 
+      error: "Missing EMAIL_USER or EMAIL_PASS in process.env", 
+      envKeys: Object.keys(process.env).filter(k => k.includes('EMAIL') || k.includes('SMTP') || k.includes('PASS'))
+    });
+  }
+
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: { user, pass }
+  });
+
+  const mailOptions = {
+    from: user,
+    to: user,
+    subject: 'Dynace Test Route Email',
+    text: 'Test message.'
+  };
+
+  try {
+    const info = await transporter.sendMail(mailOptions);
+    res.json({ success: true, message: "Email sent successfully", messageId: info.messageId, emailUser: user });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      error: err.message,
+      code: err.code,
+      response: err.response,
+      emailUser: user
+    });
+  }
+});
+
 // --- NEWSLETTER ROUTE ---
 
 app.post('/api/newsletter/subscribe', async (req, res) => {
@@ -412,6 +451,7 @@ app.get('/api/orders/user', authenticateToken, async (req, res) => {
       shipping: row.shipping,
       total: row.total,
       status: row.status,
+      trackingNumber: row.tracking_number || '',
       createdAt: row.created_at
     }));
     res.json(ordersList);
@@ -448,7 +488,8 @@ app.get('/api/orders/track/:orderNumber', async (req, res) => {
       last_name: order.last_name,
       address: order.address,
       postal_code: order.postal_code,
-      city: order.city
+      city: order.city,
+      tracking_number: order.tracking_number || ''
     });
   } catch (err) {
     console.error('Erreur suivi commande :', err.message);
@@ -553,6 +594,97 @@ app.post('/api/payment/create-checkout-session', async (req, res) => {
   } catch (err) {
     console.error('Erreur création session Stripe :', err.message);
     res.status(500).json({ error: err.message || 'Impossible d\'initialiser le paiement sécurisé.' });
+  }
+});
+
+// Create Test Order (Bypass Stripe for authorized test users)
+app.post('/api/payment/create-test-order', authenticateToken, async (req, res) => {
+  const { items, email, firstName, lastName, address, postalCode, city } = req.body;
+
+  if (!items || items.length === 0 || !email) {
+    return res.status(400).json({ error: 'Panier ou email manquant.' });
+  }
+
+  try {
+    const user = await User.findById(req.userId);
+    if (!user || !user.allow_test_payment) {
+      return res.status(403).json({ error: "Vous n'êtes pas autorisé à utiliser le paiement de test." });
+    }
+
+    let backendSubtotal = 0;
+    const finalItems = [];
+
+    for (const item of items) {
+      const dbProduct = await Product.findById(item.id);
+      if (!dbProduct) {
+        return res.status(404).json({ error: `Produit ${item.name || item.id} non trouvé.` });
+      }
+
+      if (dbProduct.stock < item.quantity) {
+        return res.status(400).json({ error: `Stock insuffisant pour ${dbProduct.name}. (En stock: ${dbProduct.stock})` });
+      }
+
+      backendSubtotal += dbProduct.price * item.quantity;
+      finalItems.push({
+        id: dbProduct._id,
+        name: dbProduct.name,
+        price: dbProduct.price,
+        quantity: item.quantity
+      });
+    }
+
+    let threshold = 60;
+    let cost = 6.90;
+    const shippingSetting = await Setting.findOne({ key: 'shipping' });
+    if (shippingSetting && shippingSetting.value) {
+      threshold = shippingSetting.value.threshold;
+      cost = shippingSetting.value.cost;
+    }
+
+    const shippingCost = backendSubtotal >= threshold ? 0 : cost;
+    const totalAmount = backendSubtotal + shippingCost;
+    const orderNumber = `TEST-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`;
+
+    const newOrder = new Order({
+      order_number: orderNumber,
+      user_id: user._id,
+      first_name: firstName,
+      last_name: lastName,
+      email: email.toLowerCase(),
+      address,
+      postal_code: postalCode,
+      city,
+      items: finalItems,
+      subtotal: backendSubtotal,
+      shipping: shippingCost,
+      total: totalAmount,
+      status: 'Payé'
+    });
+
+    await newOrder.save();
+
+    for (const item of finalItems) {
+      try {
+        await Product.findByIdAndUpdate(item.id, { $inc: { stock: -item.quantity } });
+      } catch (err) {
+        console.error(`Erreur mise à jour stock test pour ${item.id} :`, err.message);
+      }
+    }
+
+    await sendOrderNotificationEmail({
+      orderId: orderNumber,
+      user: { firstName, lastName, email: user.email },
+      items: finalItems,
+      totalAmount,
+      shippingAddress: { fullName: `${firstName} ${lastName}`, address, postalCode, city, country: 'France', phone: '' }
+    });
+
+    await sendCustomerOrderConfirmationEmail(newOrder);
+
+    res.status(201).json({ success: true, orderNumber });
+  } catch (err) {
+    console.error('Erreur creation commande test :', err.message);
+    res.status(500).json({ error: 'Erreur lors de la création de la commande de test.' });
   }
 });
 
@@ -666,19 +798,64 @@ app.get('/api/admin/orders', authenticateToken, verifyAdmin, async (req, res) =>
 
 // Update order status
 app.put('/api/admin/orders/:id/status', authenticateToken, verifyAdmin, async (req, res) => {
-  const { status } = req.body;
+  const { status, trackingNumber } = req.body;
   if (!status) {
     return res.status(400).json({ error: 'Statut manquant.' });
   }
   try {
-    const order = await Order.findByIdAndUpdate(req.params.id, { status }, { new: true });
+    const updateData = { status };
+    if (trackingNumber !== undefined) {
+      updateData.tracking_number = trackingNumber;
+    }
+
+    const order = await Order.findByIdAndUpdate(req.params.id, updateData, { new: true });
     if (!order) {
       return res.status(404).json({ error: 'Commande non trouvée.' });
     }
+
+    // Si le statut passe à "Expédié", envoyer l'e-mail d'expédition au client
+    if (status === 'Expédié') {
+      const trackingNo = trackingNumber || order.tracking_number || '';
+      await sendShippingConfirmationEmail(order, trackingNo);
+    }
+
     res.json(order);
   } catch (err) {
     console.error('Erreur mise à jour statut commande :', err.message);
     res.status(500).json({ error: 'Erreur lors de la mise à jour du statut.' });
+  }
+});
+
+// GET all registered users for admin (excluding passwords)
+app.get('/api/admin/users', authenticateToken, verifyAdmin, async (req, res) => {
+  try {
+    const users = await User.find({}, '-password').sort({ first_name: 1 });
+    res.json(users);
+  } catch (err) {
+    console.error('Erreur lecture utilisateurs admin :', err.message);
+    res.status(500).json({ error: 'Erreur lors du chargement des utilisateurs.' });
+  }
+});
+
+// Toggle allow_test_payment permission for a user
+app.put('/api/admin/users/:id/toggle-test-payment', authenticateToken, verifyAdmin, async (req, res) => {
+  const { allowTestPayment } = req.body;
+  if (allowTestPayment === undefined) {
+    return res.status(400).json({ error: 'Statut de permission manquant.' });
+  }
+  try {
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
+      { allow_test_payment: allowTestPayment },
+      { new: true }
+    );
+    if (!user) {
+      return res.status(404).json({ error: 'Utilisateur non trouvé.' });
+    }
+    res.json({ success: true, user });
+  } catch (err) {
+    console.error('Erreur bascule permission test admin :', err.message);
+    res.status(500).json({ error: 'Erreur lors de la mise à jour des permissions.' });
   }
 });
 

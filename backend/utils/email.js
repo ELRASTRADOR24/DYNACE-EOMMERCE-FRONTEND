@@ -471,3 +471,76 @@ export const sendCustomerOrderConfirmationEmail = async (order) => {
     return false;
   }
 };
+
+export const sendShippingConfirmationEmail = async (order, trackingNumber) => {
+  if (!process.env.EMAIL_USER) {
+    console.log('Simulation Email Expédition (Configurez EMAIL_USER dans .env) :', { orderId: order.order_number, email: order.email, trackingNumber });
+    return true;
+  }
+
+  const trackingLink = `https://www.laposte.fr/outils/suivre-un-envoi?code=${trackingNumber}`;
+
+  const mailOptions = {
+    from: `"Dynace Global" <${process.env.EMAIL_USER}>`,
+    to: order.email,
+    subject: `Votre commande #${order.order_number} a été expédiée ! 🚀`,
+    html: `
+      <!DOCTYPE html>
+      <html lang="fr">
+      <head>
+        <meta charset="UTF-8">
+        <style>
+          body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f4f7f6; margin: 0; padding: 0; }
+          .email-wrapper { max-width: 600px; margin: 40px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+          .header { background-color: #10b981; padding: 40px 20px; text-align: center; }
+          .header h2 { color: #ffffff; font-size: 28px; font-weight: 800; margin: 0; text-transform: uppercase; margin-bottom: 10px; }
+          .header h1 { color: #ffffff; font-size: 18px; font-weight: 400; margin: 0; }
+          .content { padding: 40px 30px; color: #334155; }
+          .greeting { font-size: 18px; font-weight: 600; margin-bottom: 10px; color: #1e293b; }
+          .intro-text { font-size: 15px; line-height: 1.6; color: #475569; margin-bottom: 30px; }
+          .tracking-box { background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 25px; margin-bottom: 30px; text-align: center; }
+          .tracking-number { font-family: monospace; font-size: 20px; font-weight: bold; color: #153A89; margin: 15px 0; letter-spacing: 1px; }
+          .cta-button { display: inline-block; background-color: #10b981; color: #ffffff !important; font-size: 16px; font-weight: 700; text-decoration: none; padding: 15px 35px; border-radius: 30px; letter-spacing: 0.5px; border: 2px solid #10b981; margin-top: 10px; }
+          .footer { text-align: center; padding: 30px; background-color: #f1f5f9; font-size: 13px; color: #94a3b8; line-height: 1.5; }
+          .footer a { color: #153A89; text-decoration: none; }
+        </style>
+      </head>
+      <body>
+        <div class="email-wrapper">
+          <div class="header">
+            <h2>DYNACE GLOBAL</h2>
+            <h1>Votre commande est en route !</h1>
+          </div>
+          <div class="content">
+            <div class="greeting">Bonjour ${order.first_name || 'Client'},</div>
+            <div class="intro-text">
+              Bonne nouvelle ! Votre commande <strong>#${order.order_number}</strong> a été expédiée. Elle est actuellement entre les mains du transporteur et arrive très bientôt chez vous.
+            </div>
+            <div class="tracking-box">
+              <div style="font-size: 14px; text-transform: uppercase; color: #94a3b8; font-weight: 700; letter-spacing: 0.5px;">Numéro de suivi Colissimo</div>
+              <div class="tracking-number">${trackingNumber}</div>
+              <a href="${trackingLink}" target="_blank" class="cta-button">Suivre mon colis sur La Poste</a>
+            </div>
+            <div style="font-size: 14px; color: #64748b; line-height: 1.5;">
+              Vous pouvez également suivre l'avancée de votre préparation et la livraison directement sur notre boutique en cliquant sur le lien ci-dessous :<br/>
+              <a href="https://dynace-shop.vercel.app/track?order=${order.order_number}&email=${encodeURIComponent(order.email)}" style="color: #153A89; font-weight: 600; text-decoration: none;">Suivre sur notre site</a>
+            </div>
+          </div>
+          <div class="footer">
+            <p>Ceci est un e-mail automatique, merci de ne pas y répondre directement.<br/>Pour toute question, contactez notre support via la page <a href="https://dynace-shop.vercel.app/contact">Contact</a>.</p>
+            <p>&copy; ${new Date().getFullYear()} Dynace Global. Tous droits réservés.</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    return true;
+  } catch (error) {
+    console.error("Erreur lors de l'envoi de l'email d'expédition:", error);
+    return false;
+  }
+};
