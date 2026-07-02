@@ -375,6 +375,32 @@ app.get('/api/test-email-error', async (req, res) => {
     });
   }
 
+  if (process.env.RESEND_API_KEY) {
+    const fromEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
+    try {
+      const resendRes = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          from: `Dynace Global <${fromEmail}>`,
+          to: [user || 'johansonzoda@gmail.com'],
+          subject: 'Dynace Test Resend Email',
+          html: '<p>Si vous recevez ce message, Resend est configuré correctement !</p>'
+        })
+      });
+      const resendData = await resendRes.json();
+      if (!resendRes.ok) {
+        return res.status(500).json({ success: false, error: resendData });
+      }
+      return res.json({ success: true, provider: 'resend', messageId: resendData.id, emailUser: user });
+    } catch (err) {
+      return res.status(500).json({ success: false, error: err.message, provider: 'resend' });
+    }
+  }
+
   const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
     port: 587,
@@ -396,10 +422,11 @@ app.get('/api/test-email-error', async (req, res) => {
 
   try {
     const info = await transporter.sendMail(mailOptions);
-    res.json({ success: true, message: "Email sent successfully", messageId: info.messageId, emailUser: user });
+    res.json({ success: true, provider: 'smtp', messageId: info.messageId, emailUser: user });
   } catch (err) {
     res.status(500).json({
       success: false,
+      provider: 'smtp',
       error: err.message,
       code: err.code,
       response: err.response,
