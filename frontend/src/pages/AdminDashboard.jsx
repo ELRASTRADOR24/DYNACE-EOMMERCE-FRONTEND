@@ -746,7 +746,7 @@ export default function AdminDashboard({ onRefreshProducts }) {
                             onChange={(e) => {
                               const val = e.target.value;
                               if (val === 'Expédié') {
-                                const tracking = prompt('Veuillez saisir le numéro de suivi Colissimo :', o.tracking_number || '');
+                                const tracking = prompt('Veuillez saisir le numéro de suivi Chronopost :', o.tracking_number || '');
                                 if (tracking === null) return; // User cancelled prompt
                                 handleUpdateOrderStatus(o._id, val, tracking);
                               } else {
@@ -786,9 +786,9 @@ export default function AdminDashboard({ onRefreshProducts }) {
                         
                         {o.tracking_number && (
                           <div style={{ padding: '0.75rem', backgroundColor: 'var(--bg-secondary)', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '0.85rem', color: 'var(--text-primary)', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                            <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-secondary)', fontWeight: 'bold' }}>Numéro de suivi Colissimo</span>
+                            <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-secondary)', fontWeight: 'bold' }}>Numéro de suivi Chronopost</span>
                             <span style={{ fontFamily: 'monospace', fontWeight: 'bold', fontSize: '0.95rem' }}>{o.tracking_number}</span>
-                            <a href={`https://www.laposte.fr/outils/suivre-un-envoi?code=${o.tracking_number}`} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary-green)', fontWeight: 'bold', textDecoration: 'none', marginTop: '0.25rem', display: 'inline-block' }}>Suivre sur La Poste →</a>
+                            <a href={`https://www.chronopost.fr/fr/chrono_suividecolis?listeNumeros=${o.tracking_number}`} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary-green)', fontWeight: 'bold', textDecoration: 'none', marginTop: '0.25rem', display: 'inline-block' }}>Suivre sur Chronopost →</a>
                           </div>
                         )}
                       </div>

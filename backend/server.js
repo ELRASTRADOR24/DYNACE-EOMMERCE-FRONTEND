@@ -603,6 +603,7 @@ app.get('/api/orders/packing-slip/:orderNumber', async (req, res) => {
               <div class="col-content">
                 <strong>Client :</strong> ${order.first_name} ${order.last_name}<br>
                 <strong>Email :</strong> ${order.email}<br>
+                <strong>Téléphone :</strong> ${order.phone || 'Non renseigné'}<br>
               </div>
             </div>
           </div>
@@ -625,7 +626,8 @@ app.get('/api/orders/packing-slip/:orderNumber', async (req, res) => {
                   <span style="font-weight: 500; font-size: 14px; color: #475569;">
                     ${order.address}<br>
                     ${order.postal_code} ${order.city}<br>
-                    France
+                    France<br>
+                    ${order.phone ? `Tél : ${order.phone}` : ''}
                   </span>
                 </div>
               </div>
@@ -671,7 +673,7 @@ app.get('/api/orders/packing-slip/:orderNumber', async (req, res) => {
 
 // 1. Create Checkout Session
 app.post('/api/payment/create-checkout-session', async (req, res) => {
-  const { items, email, firstName, lastName, address, postalCode, city } = req.body;
+  const { items, email, firstName, lastName, phone, address, postalCode, city } = req.body;
 
   if (!items || items.length === 0 || !email) {
     return res.status(400).json({ error: 'Panier ou email manquant.' });
@@ -739,6 +741,7 @@ app.post('/api/payment/create-checkout-session', async (req, res) => {
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
+      phone_number_collection: { enabled: true },
       line_items: lineItems,
       mode: 'payment',
       customer_email: email,
@@ -750,6 +753,7 @@ app.post('/api/payment/create-checkout-session', async (req, res) => {
         firstName,
         lastName,
         email,
+        phone: phone || '',
         address,
         postalCode,
         city,
@@ -769,7 +773,7 @@ app.post('/api/payment/create-checkout-session', async (req, res) => {
 
 // Create Test Order (Bypass Stripe for authorized test users)
 app.post('/api/payment/create-test-order', authenticateToken, async (req, res) => {
-  const { items, email, firstName, lastName, address, postalCode, city } = req.body;
+  const { items, email, firstName, lastName, phone, address, postalCode, city } = req.body;
 
   if (!items || items.length === 0 || !email) {
     return res.status(400).json({ error: 'Panier ou email manquant.' });
@@ -821,6 +825,7 @@ app.post('/api/payment/create-test-order', authenticateToken, async (req, res) =
       first_name: firstName,
       last_name: lastName,
       email: email.toLowerCase(),
+      phone: phone || '',
       address,
       postal_code: postalCode,
       city,
@@ -847,7 +852,7 @@ app.post('/api/payment/create-test-order', authenticateToken, async (req, res) =
       user: { firstName, lastName, email: user.email },
       items: finalItems,
       totalAmount,
-      shippingAddress: { fullName: `${firstName} ${lastName}`, address, postalCode, city, country: 'France', phone: '' }
+      shippingAddress: { fullName: `${firstName} ${lastName}`, address, postalCode, city, country: 'France', phone: phone || '' }
     }).catch(err => console.error("Admin order notification email error:", err.message));
 
     sendCustomerOrderConfirmationEmail(newOrder).catch(err => console.error("Customer order confirmation email error:", err.message));
@@ -885,6 +890,7 @@ app.post('/api/payment/confirm-order', async (req, res) => {
     }
 
     const { firstName, lastName, email, address, postalCode, city, subtotal, shipping, total, items } = session.metadata;
+    const phone = session.customer_details?.phone || session.metadata.phone || '';
 
     const user = await User.findOne({ email });
     const userId = user ? user._id : null;
@@ -895,6 +901,7 @@ app.post('/api/payment/confirm-order', async (req, res) => {
       first_name: firstName,
       last_name: lastName,
       email,
+      phone: phone || '',
       address,
       postal_code: postalCode,
       city,
@@ -914,7 +921,7 @@ app.post('/api/payment/confirm-order', async (req, res) => {
       user: { firstName, lastName, email },
       items: JSON.parse(items),
       totalAmount: parseFloat(total),
-      shippingAddress: { fullName: `${firstName} ${lastName}`, address, postalCode, city, country: 'France', phone: '' }
+      shippingAddress: { fullName: `${firstName} ${lastName}`, address, postalCode, city, country: 'France', phone: phone || '' }
     }).catch(err => console.error("Admin order notification email error:", err.message));
 
     console.log(`✅ Commande confirmée et enregistrée : ${orderNumber}`);

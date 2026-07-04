@@ -232,7 +232,7 @@ export const sendOrderNotificationEmail = async ({ orderId, user, items, totalAm
           <div class="shipping-label">
             <div class="shipping-label-header">
               <h3>📦 Fiche d'Expédition</h3>
-              <p>Imprimez cette fiche et collez-la sur le colis, ou recopiez les informations sur Colissimo en ligne</p>
+              <p>Imprimez cette fiche et collez-la sur le colis, ou recopiez les informations sur Chronopost en ligne</p>
             </div>
             <div class="label-grid">
               <div class="label-from">
@@ -271,15 +271,12 @@ export const sendOrderNotificationEmail = async ({ orderId, user, items, totalAm
             <div style="margin-bottom: 20px;">
               <div style="display: flex; align-items: center; margin-bottom: 10px;">
                 <span style="background-color: #153A89; color: #fff; font-size: 14px; font-weight: 800; width: 28px; height: 28px; border-radius: 50%; display: inline-block; text-align: center; line-height: 28px; margin-right: 10px;">1</span>
-                <strong style="font-size: 15px; color: #1e293b;">Cliquez sur le lien ci-dessous pour aller sur Colissimo</strong>
+                <strong style="font-size: 15px; color: #1e293b;">Cliquez sur le lien ci-dessous pour aller sur Chronopost</strong>
               </div>
               <div style="text-align: center; margin: 10px 0;">
-                <a href="https://www.laposte.fr/colissimo-en-ligne/expedier" target="_blank" style="display: inline-block; background: linear-gradient(135deg, #00468b 0%, #153A89 100%); color: #ffffff; padding: 14px 30px; border-radius: 10px; text-decoration: none; font-size: 15px; font-weight: 700; letter-spacing: 0.5px; box-shadow: 0 4px 12px rgba(0,70,139,0.3);">
-                  📦 Ouvrir Colissimo en ligne →
+                <a href="https://www.chronopost.fr/fr/particulier/envoyer-un-colis" target="_blank" style="display: inline-block; background: linear-gradient(135deg, #00468b 0%, #153A89 100%); color: #ffffff; padding: 14px 30px; border-radius: 10px; text-decoration: none; font-size: 15px; font-weight: 700; letter-spacing: 0.5px; box-shadow: 0 4px 12px rgba(0,70,139,0.3);">
+                  📦 Ouvrir Chronopost en ligne →
                 </a>
-              </div>
-              <div style="text-align: center; margin-top: 8px;">
-                <a href="https://www.mondialrelay.fr" target="_blank" style="color: #64748b; font-size: 12px; text-decoration: underline;">ou utiliser Mondial Relay</a>
               </div>
             </div>
             
@@ -288,7 +285,7 @@ export const sendOrderNotificationEmail = async ({ orderId, user, items, totalAm
                 <span style="background-color: #153A89; color: #fff; font-size: 14px; font-weight: 800; width: 28px; height: 28px; border-radius: 50%; display: inline-block; text-align: center; line-height: 28px; margin-right: 10px;">2</span>
                 <strong style="font-size: 15px; color: #1e293b;">Achetez l'étiquette d'envoi en recopiant les informations</strong>
               </div>
-              <p style="font-size: 14px; color: #475569; margin: 0 0 0 38px; line-height: 1.5;">Utilisez l'adresse du destinataire ci-dessus. Une fois payée, imprimez votre fiche Colissimo et collez-la sur votre paquet.</p>
+              <p style="font-size: 14px; color: #475569; margin: 0 0 0 38px; line-height: 1.5;">Utilisez l'adresse et le téléphone du destinataire ci-dessus. Une fois payée, imprimez votre fiche Chronopost et collez-la sur votre paquet.</p>
             </div>
             
             <div>
@@ -296,7 +293,7 @@ export const sendOrderNotificationEmail = async ({ orderId, user, items, totalAm
                 <span style="background-color: #153A89; color: #fff; font-size: 14px; font-weight: 800; width: 28px; height: 28px; border-radius: 50%; display: inline-block; text-align: center; line-height: 28px; margin-right: 10px;">3</span>
                 <strong style="font-size: 15px; color: #1e293b;">Renseignez le numéro de suivi dans l'administration</strong>
               </div>
-              <p style="font-size: 14px; color: #475569; margin: 0 0 0 38px; line-height: 1.5;">Allez sur votre tableau de bord admin, passez la commande en statut "Expédié" et saisissez le numéro de suivi Colissimo obtenu. Le client sera alors notifié automatiquement par e-mail avec son lien de suivi.</p>
+              <p style="font-size: 14px; color: #475569; margin: 0 0 0 38px; line-height: 1.5;">Allez sur votre tableau de bord admin, passez la commande en statut "Expédié" et saisissez le numéro de suivi Chronopost obtenu. Le client sera alors notifié automatiquement par e-mail avec son lien de suivi.</p>
             </div>
           </div>
         </div>
@@ -435,7 +432,7 @@ export const sendCustomerOrderConfirmationEmail = async (order) => {
 };
 
 export const sendShippingConfirmationEmail = async (order, trackingNumber) => {
-  const trackingLink = `https://www.laposte.fr/outils/suivre-un-envoi?code=${trackingNumber}`;
+  const trackingLink = `https://www.chronopost.fr/fr/chrono_suividecolis?listeNumeros=${trackingNumber}`;
 
   const html = `
     <!DOCTYPE html>
@@ -467,12 +464,12 @@ export const sendShippingConfirmationEmail = async (order, trackingNumber) => {
         <div class="content">
           <div class="greeting">Bonjour ${order.first_name || 'Client'},</div>
           <div class="intro-text">
-            Bonne nouvelle ! Votre commande <strong>#${order.order_number}</strong> a été expédiée. Elle est actuellement entre les mains du transporteur et arrive très bientôt chez vous.
+            Bonne nouvelle ! Votre commande <strong>#${order.order_number}</strong> a été expédiée. Elle est actuellement entre les mains de Chronopost et arrive très bientôt chez vous.
           </div>
           <div class="tracking-box">
-            <div style="font-size: 14px; text-transform: uppercase; color: #94a3b8; font-weight: 700; letter-spacing: 0.5px;">Numéro de suivi Colissimo</div>
+            <div style="font-size: 14px; text-transform: uppercase; color: #94a3b8; font-weight: 700; letter-spacing: 0.5px;">Numéro de suivi Chronopost</div>
             <div class="tracking-number">${trackingNumber}</div>
-            <a href="${trackingLink}" target="_blank" class="cta-button">Suivre mon colis sur La Poste</a>
+            <a href="${trackingLink}" target="_blank" class="cta-button">Suivre mon colis sur Chronopost</a>
           </div>
           <div style="font-size: 14px; color: #64748b; line-height: 1.5;">
             Vous pouvez également suivre l'avancée de votre préparation et la livraison directement sur notre boutique en cliquant sur le lien ci-dessous :<br/>

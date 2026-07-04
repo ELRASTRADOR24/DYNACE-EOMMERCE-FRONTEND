@@ -157,7 +157,7 @@ export default function Orders({ onBackToShopping }) {
                   </div>
                   {order.trackingNumber && (
                     <div style={{ fontSize: '0.85rem', color: 'var(--text-primary)' }}>
-                      Colissimo : <a href={`https://www.laposte.fr/outils/suivre-un-envoi?code=${order.trackingNumber}`} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary-green)', fontWeight: 'bold', textDecoration: 'none', marginLeft: '0.25rem' }}>{order.trackingNumber} ↗</a>
+                      Chronopost : <a href={`https://www.chronopost.fr/fr/chrono_suividecolis?listeNumeros=${order.trackingNumber}`} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary-green)', fontWeight: 'bold', textDecoration: 'none', marginLeft: '0.25rem' }}>{order.trackingNumber} ↗</a>
                     </div>
                   )}
                 </div>

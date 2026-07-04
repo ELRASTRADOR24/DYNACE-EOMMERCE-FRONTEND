@@ -11,6 +11,7 @@ export default function Checkout({ cartItems, onClearCart, onBackToShopping, cur
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [address, setAddress] = useState('');
   const [postalCode, setPostalCode] = useState('');
   const [city, setCity] = useState('');
@@ -57,6 +58,7 @@ export default function Checkout({ cartItems, onClearCart, onBackToShopping, cur
       setFirstName(currentUser.firstName || '');
       setLastName(currentUser.lastName || '');
       setEmail(currentUser.email || '');
+      setPhone(currentUser.phone || '');
       setAddress(currentUser.address || '');
       setPostalCode(currentUser.postalCode || '');
       setCity(currentUser.city || '');
@@ -215,6 +217,7 @@ export default function Checkout({ cartItems, onClearCart, onBackToShopping, cur
             email,
             firstName,
             lastName,
+            phone,
             address,
             postalCode,
             city,
@@ -246,6 +249,7 @@ export default function Checkout({ cartItems, onClearCart, onBackToShopping, cur
             email,
             firstName,
             lastName,
+            phone,
             address,
             postalCode,
             city,
@@ -809,6 +813,20 @@ export default function Checkout({ cartItems, onClearCart, onBackToShopping, cur
                 placeholder="Paris"
               />
               <span className="form-error">La ville est requise.</span>
+            </div>
+
+            <div className="form-group full-width">
+              <label className="form-label" htmlFor="phone">Numéro de Téléphone (Indispensable pour la livraison Chronopost)</label>
+              <input 
+                className="form-input" 
+                type="tel" 
+                id="phone" 
+                required 
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="06 12 34 56 78"
+              />
+              <span className="form-error">Le numéro de téléphone est requis.</span>
             </div>
           </div>
 
