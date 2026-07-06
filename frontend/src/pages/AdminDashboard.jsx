@@ -3,6 +3,19 @@ import { Plus, Edit2, Trash2, Package, ShoppingCart, RefreshCw, Save, X, Check, 
 
 export default function AdminDashboard({ onRefreshProducts }) {
   const [activeSubTab, setActiveSubTab] = useState('products'); // 'products' or 'orders'
+  const [highlightedOrderNumber, setHighlightedOrderNumber] = useState('');
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const tabParam = params.get('tab');
+    const orderParam = params.get('order');
+    if (tabParam) {
+      setActiveSubTab(tabParam);
+    }
+    if (orderParam) {
+      setHighlightedOrderNumber(orderParam);
+    }
+  }, []);
   
   // State for products
   const [products, setProducts] = useState([]);
@@ -107,6 +120,18 @@ export default function AdminDashboard({ onRefreshProducts }) {
       fetchUsers();
     }
   }, [activeSubTab]);
+
+  useEffect(() => {
+    if (highlightedOrderNumber && orders.length > 0) {
+      const timer = setTimeout(() => {
+        const el = document.getElementById(`order-${highlightedOrderNumber}`);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 600);
+      return () => clearTimeout(timer);
+    }
+  }, [highlightedOrderNumber, orders]);
 
   const showError = (msg) => {
     setErrorMsg(msg);
@@ -674,16 +699,19 @@ export default function AdminDashboard({ onRefreshProducts }) {
           ) : (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(400px, 1fr))', gap: '2rem' }}>
               {orders.map(o => (
-                <div key={o._id} style={{ 
-                  backgroundColor: 'var(--bg-secondary)', 
-                  borderRadius: '20px', 
-                  border: '1px solid var(--border-color)', 
-                  boxShadow: 'var(--shadow-premium)', 
-                  overflow: 'hidden',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  transition: 'transform 0.2s ease, box-shadow 0.2s ease'
-                }}
+                <div 
+                  key={o._id} 
+                  id={`order-${o.order_number}`}
+                  style={{ 
+                    backgroundColor: 'var(--bg-secondary)', 
+                    borderRadius: '20px', 
+                    border: o.order_number === highlightedOrderNumber ? '2px solid var(--primary-gold)' : '1px solid var(--border-color)', 
+                    boxShadow: o.order_number === highlightedOrderNumber ? '0 0 20px rgba(197, 168, 128, 0.4)' : 'var(--shadow-premium)', 
+                    overflow: 'hidden',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    transition: 'transform 0.2s ease, box-shadow 0.2s ease'
+                  }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.transform = 'translateY(-4px)';
                   e.currentTarget.style.boxShadow = '0 12px 30px rgba(0,0,0,0.15)';

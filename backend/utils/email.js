@@ -22,14 +22,17 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-// Unified mail sender supporting Resend API in production and Nodemailer in development
+// Unified mail sender supporting Resend API (for verified custom domains) and Gmail SMTP as fallback
 export const sendEmail = async ({ to, subject, html, replyTo }) => {
   const resendApiKey = process.env.RESEND_API_KEY;
+  const resendFromEmail = process.env.RESEND_FROM_EMAIL;
 
-  if (resendApiKey) {
-    const fromEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
+  // Use Resend only if we have an API key AND a configured custom sender email that is not the default onboarding address
+  const useResend = resendApiKey && resendFromEmail && resendFromEmail !== 'onboarding@resend.dev';
+
+  if (useResend) {
     const body = {
-      from: `Dynace Global <${fromEmail}>`,
+      from: `Dynace Global <${resendFromEmail}>`,
       to: Array.isArray(to) ? to : [to],
       subject,
       html
@@ -39,7 +42,7 @@ export const sendEmail = async ({ to, subject, html, replyTo }) => {
     }
 
     try {
-      let res = await fetch('https://api.resend.com/emails', {
+      const res = await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${resendApiKey}`,
@@ -47,26 +50,7 @@ export const sendEmail = async ({ to, subject, html, replyTo }) => {
         },
         body: JSON.stringify(body)
       });
-      let data = await res.json();
-
-      // Auto-healing for Resend sandbox restrictions
-      if (!res.ok && data.name === 'validation_error' && data.message.includes('your own email address')) {
-        const match = data.message.match(/\(([^)]+)\)/);
-        if (match && match[1]) {
-          const verifiedEmail = match[1];
-          console.log(`[Resend Sandbox] Redirection de l'email de ${body.to} vers l'adresse vérifiée: ${verifiedEmail}`);
-          body.to = [verifiedEmail];
-          res = await fetch('https://api.resend.com/emails', {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${resendApiKey}`,
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(body)
-          });
-          data = await res.json();
-        }
-      }
+      const data = await res.json();
 
       if (!res.ok) {
         console.error("Resend API Error details:", data);
@@ -80,9 +64,9 @@ export const sendEmail = async ({ to, subject, html, replyTo }) => {
     }
   }
 
-  // Fallback to local Nodemailer SMTP
+  // Fallback to local Nodemailer SMTP (Gmail)
   if (!process.env.EMAIL_USER) {
-    console.log('Simulation Email (Configurez EMAIL_USER dans .env ou RESEND_API_KEY) :', { to, subject });
+    console.log('Simulation Email (Configurez EMAIL_USER dans .env pour envoyer de vrais e-mails) :', { to, subject });
     return true;
   }
 
@@ -98,7 +82,7 @@ export const sendEmail = async ({ to, subject, html, replyTo }) => {
 
   try {
     await transporter.sendMail(mailOptions);
-    console.log("Email envoyé avec succès via SMTP.");
+    console.log("Email envoyé avec succès via Gmail SMTP à :", to);
     return true;
   } catch (error) {
     console.error("Nodemailer SMTP Error:", error.message);
@@ -125,6 +109,7 @@ export const sendContactEmail = async ({ name, email, subject, message }) => {
 
 export const sendOrderNotificationEmail = async ({ orderId, user, items, totalAmount, shippingAddress }) => {
   const adminEmail = process.env.EMAIL_USER || 'dynaceglogal@gmail.com';
+  const frontendUrl = process.env.FRONTEND_URL || 'https://xn--dynaceglobalesant-top-r5b.com';
 
   const itemsHtml = items.map(item => `
     <tr>
@@ -259,9 +244,14 @@ export const sendOrderNotificationEmail = async ({ orderId, user, items, totalAm
             </div>
           </div>
           
-          <div style="margin-top: 25px; text-align: center; margin-bottom: 25px;">
-            <a href="${process.env.BACKEND_URL || 'https://dynace-backend.onrender.com'}/api/orders/packing-slip/${orderId}" target="_blank" style="display: inline-block; background-color: #10b981; color: #ffffff !important; padding: 15px 35px; border-radius: 8px; text-decoration: none; font-size: 15px; font-weight: 800; letter-spacing: 0.5px; box-shadow: 0 4px 12px rgba(16,185,129,0.2); border: 2px solid #10b981;">
+          <div style="margin-top: 25px; text-align: center; margin-bottom: 12px;">
+            <a href="${process.env.BACKEND_URL || 'https://dynace-backend.onrender.com'}/api/orders/packing-slip/${orderId}" target="_blank" style="display: inline-block; background-color: #10b981; color: #ffffff !important; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-size: 15px; font-weight: 800; letter-spacing: 0.5px; box-shadow: 0 4px 12px rgba(16,185,129,0.2); border: 2px solid #10b981; width: 85%; max-width: 420px; text-align: center;">
               🖨️ Imprimer la Fiche d'Expédition / Coller sur le carton →
+            </a>
+          </div>
+          <div style="text-align: center; margin-bottom: 25px;">
+            <a href="${frontendUrl}/?tab=admin&order=${orderId}" target="_blank" style="display: inline-block; background-color: #153A89; color: #ffffff !important; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-size: 15px; font-weight: 800; letter-spacing: 0.5px; box-shadow: 0 4px 12px rgba(21,58,137,0.2); border: 2px solid #153A89; width: 85%; max-width: 420px; text-align: center;">
+              👁️ Voir la commande dans l'Administration →
             </a>
           </div>
           

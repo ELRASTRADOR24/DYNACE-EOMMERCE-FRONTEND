@@ -19,6 +19,8 @@ import OrderTracking from './pages/OrderTracking';
 function App() {
   const [currentTab, setCurrentTab] = useState(() => {
     const params = new URLSearchParams(window.location.search);
+    const tabParam = params.get('tab');
+    if (tabParam) return tabParam;
     if (window.location.pathname === '/track') return 'track';
     return params.get('payment') ? 'checkout' : 'home';
   });
