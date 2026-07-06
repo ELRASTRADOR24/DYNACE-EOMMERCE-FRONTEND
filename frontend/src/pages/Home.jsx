@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import ProductCard from '../components/ProductCard';
-import { Search } from 'lucide-react';
+import { Search, Plus } from 'lucide-react';
 
 export default function Home({ products, onSelectProduct, onAddToCart }) {
   const [search, setSearch] = useState('');
@@ -73,6 +73,33 @@ export default function Home({ products, onSelectProduct, onAddToCart }) {
               onAddToCart={onAddToCart}
             />
           ))}
+
+          {/* Special Coming Soon Card */}
+          <article className="product-card" style={{ cursor: 'default' }}>
+            <div className="product-img-wrapper" style={{ background: 'linear-gradient(135deg, var(--bg-secondary) 0%, var(--border-color) 100%)', padding: '1rem' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', width: '100%' }}>
+                <Plus size={36} strokeWidth={1.5} style={{ color: 'var(--primary-green)', marginBottom: '0.5rem', opacity: 0.8 }} />
+                <span style={{ fontSize: '0.7rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--text-secondary)', fontWeight: '600' }}>Dynace Lab</span>
+              </div>
+              <span className="product-tag" style={{ backgroundColor: 'var(--accent-gold)', color: 'var(--bg-primary)', fontWeight: 'bold' }}>Bientôt</span>
+            </div>
+            
+            <div className="product-info" style={{ flexGrow: 1, display: 'flex', flexDirection: 'column', padding: '1rem 0 0 0' }}>
+              <h3 className="product-title" style={{ color: 'var(--text-primary)' }}>
+                Nouveautés Dynace
+              </h3>
+              <p className="product-benefits-summary" style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', display: 'block', marginTop: '0.5rem' }}>
+                De nouvelles formules innovantes pour optimiser votre capital cellulaire et votre bien-être global sont actuellement en préparation.
+              </p>
+              
+              <div className="product-footer" style={{ marginTop: 'auto' }}>
+                <div className="product-price-container">
+                  <span className="product-price-label">Statut</span>
+                  <span className="product-price" style={{ color: 'var(--primary-green)', fontWeight: '600' }}>Prochainement</span>
+                </div>
+              </div>
+            </div>
+          </article>
         </div>
       )}
     </div>
