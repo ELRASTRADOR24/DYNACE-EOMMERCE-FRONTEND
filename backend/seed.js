@@ -5,7 +5,7 @@ const initialProducts = [
   {
     id: "rocenta",
     name: "Dynace Rocenta",
-    price: 49.90,
+    price: 60.00,
     category: "vitalite",
     image: "/images/rocenta.png",
     images: ["/images/rocenta.png", "/images/rocenta_2.png", "/images/rocenta_3.png"],
@@ -22,7 +22,8 @@ const initialProducts = [
   {
     id: "dynafuel",
     name: "Dynace Dynafuel",
-    price: 39.90,
+    price: 60.00,
+    stock: 0,
     category: "energie",
     image: "/images/dynafuel.png",
     images: ["/images/dynafuel.png", "/images/dynafuel_2.png", "/images/dynafuel_3.png"],
@@ -39,7 +40,7 @@ const initialProducts = [
   {
     id: "urbanism",
     name: "Dynace Urbanism",
-    price: 42.90,
+    price: 60.00,
     category: "minceur",
     image: "/images/urbanism.png",
     images: ["/images/urbanism.png", "/images/urbanism_2.png", "/images/urbanism_3.png"],
@@ -56,7 +57,7 @@ const initialProducts = [
   {
     id: "acebrew",
     name: "Dynace Ace Brew",
-    price: 24.90,
+    price: 32.00,
     category: "energie",
     image: "/images/acebrew.png",
     images: ["/images/acebrew.png", "/images/acebrew_2.png", "/images/acebrew_3.png"],
@@ -73,7 +74,8 @@ const initialProducts = [
   {
     id: "fitmax",
     name: "Dynace FitMax",
-    price: 35.90,
+    price: 60.00,
+    stock: 0,
     category: "minceur",
     image: "/images/fitmax.png",
     images: ["/images/fitmax.png"],
@@ -90,7 +92,7 @@ const initialProducts = [
   {
     id: "aceguard",
     name: "Dynace Ace Guard",
-    price: 38.90,
+    price: 32.00,
     category: "vitalite",
     image: "/images/aceguard.png",
     images: ["/images/aceguard.png", "/images/aceguard_2.png", "/images/aceguard_3.png"],
@@ -107,7 +109,7 @@ const initialProducts = [
   {
     id: "tripleroot",
     name: "Dynace Triple Root Coffee",
-    price: 27.90,
+    price: 32.00,
     category: "energie",
     image: "/images/tripleroot.png",
     images: ["/images/tripleroot.png", "/images/tripleroot_2.png", "/images/tripleroot_3.png"],
@@ -124,7 +126,7 @@ const initialProducts = [
   {
     id: "lyftmax",
     name: "Dynace LyftMax",
-    price: 44.90,
+    price: 60.00,
     category: "vitalite",
     image: "/images/lyftmax.png",
     images: ["/images/lyftmax.png", "/images/lyftmax_2.png", "/images/lyftmax_3.png"],
@@ -141,7 +143,7 @@ const initialProducts = [
   {
     id: "collagene",
     name: "Dynace Collagène Beauté",
-    price: 46.90,
+    price: 60.00,
     category: "beaute",
     image: "/images/collagene.png",
     images: ["/images/collagene.png", "/images/collagene_2.png", "/images/collagene_3.png"],
@@ -158,7 +160,7 @@ const initialProducts = [
   {
     id: "toothpaste",
     name: "Dynace Duo Toothpaste",
-    price: 19.90,
+    price: 25.00,
     category: "beaute",
     image: "/images/toothpaste.png",
     images: ["/images/toothpaste.png", "/images/toothpaste_2.png", "/images/toothpaste_3.png"],
@@ -178,20 +180,27 @@ export const seedProducts = async () => {
   try {
     console.log('Synchronisation du catalogue des produits (MongoDB)...');
     for (const prod of initialProducts) {
+      const updateData = {
+        name: prod.name,
+        price: prod.price,
+        category: prod.category,
+        image: prod.image,
+        images: prod.images,
+        summary: prod.summary,
+        description: prod.description,
+        benefits: prod.benefits,
+        usage: prod.usage,
+      };
+
+      if (prod.stock !== undefined) {
+        updateData.stock = prod.stock;
+      } else {
+        updateData.$setOnInsert = { stock: 50 };
+      }
+
       await Product.findByIdAndUpdate(
         prod.id,
-        {
-          name: prod.name,
-          price: prod.price,
-          category: prod.category,
-          image: prod.image,
-          images: prod.images,
-          summary: prod.summary,
-          description: prod.description,
-          benefits: prod.benefits,
-          usage: prod.usage,
-          $setOnInsert: { stock: 50 }
-        },
+        updateData,
         { upsert: true, new: true }
       );
     }
