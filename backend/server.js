@@ -1038,7 +1038,7 @@ app.put('/api/admin/orders/:id/status', authenticateToken, verifyAdmin, async (r
       updateData.tracking_number = trackingNumber;
     }
 
-    const order = await Order.findByIdAndUpdate(req.params.id, updateData, { new: true });
+    const order = await Order.findByIdAndUpdate(req.params.id, updateData, { returnDocument: 'after' });
     if (!order) {
       return res.status(404).json({ error: 'Commande non trouvée.' });
     }
@@ -1091,7 +1091,7 @@ app.put('/api/admin/users/:id/toggle-test-payment', authenticateToken, verifyAdm
     const user = await User.findByIdAndUpdate(
       req.params.id,
       { allow_test_payment: allowTestPayment },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!user) {
       return res.status(404).json({ error: 'Utilisateur non trouvé.' });
@@ -1192,7 +1192,7 @@ app.put('/api/admin/products/:id', authenticateToken, verifyAdmin, upload.single
     const updatedProduct = await Product.findByIdAndUpdate(
       req.params.id,
       updateData,
-      { new: true }
+      { returnDocument: 'after' }
     );
 
     if (!updatedProduct) {
@@ -1250,7 +1250,7 @@ app.put('/api/admin/settings/shipping', authenticateToken, verifyAdmin, async (r
     const updatedSetting = await Setting.findOneAndUpdate(
       { key: 'shipping' },
       { key: 'shipping', value },
-      { upsert: true, new: true }
+      { upsert: true, returnDocument: 'after' }
     );
     res.json({ success: true, setting: updatedSetting.value });
   } catch (err) {
