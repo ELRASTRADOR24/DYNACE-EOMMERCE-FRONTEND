@@ -22,17 +22,36 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-// Unified mail sender supporting Resend API (for verified custom domains) and Gmail SMTP as fallback
+// SMTP Mailer helper function
+const sendEmailSMTP = async ({ to, subject, html, replyTo }) => {
+  const mailOptions = {
+    from: `"Dynace Global" <${process.env.EMAIL_USER}>`,
+    to,
+    subject,
+    html
+  };
+  if (replyTo) {
+    mailOptions.replyTo = replyTo;
+  }
+
+  try {
+    await transporter.sendMail(mailOptions);
+    console.log("Email envoyé avec succès via Gmail SMTP à :", to);
+    return true;
+  } catch (error) {
+    console.error("Nodemailer SMTP Error:", error.message);
+    return false;
+  }
+};
+
+// Unified mail sender supporting Resend API (with automatic Gmail SMTP fallback)
 export const sendEmail = async ({ to, subject, html, replyTo }) => {
   const resendApiKey = process.env.RESEND_API_KEY;
-  const resendFromEmail = process.env.RESEND_FROM_EMAIL;
 
-  // Use Resend only if we have an API key AND a configured custom sender email that is not the default onboarding address
-  const useResend = resendApiKey && resendFromEmail && resendFromEmail !== 'onboarding@resend.dev';
-
-  if (useResend) {
+  if (resendApiKey) {
+    const fromEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
     const body = {
-      from: `Dynace Global <${resendFromEmail}>`,
+      from: `Dynace Global <${fromEmail}>`,
       to: Array.isArray(to) ? to : [to],
       subject,
       html
@@ -52,42 +71,36 @@ export const sendEmail = async ({ to, subject, html, replyTo }) => {
       });
       const data = await res.json();
 
-      if (!res.ok) {
-        console.error("Resend API Error details:", data);
-        return false;
+      if (res.ok) {
+        console.log("Email envoyé avec succès via Resend. ID:", data.id);
+        return true;
       }
-      console.log("Email envoyé avec succès via Resend. ID:", data.id);
-      return true;
+
+      console.error("Resend API Error details:", data);
+
+      // Fallback to Gmail SMTP if Resend fails and SMTP is configured
+      if (process.env.EMAIL_USER) {
+        console.log("Resend a échoué. Tentative de repli sur Gmail SMTP...");
+        return sendEmailSMTP({ to, subject, html, replyTo });
+      }
+      return false;
     } catch (err) {
       console.error("Resend API Fetch error:", err.message);
+      if (process.env.EMAIL_USER) {
+        console.log("Erreur Resend Fetch. Tentative de repli sur Gmail SMTP...");
+        return sendEmailSMTP({ to, subject, html, replyTo });
+      }
       return false;
     }
   }
 
-  // Fallback to local Nodemailer SMTP (Gmail)
-  if (!process.env.EMAIL_USER) {
-    console.log('Simulation Email (Configurez EMAIL_USER dans .env pour envoyer de vrais e-mails) :', { to, subject });
-    return true;
+  // Fallback directly to local Nodemailer SMTP (Gmail)
+  if (process.env.EMAIL_USER) {
+    return sendEmailSMTP({ to, subject, html, replyTo });
   }
 
-  const mailOptions = {
-    from: `"Dynace Global" <${process.env.EMAIL_USER}>`,
-    to,
-    subject,
-    html
-  };
-  if (replyTo) {
-    mailOptions.replyTo = replyTo;
-  }
-
-  try {
-    await transporter.sendMail(mailOptions);
-    console.log("Email envoyé avec succès via Gmail SMTP à :", to);
-    return true;
-  } catch (error) {
-    console.error("Nodemailer SMTP Error:", error.message);
-    return false;
-  }
+  console.log('Simulation Email (Configurez EMAIL_USER dans .env pour envoyer de vrais e-mails) :', { to, subject });
+  return true;
 };
 
 export const sendContactEmail = async ({ name, email, subject, message }) => {
