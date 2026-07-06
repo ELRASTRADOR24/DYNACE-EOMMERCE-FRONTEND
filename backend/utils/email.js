@@ -239,7 +239,7 @@ export const sendOrderNotificationEmail = async ({ orderId, user, items, totalAm
                 <div class="label-section-title">Expéditeur</div>
                 <div class="label-name">DYNACE GLOBAL</div>
                 <div class="label-address">
-                  (Votre adresse d'expédition)<br>
+                  78300 Poissy<br>
                   France
                 </div>
               </div>
