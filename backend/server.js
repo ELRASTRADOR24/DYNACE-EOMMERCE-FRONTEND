@@ -669,14 +669,49 @@ app.get('/api/orders/packing-slip/:orderNumber', async (req, res) => {
   }
 });
 
+// --- COUNTRY & SHIPPING CONFIGURATIONS ---
+const COUNTRY_CONFIGS = {
+  FR: { name: 'France (Métropolitaine)', shippingCost: 6.90, freeThreshold: 60, status: 'allowed' },
+  BE: { name: 'Belgique', shippingCost: 12.90, freeThreshold: 120, status: 'allowed' },
+  CH: { name: 'Suisse', shippingCost: 12.90, freeThreshold: 120, status: 'allowed' },
+  LU: { name: 'Luxembourg', shippingCost: 12.90, freeThreshold: 120, status: 'allowed' },
+  DE: { name: 'Allemagne', shippingCost: 12.90, freeThreshold: 120, status: 'allowed' },
+  ES: { name: 'Espagne', shippingCost: 12.90, freeThreshold: 120, status: 'allowed' },
+  IT: { name: 'Italie', shippingCost: 12.90, freeThreshold: 120, status: 'allowed' },
+  PT: { name: 'Portugal', shippingCost: 12.90, freeThreshold: 120, status: 'allowed' },
+  NL: { name: 'Pays-Bas', shippingCost: 12.90, freeThreshold: 120, status: 'allowed' },
+  
+  SN: { name: 'Sénégal', shippingCost: 24.90, freeThreshold: 200, status: 'allowed' },
+  CI: { name: 'Côte d’Ivoire', shippingCost: 24.90, freeThreshold: 200, status: 'allowed' },
+  CM: { name: 'Cameroun', shippingCost: 24.90, freeThreshold: 200, status: 'allowed' },
+  GA: { name: 'Gabon', shippingCost: 24.90, freeThreshold: 200, status: 'allowed' },
+  CG: { name: 'Congo', shippingCost: 24.90, freeThreshold: 200, status: 'allowed' },
+  BJ: { name: 'Bénin', shippingCost: 24.90, freeThreshold: 200, status: 'allowed' },
+  TG: { name: 'Togo', shippingCost: 24.90, freeThreshold: 200, status: 'allowed' },
+  ML: { name: 'Mali', shippingCost: 24.90, freeThreshold: 200, status: 'allowed' },
+  GN: { name: 'Guinée', shippingCost: 24.90, freeThreshold: 200, status: 'allowed' },
+  
+  US: { name: 'États-Unis', status: 'blocked', reason: 'Les réglementations douanières et sanitaires américaines (FDA) bloquent actuellement l’importation de compléments alimentaires Dynace par des particuliers.' },
+  CA: { name: 'Canada', status: 'blocked', reason: 'Les douanes canadiennes bloquent actuellement les livraisons de compléments alimentaires Dynace Global.' },
+  
+  WORLD: { name: 'Reste du monde', shippingCost: 24.90, freeThreshold: 200, status: 'allowed' }
+};
+
 // --- PAYMENT ROUTES ---
 
 // 1. Create Checkout Session
 app.post('/api/payment/create-checkout-session', async (req, res) => {
-  const { items, email, firstName, lastName, phone, address, postalCode, city } = req.body;
+  const { items, email, firstName, lastName, phone, address, postalCode, city, country } = req.body;
 
   if (!items || items.length === 0 || !email) {
     return res.status(400).json({ error: 'Panier ou email manquant.' });
+  }
+
+  const selectedCountry = country || 'FR';
+  const config = COUNTRY_CONFIGS[selectedCountry] || COUNTRY_CONFIGS.WORLD;
+
+  if (config.status === 'blocked') {
+    return res.status(400).json({ error: config.reason || 'Livraison impossible vers ce pays.' });
   }
 
   try {
@@ -711,13 +746,15 @@ app.post('/api/payment/create-checkout-session', async (req, res) => {
       });
     }
 
-    // Récupérer les paramètres de livraison depuis la base de données
-    let threshold = 60;
-    let cost = 6.90;
-    const shippingSetting = await Setting.findOne({ key: 'shipping' });
-    if (shippingSetting && shippingSetting.value) {
-      threshold = shippingSetting.value.threshold;
-      cost = shippingSetting.value.cost;
+    // Récupérer les paramètres de livraison (par défaut du pays ou DB pour la France)
+    let threshold = config.freeThreshold;
+    let cost = config.shippingCost;
+    if (selectedCountry === 'FR') {
+      const shippingSetting = await Setting.findOne({ key: 'shipping' });
+      if (shippingSetting && shippingSetting.value) {
+        threshold = shippingSetting.value.threshold;
+        cost = shippingSetting.value.cost;
+      }
     }
 
     // Calculer les frais de livraison avec le sous-total du backend
@@ -729,7 +766,7 @@ app.post('/api/payment/create-checkout-session', async (req, res) => {
           currency: 'eur',
           product_data: {
             name: 'Frais de livraison',
-            description: 'Livraison standard à domicile'
+            description: `Livraison Colissimo/Chronopost (${config.name})`
           },
           unit_amount: Math.round(shippingCost * 100)
         },
@@ -757,6 +794,8 @@ app.post('/api/payment/create-checkout-session', async (req, res) => {
         address,
         postalCode,
         city,
+        country: config.name,
+        countryCode: selectedCountry,
         subtotal: backendSubtotal.toFixed(2),
         shipping: shippingCost.toFixed(2),
         total: (backendSubtotal + shippingCost).toFixed(2),
@@ -773,10 +812,17 @@ app.post('/api/payment/create-checkout-session', async (req, res) => {
 
 // Create Test Order (Bypass Stripe for authorized test users)
 app.post('/api/payment/create-test-order', authenticateToken, async (req, res) => {
-  const { items, email, firstName, lastName, phone, address, postalCode, city } = req.body;
+  const { items, email, firstName, lastName, phone, address, postalCode, city, country } = req.body;
 
   if (!items || items.length === 0 || !email) {
     return res.status(400).json({ error: 'Panier ou email manquant.' });
+  }
+
+  const selectedCountry = country || 'FR';
+  const config = COUNTRY_CONFIGS[selectedCountry] || COUNTRY_CONFIGS.WORLD;
+
+  if (config.status === 'blocked') {
+    return res.status(400).json({ error: config.reason || 'Livraison impossible vers ce pays.' });
   }
 
   try {
@@ -807,12 +853,15 @@ app.post('/api/payment/create-test-order', authenticateToken, async (req, res) =
       });
     }
 
-    let threshold = 60;
-    let cost = 6.90;
-    const shippingSetting = await Setting.findOne({ key: 'shipping' });
-    if (shippingSetting && shippingSetting.value) {
-      threshold = shippingSetting.value.threshold;
-      cost = shippingSetting.value.cost;
+    // Récupérer les paramètres de livraison (par défaut du pays ou DB pour la France)
+    let threshold = config.freeThreshold;
+    let cost = config.shippingCost;
+    if (selectedCountry === 'FR') {
+      const shippingSetting = await Setting.findOne({ key: 'shipping' });
+      if (shippingSetting && shippingSetting.value) {
+        threshold = shippingSetting.value.threshold;
+        cost = shippingSetting.value.cost;
+      }
     }
 
     const shippingCost = backendSubtotal >= threshold ? 0 : cost;
@@ -829,6 +878,7 @@ app.post('/api/payment/create-test-order', authenticateToken, async (req, res) =
       address,
       postal_code: postalCode,
       city,
+      country: config.name,
       items: finalItems,
       subtotal: backendSubtotal,
       shipping: shippingCost,
@@ -852,7 +902,7 @@ app.post('/api/payment/create-test-order', authenticateToken, async (req, res) =
       user: { firstName, lastName, email: user.email },
       items: finalItems,
       totalAmount,
-      shippingAddress: { fullName: `${firstName} ${lastName}`, address, postalCode, city, country: 'France', phone: phone || '' }
+      shippingAddress: { fullName: `${firstName} ${lastName}`, address, postalCode, city, country: config.name, phone: phone || '' }
     }).catch(err => console.error("Admin order notification email error:", err.message));
 
     sendCustomerOrderConfirmationEmail(newOrder).catch(err => console.error("Customer order confirmation email error:", err.message));
@@ -889,7 +939,7 @@ app.post('/api/payment/confirm-order', async (req, res) => {
       return res.json({ success: true, orderNumber, alreadyProcessed: true });
     }
 
-    const { firstName, lastName, email, address, postalCode, city, subtotal, shipping, total, items } = session.metadata;
+    const { firstName, lastName, email, address, postalCode, city, country, subtotal, shipping, total, items } = session.metadata;
     const phone = session.customer_details?.phone || session.metadata.phone || '';
 
     const user = await User.findOne({ email });
@@ -905,6 +955,7 @@ app.post('/api/payment/confirm-order', async (req, res) => {
       address,
       postal_code: postalCode,
       city,
+      country: country || 'France',
       items: JSON.parse(items),
       subtotal: parseFloat(subtotal),
       shipping: parseFloat(shipping),
@@ -921,7 +972,7 @@ app.post('/api/payment/confirm-order', async (req, res) => {
       user: { firstName, lastName, email },
       items: JSON.parse(items),
       totalAmount: parseFloat(total),
-      shippingAddress: { fullName: `${firstName} ${lastName}`, address, postalCode, city, country: 'France', phone: phone || '' }
+      shippingAddress: { fullName: `${firstName} ${lastName}`, address, postalCode, city, country: country || 'France', phone: phone || '' }
     }).catch(err => console.error("Admin order notification email error:", err.message));
 
     console.log(`✅ Commande confirmée et enregistrée : ${orderNumber}`);

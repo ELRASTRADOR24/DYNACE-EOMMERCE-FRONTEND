@@ -57,6 +57,7 @@ const orderSchema = new mongoose.Schema({
   address: { type: String, required: true },
   postal_code: { type: String, required: true },
   city: { type: String, required: true },
+  country: { type: String, default: 'France' },
   items: { type: Array, required: true }, // Array of product items
   subtotal: { type: Number, required: true },
   shipping: { type: Number, required: true },

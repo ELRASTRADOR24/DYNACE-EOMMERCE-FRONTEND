@@ -1,6 +1,33 @@
 import React, { useState, useEffect } from 'react';
 import { CreditCard, Truck, User, Check, ArrowRight, Lock, Loader } from 'lucide-react';
 
+const COUNTRY_CONFIGS = {
+  FR: { name: 'France (Métropolitaine)', shippingCost: 6.90, freeThreshold: 60, status: 'allowed' },
+  BE: { name: 'Belgique', shippingCost: 12.90, freeThreshold: 120, status: 'allowed' },
+  CH: { name: 'Suisse', shippingCost: 12.90, freeThreshold: 120, status: 'allowed' },
+  LU: { name: 'Luxembourg', shippingCost: 12.90, freeThreshold: 120, status: 'allowed' },
+  DE: { name: 'Allemagne', shippingCost: 12.90, freeThreshold: 120, status: 'allowed' },
+  ES: { name: 'Espagne', shippingCost: 12.90, freeThreshold: 120, status: 'allowed' },
+  IT: { name: 'Italie', shippingCost: 12.90, freeThreshold: 120, status: 'allowed' },
+  PT: { name: 'Portugal', shippingCost: 12.90, freeThreshold: 120, status: 'allowed' },
+  NL: { name: 'Pays-Bas', shippingCost: 12.90, freeThreshold: 120, status: 'allowed' },
+  
+  SN: { name: 'Sénégal', shippingCost: 24.90, freeThreshold: 200, status: 'allowed' },
+  CI: { name: 'Côte d’Ivoire', shippingCost: 24.90, freeThreshold: 200, status: 'allowed' },
+  CM: { name: 'Cameroun', shippingCost: 24.90, freeThreshold: 200, status: 'allowed' },
+  GA: { name: 'Gabon', shippingCost: 24.90, freeThreshold: 200, status: 'allowed' },
+  CG: { name: 'Congo', shippingCost: 24.90, freeThreshold: 200, status: 'allowed' },
+  BJ: { name: 'Bénin', shippingCost: 24.90, freeThreshold: 200, status: 'allowed' },
+  TG: { name: 'Togo', shippingCost: 24.90, freeThreshold: 200, status: 'allowed' },
+  ML: { name: 'Mali', shippingCost: 24.90, freeThreshold: 200, status: 'allowed' },
+  GN: { name: 'Guinée', shippingCost: 24.90, freeThreshold: 200, status: 'allowed' },
+  
+  US: { name: 'États-Unis', status: 'blocked', reason: 'Les réglementations douanières et sanitaires américaines (FDA) bloquent actuellement l’importation de compléments alimentaires Dynace par des particuliers.' },
+  CA: { name: 'Canada', status: 'blocked', reason: 'Les douanes canadiennes bloquent actuellement les livraisons de compléments alimentaires Dynace Global.' },
+  
+  WORLD: { name: 'Reste du monde', shippingCost: 24.90, freeThreshold: 200, status: 'allowed' }
+};
+
 export default function Checkout({ cartItems, onClearCart, onBackToShopping, currentUser, onLogin }) {
   const [checkoutMode, setCheckoutMode] = useState(currentUser ? 'registered' : null); // null, 'guest', 'registered', 'login_inline', 'signup_inline'
   const [isOrdered, setIsOrdered] = useState(false);
@@ -15,6 +42,7 @@ export default function Checkout({ cartItems, onClearCart, onBackToShopping, cur
   const [address, setAddress] = useState('');
   const [postalCode, setPostalCode] = useState('');
   const [city, setCity] = useState('');
+  const [country, setCountry] = useState('FR');
   
   // Stripe confirmation states
   const [isConfirming, setIsConfirming] = useState(false);
@@ -48,7 +76,27 @@ export default function Checkout({ cartItems, onClearCart, onBackToShopping, cur
   }, []);
 
   const subtotal = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
-  const shippingCost = subtotal >= shippingThreshold || subtotal === 0 ? 0 : shippingCostBase;
+
+  const getShippingDetails = (selectedCountryCode, currentSubtotal) => {
+    const config = COUNTRY_CONFIGS[selectedCountryCode] || COUNTRY_CONFIGS.WORLD;
+    if (config.status === 'blocked') {
+      return { cost: 0, threshold: 0, isBlocked: true, reason: config.reason };
+    }
+    
+    let threshold = config.freeThreshold;
+    let cost = config.shippingCost;
+    
+    if (selectedCountryCode === 'FR') {
+      threshold = shippingThreshold;
+      cost = shippingCostBase;
+    }
+    
+    const costFinal = currentSubtotal >= threshold || currentSubtotal === 0 ? 0 : cost;
+    return { cost: costFinal, threshold, isBlocked: false };
+  };
+
+  const shippingDetails = getShippingDetails(country, subtotal);
+  const shippingCost = shippingDetails.cost;
   const grandTotal = subtotal + shippingCost;
 
   // Effect to automatically set registered mode if currentUser logs in
@@ -221,6 +269,7 @@ export default function Checkout({ cartItems, onClearCart, onBackToShopping, cur
             address,
             postalCode,
             city,
+            country,
             items: cartItems.map(item => ({
               id: item.id,
               name: item.name,
@@ -253,6 +302,7 @@ export default function Checkout({ cartItems, onClearCart, onBackToShopping, cur
             address,
             postalCode,
             city,
+            country,
             items: cartItems.map(item => ({
               id: item.id,
               name: item.name,
@@ -727,6 +777,42 @@ export default function Checkout({ cartItems, onClearCart, onBackToShopping, cur
           </h3>
           
           <div className="form-grid">
+            <div className="form-group full-width">
+              <label className="form-label" htmlFor="country">Pays de livraison</label>
+              <select 
+                className="form-input" 
+                id="country" 
+                required 
+                value={country}
+                onChange={(e) => setCountry(e.target.value)}
+                style={{ cursor: 'pointer', appearance: 'auto' }}
+              >
+                {Object.entries(COUNTRY_CONFIGS).map(([code, config]) => (
+                  <option key={code} value={code}>
+                    {config.name} {config.status === 'blocked' ? ' (Non disponible)' : ''}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {shippingDetails.isBlocked && (
+              <div className="form-group full-width" style={{
+                backgroundColor: 'var(--danger-bg)',
+                border: '1px solid rgba(217, 48, 37, 0.2)',
+                padding: '1rem 1.25rem',
+                borderRadius: '8px',
+                color: 'var(--text-primary)',
+                lineHeight: '1.5',
+                fontSize: '0.85rem',
+                marginBottom: '0.5rem'
+              }}>
+                <strong style={{ color: 'var(--danger)', display: 'block', fontSize: '0.95rem', marginBottom: '0.25rem' }}>
+                  🚫 Livraison impossible
+                </strong>
+                {shippingDetails.reason}
+              </div>
+            )}
+
             <div className="form-group">
               <label className="form-label" htmlFor="firstName">Prénom</label>
               <input 
@@ -879,8 +965,22 @@ export default function Checkout({ cartItems, onClearCart, onBackToShopping, cur
                 Retour
               </button>
             )}
-            <button type="submit" className="place-order-btn" style={{ flex: 2 }}>
-              {useTestPayment ? `Valider la commande test - ${grandTotal.toFixed(2)} €` : `Procéder au paiement - ${grandTotal.toFixed(2)} €`}
+            <button 
+              type="submit" 
+              className="place-order-btn" 
+              disabled={shippingDetails.isBlocked || isConfirming}
+              style={{ 
+                flex: 2,
+                ...(shippingDetails.isBlocked ? {
+                  backgroundColor: 'var(--bg-secondary)',
+                  color: 'var(--text-secondary)',
+                  border: '1px solid var(--border-color)',
+                  cursor: 'not-allowed',
+                  boxShadow: 'none'
+                } : {})
+              }}
+            >
+              {isConfirming ? 'Initialisation...' : (shippingDetails.isBlocked ? 'Livraison indisponible' : (useTestPayment ? `Valider la commande test - ${grandTotal.toFixed(2)} €` : `Procéder au paiement - ${grandTotal.toFixed(2)} €`))}
             </button>
           </div>
         </form>
