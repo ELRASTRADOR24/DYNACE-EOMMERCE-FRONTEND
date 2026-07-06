@@ -28,25 +28,25 @@
 }
 
 [data-theme="dark"] {
-  /* Dynace Global Theme - Mode Sombre Premium (Nuit éclairée) */
-  --bg-primary: #141C30; /* Bleu Nuit / Slate foncé éclairé (plus clair) */
-  --bg-secondary: #202A45; /* Variante plus claire de la nuit pour les cartes */
-  --bg-glass: rgba(20, 28, 48, 0.85);
-  --text-primary: #F0F2F5; /* Blanc cassé doux */
-  --text-secondary: #A0ABC0; /* Gris bleuté clair */
-  --primary-green: #00ACD8; /* Teal/Cyan */
-  --primary-green-hover: #00C0F2;
-  --accent-gold: #FDB913; /* Or Chaud */
-  --accent-gold-hover: #FFE066;
-  --border-color: rgba(243, 244, 246, 0.05);
-  --shadow-premium: rgba(0, 0, 0, 0.3) 0px 20px 50px;
-  --shadow-glow: rgba(253, 185, 19, 0.1) 0px 4px 12px;
-  --danger: #FF6B6B;
-  --danger-bg: rgba(255, 107, 107, 0.1);
-  --success: #81C784;
-  --success-bg: rgba(129, 199, 132, 0.1);
-  --warning: #FBBF24;
-  --warning-bg: rgba(251, 191, 36, 0.1);
+  /* Dynace Global Theme - Mode Sombre Ultra-Premium (Nuit Obsidienne & Or Champagne) */
+  --bg-primary: #0A0F1D; /* Obsidian Midnight - Sombre profond et luxueux */
+  --bg-secondary: #121A2E; /* Deep Navy - Cartes élégantes détachées du fond */
+  --bg-glass: rgba(10, 15, 29, 0.85);
+  --text-primary: #F8FAFC; /* Blanc froid net */
+  --text-secondary: #94A3B8; /* Gris acier/slate doux pour le texte secondaire */
+  --primary-green: #3A6DDE; /* Royal Blue illuminé pour le contraste sur fond sombre */
+  --primary-green-hover: #2655C4;
+  --accent-gold: #C5A880; /* Or Champagne - Conserve l'identité de luxe même en mode sombre */
+  --accent-gold-hover: #D8BD99;
+  --border-color: rgba(255, 255, 255, 0.06); /* Bordure ultra-fine argentée */
+  --shadow-premium: rgba(0, 0, 0, 0.5) 0px 15px 40px;
+  --shadow-glow: rgba(197, 168, 128, 0.15) 0px 4px 12px;
+  --danger: #EF4444;
+  --danger-bg: rgba(239, 68, 68, 0.1);
+  --success: #10B981;
+  --success-bg: rgba(16, 185, 129, 0.1);
+  --warning: #F59E0B;
+  --warning-bg: rgba(245, 158, 11, 0.1);
 }
 
 * {
@@ -280,7 +280,15 @@ body {
 .categories-container {
   display: flex;
   gap: 1.5rem;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding-bottom: 0.5rem;
+  margin-bottom: -0.5rem;
+}
+.categories-container::-webkit-scrollbar {
+  display: none;
 }
 
 .category-btn {
@@ -1717,11 +1725,61 @@ body {
   }
 
   .categories-container {
-    justify-content: center;
+    justify-content: flex-start;
+    padding-left: 1rem;
+    padding-right: 1rem;
   }
 
   .product-grid {
-    gap: 3rem 1.5rem;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem 1rem;
+  }
+
+  .product-card {
+    padding: 0.5rem;
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+  }
+
+  .product-card .product-title {
+    font-size: 0.95rem;
+    margin-bottom: 0.25rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .product-benefits-summary {
+    display: none !important;
+  }
+
+  .product-footer {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+  }
+
+  .product-price-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+  }
+
+  .product-price-label {
+    font-size: 0.65rem;
+  }
+
+  .product-price {
+    font-size: 1rem;
+  }
+
+  .product-action-btn {
+    width: 100% !important;
+    justify-content: center;
+    padding: 0.5rem 0.5rem;
+    font-size: 0.75rem;
   }
 
   .detail-container {
