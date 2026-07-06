@@ -260,7 +260,7 @@ export const sendOrderNotificationEmail = async ({ orderId, user, items, totalAm
           </div>
           
           <div style="margin-top: 25px; text-align: center; margin-bottom: 25px;">
-            <a href="${process.env.BACKEND_URL || 'https://dynace-ecommerce-backend.onrender.com'}/api/orders/packing-slip/${orderId}" target="_blank" style="display: inline-block; background-color: #10b981; color: #ffffff !important; padding: 15px 35px; border-radius: 8px; text-decoration: none; font-size: 15px; font-weight: 800; letter-spacing: 0.5px; box-shadow: 0 4px 12px rgba(16,185,129,0.2); border: 2px solid #10b981;">
+            <a href="${process.env.BACKEND_URL || 'https://dynace-backend.onrender.com'}/api/orders/packing-slip/${orderId}" target="_blank" style="display: inline-block; background-color: #10b981; color: #ffffff !important; padding: 15px 35px; border-radius: 8px; text-decoration: none; font-size: 15px; font-weight: 800; letter-spacing: 0.5px; box-shadow: 0 4px 12px rgba(16,185,129,0.2); border: 2px solid #10b981;">
               🖨️ Imprimer la Fiche d'Expédition / Coller sur le carton →
             </a>
           </div>
@@ -313,6 +313,7 @@ export const sendOrderNotificationEmail = async ({ orderId, user, items, totalAm
 };
 
 export const sendCustomerOrderConfirmationEmail = async (order) => {
+  const frontendUrl = process.env.FRONTEND_URL || 'https://xn--dynaceglobalesant-top-r5b.com';
   const itemsHtml = order.items.map(item => `
     <tr>
       <td style="padding: 10px; border-bottom: 1px solid #eee;">${item.name}</td>
@@ -404,7 +405,7 @@ export const sendCustomerOrderConfirmationEmail = async (order) => {
           </div>
           
           <div class="cta-container">
-            <a href="https://dynace-shop.vercel.app/track?order=${order.order_number}&email=${encodeURIComponent(order.email)}" class="cta-button">
+            <a href="${frontendUrl}/track?order=${order.order_number}&email=${encodeURIComponent(order.email)}" class="cta-button">
               Suivre ma commande en temps réel
             </a>
           </div>
@@ -412,7 +413,7 @@ export const sendCustomerOrderConfirmationEmail = async (order) => {
         <div class="footer">
           <p>
             Ceci est un e-mail automatique, merci de ne pas y répondre directement.<br/>
-            Pour toute question, contactez notre support client via la page <a href="https://dynace-shop.vercel.app/contact">Contact</a> de notre site.
+            Pour toute question, contactez notre support client via la page <a href="${frontendUrl}/contact">Contact</a> de notre site.
           </p>
           <p>&copy; ${new Date().getFullYear()} Dynace Global. Tous droits réservés.</p>
         </div>
@@ -432,6 +433,7 @@ export const sendCustomerOrderConfirmationEmail = async (order) => {
 };
 
 export const sendShippingConfirmationEmail = async (order, trackingNumber) => {
+  const frontendUrl = process.env.FRONTEND_URL || 'https://xn--dynaceglobalesant-top-r5b.com';
   const trackingLink = `https://www.chronopost.fr/fr/chrono_suividecolis?listeNumeros=${trackingNumber}`;
 
   const html = `
@@ -473,11 +475,11 @@ export const sendShippingConfirmationEmail = async (order, trackingNumber) => {
           </div>
           <div style="font-size: 14px; color: #64748b; line-height: 1.5;">
             Vous pouvez également suivre l'avancée de votre préparation et la livraison directement sur notre boutique en cliquant sur le lien ci-dessous :<br/>
-            <a href="https://dynace-shop.vercel.app/track?order=${order.order_number}&email=${encodeURIComponent(order.email)}" style="color: #153A89; font-weight: 600; text-decoration: none;">Suivre sur notre site</a>
+            <a href="${frontendUrl}/track?order=${order.order_number}&email=${encodeURIComponent(order.email)}" style="color: #153A89; font-weight: 600; text-decoration: none;">Suivre sur notre site</a>
           </div>
         </div>
         <div class="footer">
-          <p>Ceci est un e-mail automatique, merci de ne pas y répondre directement.<br/>Pour toute question, contactez notre support via la page <a href="https://dynace-shop.vercel.app/contact">Contact</a>.</p>
+          <p>Ceci est un e-mail automatique, merci de ne pas y répondre directement.<br/>Pour toute question, contactez notre support via la page <a href="${frontendUrl}/contact">Contact</a>.</p>
           <p>&copy; ${new Date().getFullYear()} Dynace Global. Tous droits réservés.</p>
         </div>
       </div>
