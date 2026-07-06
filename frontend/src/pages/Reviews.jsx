@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Star, Play, Pause, AlertCircle, MessageSquare, CheckCircle } from 'lucide-react';
-import { reviews } from '../data/products';
 
 const getProductName = (id) => {
   const mapping = {
@@ -61,17 +60,14 @@ export default function Reviews() {
     }
   };
 
-  const allVideoReviews = [
-    ...reviews,
-    ...dbReviews.filter(r => r.video_url).map((r, index) => ({
-      id: r._id || `db-vid-${index}`,
-      name: r.name,
-      stars: r.rating,
-      text: r.comment,
-      product: getProductName(r.product_id),
-      videoUrl: r.video_url
-    }))
-  ];
+  const allVideoReviews = dbReviews.filter(r => r.video_url).map((r, index) => ({
+    id: r._id || `db-vid-${index}`,
+    name: r.name,
+    stars: r.rating,
+    text: r.comment,
+    product: getProductName(r.product_id),
+    videoUrl: r.video_url
+  }));
 
   return (
     <div className="reviews-page-container">
@@ -100,51 +96,107 @@ export default function Reviews() {
       <div className="video-testimonials-section">
         <h2 className="section-subtitle-reviews">Témoignages Vidéo</h2>
         <div className="reviews-grid">
-          {allVideoReviews.map((rev) => {
-            const isPlaying = playingId === rev.id;
-            return (
-              <div className="review-card" key={rev.id}>
-                <div className="video-wrapper">
-                  <video
-                    ref={(el) => (videoRefs.current[rev.id] = el)}
-                    src={rev.videoUrl}
-                    className="review-video"
-                    loop
-                    playsInline
-                    onClick={() => handlePlayToggle(rev.id)}
-                  />
-                  <div 
-                    className="video-overlay" 
-                    onClick={() => handlePlayToggle(rev.id)}
-                    style={{ opacity: isPlaying ? 0 : 1, transition: 'opacity 0.3s' }}
-                  >
-                    <button className="play-icon-btn" aria-label="Lire la vidéo de témoignage">
-                      {isPlaying ? <Pause size={24} fill="currentColor" /> : <Play size={24} fill="currentColor" />}
-                    </button>
+          {allVideoReviews.length === 0 ? (
+            <>
+              {/* Mockup Card 1 */}
+              <div className="review-card mockup-card">
+                <div className="video-wrapper mockup-video-wrapper">
+                  <div className="mockup-video-overlay-bg"></div>
+                  <div className="video-overlay">
+                    <div className="play-icon-btn" aria-label="Exemple de vidéo">
+                      <Play size={24} fill="currentColor" />
+                    </div>
                   </div>
+                  <span className="mockup-badge">Exemple d'affichage</span>
                 </div>
 
                 <div className="review-card-info">
                   <div className="reviewer-name">
-                    <span>{rev.name}</span>
+                    <span>Marie L. (Exemple)</span>
                     <div className="review-stars">
                       {[...Array(5)].map((_, i) => (
-                        <Star 
-                          key={i} 
-                          size={16} 
-                          fill={i < rev.stars ? 'var(--accent-gold)' : 'none'} 
-                          stroke={i < rev.stars ? 'var(--accent-gold)' : 'var(--text-secondary)'} 
-                        />
+                        <Star key={i} size={16} fill="var(--accent-gold)" stroke="var(--accent-gold)" />
                       ))}
                     </div>
                   </div>
-
-                  <p className="review-text">"{rev.text}"</p>
-                  <span className="reviewed-product-badge">Produit : {rev.product}</span>
+                  <p className="review-text">"Ceci est un exemple de témoignage vidéo : après 3 semaines d'utilisation quotidienne du Dynace Rocenta, je suis bluffée par l'éclat de ma peau et mon regain d'énergie !"</p>
+                  <span className="reviewed-product-badge">Produit : Dynace Rocenta</span>
                 </div>
               </div>
-            );
-          })}
+
+              {/* Mockup Card 2 */}
+              <div className="review-card mockup-card">
+                <div className="video-wrapper mockup-video-wrapper" style={{ background: 'linear-gradient(135deg, #153A89 0%, #00468b 100%)' }}>
+                  <div className="mockup-video-overlay-bg" style={{ opacity: 0.25 }}></div>
+                  <div className="video-overlay">
+                    <div className="play-icon-btn" aria-label="Votre vidéo ici !">
+                      <Play size={24} fill="currentColor" />
+                    </div>
+                  </div>
+                  <span className="mockup-badge">Votre vidéo ici</span>
+                </div>
+
+                <div className="review-card-info">
+                  <div className="reviewer-name">
+                    <span>Votre Témoignage ?</span>
+                    <div className="review-stars">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} size={16} fill="var(--accent-gold)" stroke="var(--accent-gold)" />
+                      ))}
+                    </div>
+                  </div>
+                  <p className="review-text">"Enregistrez votre propre vidéo depuis votre téléphone ou importez un fichier pour aider notre communauté et obtenir 10% de réduction immédiate."</p>
+                  <span className="reviewed-product-badge">Offre : -10% de réduction</span>
+                </div>
+              </div>
+            </>
+          ) : (
+            allVideoReviews.map((rev) => {
+              const isPlaying = playingId === rev.id;
+              return (
+                <div className="review-card" key={rev.id}>
+                  <div className="video-wrapper">
+                    <video
+                      ref={(el) => (videoRefs.current[rev.id] = el)}
+                      src={rev.videoUrl}
+                      className="review-video"
+                      loop
+                      playsInline
+                      onClick={() => handlePlayToggle(rev.id)}
+                    />
+                    <div 
+                      className="video-overlay" 
+                      onClick={() => handlePlayToggle(rev.id)}
+                      style={{ opacity: isPlaying ? 0 : 1, transition: 'opacity 0.3s' }}
+                    >
+                      <button className="play-icon-btn" aria-label="Lire la vidéo de témoignage">
+                        {isPlaying ? <Pause size={24} fill="currentColor" /> : <Play size={24} fill="currentColor" />}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="review-card-info">
+                    <div className="reviewer-name">
+                      <span>{rev.name}</span>
+                      <div className="review-stars">
+                        {[...Array(5)].map((_, i) => (
+                          <Star 
+                            key={i} 
+                            size={16} 
+                            fill={i < rev.stars ? 'var(--accent-gold)' : 'none'} 
+                            stroke={i < rev.stars ? 'var(--accent-gold)' : 'var(--text-secondary)'} 
+                          />
+                        ))}
+                      </div>
+                    </div>
+
+                    <p className="review-text">"{rev.text}"</p>
+                    <span className="reviewed-product-badge">Produit : {rev.product}</span>
+                  </div>
+                </div>
+              );
+            })
+          )}
         </div>
       </div>
 
