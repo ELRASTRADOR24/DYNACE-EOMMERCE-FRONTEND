@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import ProductCard from '../components/ProductCard';
-import { Search, Plus } from 'lucide-react';
+import { Search, Plus, ArrowRight, ShieldCheck, Activity, Sparkles } from 'lucide-react';
 
 export default function Home({ products, onSelectProduct, onAddToCart }) {
   const [search, setSearch] = useState('');
@@ -21,16 +21,46 @@ export default function Home({ products, onSelectProduct, onAddToCart }) {
     return matchesCategory && matchesSearch;
   });
 
+  const handleExploreClick = () => {
+    const filterBar = document.querySelector('.filter-bar');
+    if (filterBar) {
+      filterBar.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
   return (
     <div>
       <section className="hero-section">
-        <p className="hero-tagline">Dynamic Ace Global · Distributeur Agréé</p>
-        <h1 className="hero-title">Une approche holistique de la beauté et du bien-être.</h1>
+        <div className="hero-badge">
+          <span>Distributeur Officiel Dynace Global</span>
+        </div>
+        
+        <h1 className="hero-title">
+          Réactivez votre <span>vitalité</span> à la source.
+        </h1>
+        
         <p className="hero-subtitle">
-          Une sélection de produits naturels formulés avec précision pour soutenir votre vitalité cellulaire, votre équilibre et votre éclat au quotidien.
+          Des formules cliniquement étayées à base de cellules souches végétales pour régénérer votre organisme, renforcer vos défenses et révéler votre éclat.
         </p>
-        <div className="hero-disclaimer" style={{ color: 'var(--primary-green)', fontWeight: 'bold', fontSize: '0.95rem' }}>
-          ✨ Garantie Distributeur Officiel • Ingrédients 100% Naturels Certifiés Haute Qualité
+        
+        <button className="hero-cta-btn" onClick={handleExploreClick}>
+          <span>Découvrir la gamme</span>
+          <ArrowRight size={16} />
+        </button>
+
+        <div className="hero-pills">
+          <div className="hero-pill">
+            <ShieldCheck size={14} style={{ color: 'var(--primary-green)' }} />
+            <span>Régénération Cellulaire</span>
+          </div>
+          <div className="hero-pill">
+            <Activity size={14} style={{ color: 'var(--accent-gold)' }} />
+            <span>Énergie & Tonus</span>
+          </div>
+          <div className="hero-pill">
+            <Sparkles size={14} style={{ color: 'var(--primary-green)' }} />
+            <span>Beauté & Éclat</span>
+          </div>
         </div>
       </section>
 
