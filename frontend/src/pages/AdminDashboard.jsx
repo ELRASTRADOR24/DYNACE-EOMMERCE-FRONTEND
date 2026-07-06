@@ -272,6 +272,29 @@ export default function AdminDashboard({ onRefreshProducts }) {
     }
   };
 
+  // Delete order
+  const handleDeleteOrder = async (id) => {
+    if (!window.confirm('Voulez-vous vraiment supprimer cette commande ? Cette action est irréversible.')) {
+      return;
+    }
+    const token = localStorage.getItem('dynace_jwt');
+    try {
+      const res = await fetch(`/api/admin/orders/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        showSuccess('Commande supprimée avec succès.');
+        fetchOrders();
+      } else {
+        const data = await res.json();
+        showError(data.error || 'Erreur lors de la suppression de la commande.');
+      }
+    } catch (err) {
+      showError('Erreur réseau lors de la suppression.');
+    }
+  };
+
   // Save Settings
   const handleSaveSettings = async (e) => {
     e.preventDefault();
@@ -785,12 +808,45 @@ export default function AdminDashboard({ onRefreshProducts }) {
                         </div>
                         
                         {o.tracking_number && (
-                          <div style={{ padding: '0.75rem', backgroundColor: 'var(--bg-secondary)', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '0.85rem', color: 'var(--text-primary)', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                          <div style={{ padding: '0.75rem', backgroundColor: 'var(--bg-secondary)', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '0.85rem', color: 'var(--text-primary)', display: 'flex', flexDirection: 'column', gap: '0.25rem', marginBottom: '1rem' }}>
                             <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-secondary)', fontWeight: 'bold' }}>Numéro de suivi Chronopost</span>
                             <span style={{ fontFamily: 'monospace', fontWeight: 'bold', fontSize: '0.95rem' }}>{o.tracking_number}</span>
                             <a href={`https://www.chronopost.fr/fr/chrono_suividecolis?listeNumeros=${o.tracking_number}`} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary-green)', fontWeight: 'bold', textDecoration: 'none', marginTop: '0.25rem', display: 'inline-block' }}>Suivre sur Chronopost →</a>
                           </div>
                         )}
+
+                        <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--border-color)' }}>
+                          <button
+                            onClick={() => handleDeleteOrder(o._id || o.id)}
+                            style={{
+                              width: '100%',
+                              padding: '0.6rem 1rem',
+                              backgroundColor: 'transparent',
+                              color: 'var(--danger)',
+                              border: '1px solid var(--danger)',
+                              borderRadius: '8px',
+                              fontWeight: '600',
+                              cursor: 'pointer',
+                              transition: 'all 0.2s',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: '0.5rem',
+                              fontSize: '0.85rem'
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.backgroundColor = 'var(--danger)';
+                              e.currentTarget.style.color = '#fff';
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.backgroundColor = 'transparent';
+                              e.currentTarget.style.color = 'var(--danger)';
+                            }}
+                          >
+                            <Trash2 size={14} />
+                            Supprimer la commande
+                          </button>
+                        </div>
                       </div>
                     </div>
 

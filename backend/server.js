@@ -1005,6 +1005,20 @@ app.put('/api/admin/orders/:id/status', authenticateToken, verifyAdmin, async (r
   }
 });
 
+// DELETE order
+app.delete('/api/admin/orders/:id', authenticateToken, verifyAdmin, async (req, res) => {
+  try {
+    const order = await Order.findByIdAndDelete(req.params.id);
+    if (!order) {
+      return res.status(404).json({ error: 'Commande non trouvée.' });
+    }
+    res.json({ success: true, message: 'Commande supprimée avec succès.' });
+  } catch (err) {
+    console.error('Erreur suppression commande admin :', err.message);
+    res.status(500).json({ error: 'Erreur lors de la suppression de la commande.' });
+  }
+});
+
 // GET all registered users for admin (excluding passwords)
 app.get('/api/admin/users', authenticateToken, verifyAdmin, async (req, res) => {
   try {
