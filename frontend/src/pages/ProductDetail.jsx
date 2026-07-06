@@ -297,6 +297,15 @@ export default function ProductDetail({ product, onBack, onAddToCart, onBuyNow, 
             <h3>Laisser un avis</h3>
             {currentUser ? (
               <form onSubmit={handleReviewSubmit} className="review-submit-form">
+                {/* Encouraging Banner for Video Reviews */}
+                <div className="video-review-callout">
+                  <span className="gift-emoji">🎁</span>
+                  <div className="callout-content">
+                    <h4>Partagez votre avis en vidéo !</h4>
+                    <p>Filmez votre retour d'expérience de 30 secondes ou importez un fichier vidéo pour recevoir un code de réduction de **-10%** sur votre prochaine commande !</p>
+                  </div>
+                </div>
+
                 <div className="form-group-review">
                   <label className="rating-label">Votre note :</label>
                   <div className="interactive-stars">
@@ -337,15 +346,39 @@ export default function ProductDetail({ product, onBack, onAddToCart, onBuyNow, 
                 </div>
 
                 <div className="form-group-review">
-                  <label htmlFor="review-video" className="comment-label">Joindre une vidéo (optionnel) :</label>
-                  <input
-                    type="file"
-                    id="review-video"
-                    accept="video/*"
-                    onChange={(e) => setNewVideo(e.target.files[0])}
-                    style={{ marginTop: '0.5rem', width: '100%' }}
-                  />
-                  {newVideo && <span style={{fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'block', marginTop: '0.25rem'}}>Vidéo sélectionnée : {newVideo.name}</span>}
+                  <label className="comment-label">Témoignage vidéo (Optionnel) :</label>
+                  <div className="custom-video-upload">
+                    <input
+                      type="file"
+                      id="review-video"
+                      accept="video/*"
+                      onChange={(e) => setNewVideo(e.target.files[0])}
+                      className="hidden-file-input"
+                    />
+                    <label htmlFor="review-video" className="video-upload-label">
+                      <span className="upload-icon">📹</span>
+                      {newVideo ? (
+                        <div className="selected-video-info">
+                          <span className="video-name">Sélectionné : {newVideo.name}</span>
+                          <span className="video-change-btn">Changer de vidéo</span>
+                        </div>
+                      ) : (
+                        <div className="upload-prompt">
+                          <strong>Prendre ou sélectionner une vidéo</strong>
+                          <span>Cliquez pour filmer ou importer depuis votre galerie</span>
+                        </div>
+                      )}
+                    </label>
+                    {newVideo && (
+                      <button 
+                        type="button" 
+                        className="remove-video-btn" 
+                        onClick={() => setNewVideo(null)}
+                      >
+                        Retirer la vidéo
+                      </button>
+                    )}
+                  </div>
                 </div>
 
                 {submitError && <div className="review-submit-error">{submitError}</div>}

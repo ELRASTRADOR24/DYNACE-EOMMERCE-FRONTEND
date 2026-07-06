@@ -61,6 +61,18 @@ export default function Reviews() {
     }
   };
 
+  const allVideoReviews = [
+    ...reviews,
+    ...dbReviews.filter(r => r.video_url).map((r, index) => ({
+      id: r._id || `db-vid-${index}`,
+      name: r.name,
+      stars: r.rating,
+      text: r.comment,
+      product: getProductName(r.product_id),
+      videoUrl: r.video_url
+    }))
+  ];
+
   return (
     <div className="reviews-page-container">
       <div className="reviews-title-section">
@@ -71,11 +83,24 @@ export default function Reviews() {
         </p>
       </div>
 
+      {/* Encouraging CTA Banner */}
+      <div className="reviews-cta-banner">
+        <div className="reviews-cta-content">
+          <h3>📢 Partagez votre expérience en vidéo !</h3>
+          <p>
+            Vous adorez nos compléments de thérapie cellulaire ? Prenez votre téléphone, filmez un court témoignage de 30 secondes en expliquant vos bienfaits, et postez-le directement depuis la fiche de votre produit préféré pour recevoir un **code promo de -10%** !
+          </p>
+        </div>
+        <a href="/" className="reviews-cta-btn">
+          Choisir un produit
+        </a>
+      </div>
+
       {/* Vidéo Testimonials */}
       <div className="video-testimonials-section">
         <h2 className="section-subtitle-reviews">Témoignages Vidéo</h2>
         <div className="reviews-grid">
-          {reviews.map((rev) => {
+          {allVideoReviews.map((rev) => {
             const isPlaying = playingId === rev.id;
             return (
               <div className="review-card" key={rev.id}>
@@ -173,6 +198,16 @@ export default function Reviews() {
                   </div>
                 </div>
                 <p className="written-card-comment">"{rev.comment}"</p>
+                {rev.video_url && (
+                  <div style={{ marginTop: '0.75rem', borderRadius: '8px', overflow: 'hidden', backgroundColor: '#000', border: '1px solid var(--border-color)' }}>
+                    <video 
+                      src={rev.video_url} 
+                      controls 
+                      playsInline 
+                      style={{ width: '100%', maxHeight: '200px', display: 'block' }}
+                    />
+                  </div>
+                )}
                 <div className="written-card-product-tag">
                   Produit évalué : <span className="product-id-tag">{getProductName(rev.product_id)}</span>
                 </div>
