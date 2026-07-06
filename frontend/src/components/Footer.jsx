@@ -55,11 +55,6 @@ export default function Footer({ setCurrentTab }) {
         <div className="footer-col brand-col">
           <img src="/images/logo.svg" alt="Dynace Global" className="footer-logo" />
           <p className="footer-tagline">Distributeur Indépendant Agréé.<br/>Découvrez le secret de la vitalité cellulaire et devenez l'As de votre propre vie.</p>
-          <div className="social-links">
-            <a href="#" aria-label="Facebook" style={{fontSize: '0.8rem', fontWeight: 'bold'}}>FB</a>
-            <a href="#" aria-label="Instagram" style={{fontSize: '0.8rem', fontWeight: 'bold'}}>IG</a>
-            <a href="#" aria-label="Twitter" style={{fontSize: '0.8rem', fontWeight: 'bold'}}>X</a>
-          </div>
         </div>
 
         <div className="footer-col">
