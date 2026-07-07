@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /checkout
+
+Sitemap: https://xn--dynaceglobalesant-top-r5b.com/sitemap.xml

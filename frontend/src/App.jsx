@@ -127,6 +127,64 @@ function App() {
     localStorage.setItem('dynace_theme', theme);
   }, [theme]);
 
+  // Dynamic SEO title & description
+  useEffect(() => {
+    let title = "Dynace Global | Boutique Officielle | Compléments Cellulaires & Bien-être";
+    let description = "Distributeur agréé Dynace Global en France et Europe. Retrouvez Rocenta, LyftMax, Urbanism, Ace Brew. Produits 100% naturels pour votre santé cellulaire.";
+
+    switch(currentTab) {
+      case 'home':
+        title = "Dynace Global | Boutique Officielle France & Europe | Santé Cellulaire";
+        description = "Boutique officielle de produits Dynace Global. Découvrez Rocenta, LyftMax, Urbanism. Améliorez votre bien-être et régénérez vos cellules avec nos solutions naturelles.";
+        break;
+      case 'detail':
+        if (selectedProductId && productsList.length > 0) {
+          const product = productsList.find(p => p.id === selectedProductId);
+          if (product) {
+            title = `${product.name} | Dynace Global Boutique Officielle`;
+            description = `${product.summary} Achetez votre ${product.name} authentique au meilleur prix sur notre boutique agréée.`;
+          }
+        }
+        break;
+      case 'reviews':
+        title = "Avis Clients | Dynace Global | Témoignages & Efficacité";
+        description = "Consultez les témoignages et retours d'expérience authentiques de nos clients sur les produits Dynace Rocenta et LyftMax.";
+        break;
+      case 'about':
+        title = "Qui sommes-nous ? | Dynace Global France | Distributeur Agréé";
+        description = "Découvrez l'histoire de Dynace Global et notre engagement à vous fournir des compléments de santé cellulaire premium, naturels et certifiés.";
+        break;
+      case 'checkout':
+        title = "Paiement Sécurisé | Dynace Global";
+        description = "Finalisez votre commande de compléments cellulaires Dynace de manière simple et sécurisée.";
+        break;
+      case 'orders':
+        title = "Mes Commandes | Dynace Global";
+        description = "Consultez l'historique de vos achats et vos factures sur votre compte Dynace Global.";
+        break;
+      case 'contact':
+        title = "Contactez-nous | Service Client Dynace Global";
+        description = "Notre équipe est à votre écoute pour toute question sur nos produits Dynace Global, les posologies ou le suivi de livraison.";
+        break;
+      case 'track':
+        title = "Suivre ma commande | Dynace Global";
+        description = "Saisissez votre numéro de commande pour suivre l'état de préparation et de livraison de votre colis Dynace.";
+        break;
+      case 'admin':
+        title = "Administration | Dynace Global";
+        description = "Tableau de bord administrateur de la boutique Dynace Global.";
+        break;
+      default:
+        break;
+    }
+
+    document.title = title;
+    const metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc) {
+      metaDesc.setAttribute('content', description);
+    }
+  }, [currentTab, selectedProductId, productsList]);
+
   const toggleTheme = () => {
     setTheme(prev => prev === 'light' ? 'dark' : 'light');
   };
