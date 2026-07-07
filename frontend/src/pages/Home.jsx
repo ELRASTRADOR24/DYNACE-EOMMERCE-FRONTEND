@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import ProductCard from '../components/ProductCard';
 import { Search, Plus, ArrowRight, ShieldCheck, Activity, Sparkles } from 'lucide-react';
 
-export default function Home({ products, onSelectProduct, onAddToCart }) {
+export default function Home({ products, loadingProducts, onSelectProduct, onAddToCart }) {
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
 
@@ -89,7 +89,24 @@ export default function Home({ products, onSelectProduct, onAddToCart }) {
         </div>
       </div>
 
-      {filteredProducts.length === 0 ? (
+      {loadingProducts ? (
+        <div className="product-grid">
+          {[1, 2, 3, 4].map(n => (
+            <div key={n} className="product-card skeleton-card" style={{ cursor: 'default' }}>
+              <div className="skeleton-image"></div>
+              <div className="skeleton-content" style={{ padding: '1.5rem' }}>
+                <div className="skeleton-title"></div>
+                <div className="skeleton-text"></div>
+                <div className="skeleton-text" style={{ width: '75%' }}></div>
+                <div className="skeleton-footer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1.5rem' }}>
+                  <div className="skeleton-price"></div>
+                  <div className="skeleton-btn"></div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : filteredProducts.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-secondary)' }}>
           Aucun produit ne correspond à votre recherche. Essayez d'autres termes ou catégories !
         </div>

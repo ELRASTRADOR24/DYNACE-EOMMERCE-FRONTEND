@@ -3367,3 +3367,55 @@ body {
   background-color: var(--primary-green);
   color: white;
 }
+
+/* ==========================================================================
+   PRODUCT SKELETON LOADER STYLES
+   ========================================================================== */
+.skeleton-card {
+  pointer-events: none !important;
+  opacity: 0.8;
+}
+.skeleton-image {
+  height: 250px;
+  background: linear-gradient(90deg, var(--bg-secondary) 25%, var(--border-color) 50%, var(--bg-secondary) 75%);
+  background-size: 200% 100%;
+  animation: loading-pulse 1.5s infinite ease-in-out;
+}
+.skeleton-title {
+  height: 18px;
+  width: 70%;
+  margin-bottom: 12px;
+  background: linear-gradient(90deg, var(--bg-secondary) 25%, var(--border-color) 50%, var(--bg-secondary) 75%);
+  background-size: 200% 100%;
+  animation: loading-pulse 1.5s infinite ease-in-out;
+  border-radius: 4px;
+}
+.skeleton-text {
+  height: 12px;
+  width: 100%;
+  margin-bottom: 8px;
+  background: linear-gradient(90deg, var(--bg-secondary) 25%, var(--border-color) 50%, var(--bg-secondary) 75%);
+  background-size: 200% 100%;
+  animation: loading-pulse 1.5s infinite ease-in-out;
+  border-radius: 4px;
+}
+.skeleton-price {
+  height: 20px;
+  width: 50px;
+  background: linear-gradient(90deg, var(--bg-secondary) 25%, var(--border-color) 50%, var(--bg-secondary) 75%);
+  background-size: 200% 100%;
+  animation: loading-pulse 1.5s infinite ease-in-out;
+  border-radius: 4px;
+}
+.skeleton-btn {
+  height: 38px;
+  width: 100px;
+  background: linear-gradient(90deg, var(--bg-secondary) 25%, var(--border-color) 50%, var(--bg-secondary) 75%);
+  background-size: 200% 100%;
+  animation: loading-pulse 1.5s infinite ease-in-out;
+  border-radius: 20px;
+}
+@keyframes loading-pulse {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}

@@ -35,6 +35,7 @@ function App() {
 
   // Products and Auth states
   const [productsList, setProductsList] = useState([]);
+  const [loadingProducts, setLoadingProducts] = useState(true);
   const [currentUser, setCurrentUser] = useState(null);
   const [loadingSession, setLoadingSession] = useState(true);
 
@@ -58,6 +59,7 @@ function App() {
 
   const fetchProducts = async () => {
     try {
+      setLoadingProducts(true);
       const res = await fetch('/api/products');
       if (res.ok) {
         const data = await res.json();
@@ -65,6 +67,8 @@ function App() {
       }
     } catch (err) {
       console.error('Erreur de chargement des produits :', err);
+    } finally {
+      setLoadingProducts(false);
     }
   };
 
@@ -249,7 +253,8 @@ function App() {
 
   const cartCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
 
-  if (loadingSession) {
+  const isAuthRequiredTab = ['admin', 'orders'].includes(currentTab);
+  if (loadingSession && isAuthRequiredTab) {
     return (
       <div style={{
         height: '100vh',
@@ -287,6 +292,7 @@ function App() {
         {currentTab === 'home' && (
           <Home
             products={productsList}
+            loadingProducts={loadingProducts}
             onSelectProduct={(id) => {
               setSelectedProductId(id);
               setCurrentTab('detail');
