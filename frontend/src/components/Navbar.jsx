@@ -42,12 +42,12 @@ export default function Navbar({
         <div 
           className="nav-brand" 
           onClick={() => handleTabClick('home')} 
-          style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
+          style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', minWidth: '141px' }}
         >
           <img 
             src="/images/logo.svg" 
             alt="Dynace Global" 
-            style={{ height: '38px', width: 'auto', display: 'block' }} 
+            style={{ height: '38px', width: '141px', display: 'block' }} 
           />
         </div>
 
