@@ -17,6 +17,7 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
   const [signupAddress, setSignupAddress] = useState('');
   const [signupPostalCode, setSignupPostalCode] = useState('');
   const [signupCity, setSignupCity] = useState('');
+  const [signupPhone, setSignupPhone] = useState('');
 
   if (!isOpen) return null;
 
@@ -63,7 +64,8 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
           password: signupPassword,
           address: signupAddress,
           postalCode: signupPostalCode,
-          city: signupCity
+          city: signupCity,
+          phone: signupPhone
         })
       });
 
@@ -84,6 +86,7 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
       setSignupAddress('');
       setSignupPostalCode('');
       setSignupCity('');
+      setSignupPhone('');
     } catch (err) {
       setError(err.message);
     }
@@ -319,6 +322,19 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
                   placeholder="Paris"
                 />
               </div>
+            </div>
+
+            <div className="form-group">
+              <label className="form-label" htmlFor="reg-phone">Numéro de Téléphone (Requis pour la livraison)</label>
+              <input 
+                className="form-input"
+                type="tel"
+                id="reg-phone"
+                required
+                value={signupPhone}
+                onChange={(e) => setSignupPhone(e.target.value)}
+                placeholder="Ex: 0612345678"
+              />
             </div>
 
             <button 

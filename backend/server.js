@@ -94,10 +94,10 @@ const authenticateToken = (req, res, next) => {
 
 // Register
 app.post('/api/auth/register', async (req, res) => {
-  const { firstName, lastName, email, password, address, postalCode, city } = req.body;
+  const { firstName, lastName, email, password, address, postalCode, city, phone } = req.body;
 
-  if (!firstName || !lastName || !email || !password || !address || !postalCode || !city) {
-    return res.status(400).json({ error: 'Veuillez remplir tous les champs.' });
+  if (!firstName || !lastName || !email || !password || !address || !postalCode || !city || !phone) {
+    return res.status(400).json({ error: 'Veuillez remplir tous les champs (le téléphone est requis pour la livraison).' });
   }
 
   if (password.length < 6) {
@@ -122,7 +122,8 @@ app.post('/api/auth/register', async (req, res) => {
       password: hashedPassword,
       address,
       postal_code: postalCode,
-      city
+      city,
+      phone
     });
     const result = await newUser.save();
 
@@ -139,6 +140,7 @@ app.post('/api/auth/register', async (req, res) => {
         address,
         postalCode,
         city,
+        phone: result.phone || '',
         isAdmin: result.is_admin || false
       }
     });
@@ -179,6 +181,7 @@ app.post('/api/auth/login', async (req, res) => {
         address: user.address,
         postalCode: user.postal_code,
         city: user.city,
+        phone: user.phone || '',
         isAdmin: user.is_admin || false
       }
     });
