@@ -3453,3 +3453,24 @@ body {
     opacity: 1;
   }
 }
+
+.social-link-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+.social-link-btn:hover {
+  color: var(--primary-gold);
+  border-color: var(--primary-gold);
+  background-color: rgba(212, 175, 55, 0.08);
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(212, 175, 55, 0.15);
+}
