@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { User, ShieldAlert, Key, UserMinus, CheckCircle, AlertTriangle, Loader } from 'lucide-react';
+import PhoneInput from '../components/PhoneInput';
 
 export default function Profile({ currentUser, onUpdateUser, onLogout }) {
   const [profileData, setProfileData] = useState({
@@ -211,14 +212,9 @@ export default function Profile({ currentUser, onUpdateUser, onLogout }) {
               </div>
               <div className="form-group-review">
                 <label className="comment-label">Numéro de téléphone</label>
-                <input
-                  type="tel"
-                  name="phone"
-                  className="review-textarea"
-                  style={{ height: '42px', padding: '0.5rem 1rem' }}
-                  value={profileData.phone}
-                  onChange={handleProfileChange}
-                  placeholder="Ex: 0612345678"
+                <PhoneInput 
+                  value={profileData.phone} 
+                  onChange={(val) => setProfileData(prev => ({ ...prev, phone: val }))} 
                 />
               </div>
             </div>

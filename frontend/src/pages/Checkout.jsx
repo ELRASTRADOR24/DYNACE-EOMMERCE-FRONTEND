@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { CreditCard, Truck, User, Check, ArrowRight, Lock, Loader } from 'lucide-react';
+import PhoneInput from '../components/PhoneInput';
 
 const COUNTRY_CONFIGS = {
   FR: { name: 'France (Métropolitaine)', shippingCost: 10.50, status: 'allowed' },
@@ -908,14 +909,11 @@ export default function Checkout({ cartItems, onClearCart, onBackToShopping, cur
 
             <div className="form-group full-width">
               <label className="form-label" htmlFor="phone">Numéro de Téléphone (Indispensable pour la livraison Chronopost)</label>
-              <input 
-                className="form-input" 
-                type="tel" 
+              <PhoneInput 
+                value={phone} 
+                onChange={setPhone} 
                 id="phone" 
                 required 
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="06 12 34 56 78"
               />
               <span className="form-error">Le numéro de téléphone est requis.</span>
             </div>

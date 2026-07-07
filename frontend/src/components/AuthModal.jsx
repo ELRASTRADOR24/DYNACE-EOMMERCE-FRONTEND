@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
+import PhoneInput from './PhoneInput';
 
 // Bulletproof SVG Google Logo to avoid broken image icons and blockages
 const GoogleLogo = () => (
@@ -552,14 +553,11 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
 
               <div className="form-group">
                 <label className="form-label" htmlFor="reg-phone">Numéro de Téléphone (Requis pour la livraison)</label>
-                <input 
-                  className="form-input"
-                  type="tel"
-                  id="reg-phone"
-                  required
-                  value={signupPhone}
-                  onChange={(e) => setSignupPhone(e.target.value)}
-                  placeholder="Ex: 0612345678"
+                <PhoneInput 
+                  value={signupPhone} 
+                  onChange={setSignupPhone} 
+                  id="reg-phone" 
+                  required 
                 />
               </div>
 
