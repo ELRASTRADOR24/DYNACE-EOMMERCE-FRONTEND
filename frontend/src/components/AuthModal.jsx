@@ -158,7 +158,7 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
         throw new Error("Le service de connexion Google se charge. Veuillez réessayer dans quelques secondes.");
       }
 
-      const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || '998495818987-placeholder.apps.googleusercontent.com';
+      const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || '928594169720-1iokpe7cijkmqra9uh0vedhqk62chpg7.apps.googleusercontent.com';
 
       if (googleClientId.includes('placeholder')) {
         throw new Error("La connexion Google n'est pas encore configurée. Veuillez ajouter votre identifiant client Google (Client ID) dans les variables d'environnement.");
