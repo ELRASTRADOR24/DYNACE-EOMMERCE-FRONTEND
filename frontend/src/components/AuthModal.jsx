@@ -197,9 +197,7 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
     }
   };
 
-  const handleAppleSignIn = () => {
-    setError("La connexion Apple nécessite un compte Apple Developer Program payant (99$/an). Cette fonction sera active dès réception de vos identifiants Apple Developer.");
-  };
+
 
   return (
     <>
@@ -443,30 +441,6 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
               >
                 <GoogleLogo />
                 <span>Continuer avec Google</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={handleAppleSignIn}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '0.75rem',
-                  width: '100%',
-                  height: '42px',
-                  border: '1px solid var(--border-color)',
-                  backgroundColor: 'black',
-                  color: 'white',
-                  fontFamily: 'var(--sans)',
-                  fontSize: '0.85rem',
-                  fontWeight: '600',
-                  cursor: 'pointer',
-                  borderRadius: '6px'
-                }}
-              >
-                <span style={{ fontSize: '1.1rem', marginTop: '-3px' }}></span>
-                <span>Continuer avec Apple</span>
               </button>
             </div>
           </>
