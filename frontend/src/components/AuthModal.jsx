@@ -158,9 +158,15 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess }) {
         throw new Error("Le service de connexion Google se charge. Veuillez réessayer dans quelques secondes.");
       }
 
+      const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || '998495818987-placeholder.apps.googleusercontent.com';
+
+      if (googleClientId.includes('placeholder')) {
+        throw new Error("La connexion Google n'est pas encore configurée. Veuillez ajouter votre identifiant client Google (Client ID) dans les variables d'environnement.");
+      }
+
       // Initialize Google OAuth2 Token Client (opens standard popup safely)
       const client = window.google.accounts.oauth2.initTokenClient({
-        client_id: '998495818987-e07e8v3h82f2a74c6j6p1e4e3b2e1a4d.apps.googleusercontent.com', // Google client ID
+        client_id: googleClientId,
         scope: 'email profile openid',
         callback: async (tokenResponse) => {
           if (tokenResponse && tokenResponse.access_token) {
