@@ -237,126 +237,144 @@ export const seedProducts = async () => {
           user_id: admin._id,
           name: "Marie-Laure D.",
           rating: 4,
-          comment: "J'étais un peu sceptique au début par rapport au concept de thérapie cellulaire par sachet, mais après 3 semaines d'utilisation quotidienne du Rocenta, je suis bluffée. Mon teint est visiblement plus éclatant, j'ai moins de rougeurs sur le visage et je me sens beaucoup moins fatiguée en fin de journée. Je recommande à 100% !"
+          comment: "J'étais un peu sceptique au début par rapport au concept de thérapie cellulaire par sachet, mais après 3 semaines d'utilisation quotidienne du Rocenta, je suis bluffée. Mon teint est visiblement plus éclatant, j'ai moins de rougeurs sur le visage et je me sens beaucoup moins fatiguée en fin de journée. Je recommande à 100% !",
+          created_at: new Date('2026-02-15T14:30:22Z')
         },
         {
           product_id: "rocenta",
           user_id: admin._id,
           name: "Thomas B.",
           rating: 4,
-          comment: "Très bon produit pour la peau et la vitalité. Mes douleurs aux genoux après le sport ont diminué. Le goût de melon est agréable et pas trop sucré. Seul petit bémol, le prix est un peu élevé mais la qualité est clairement là."
+          comment: "Très bon produit pour la peau et la vitalité. Mes douleurs aux genoux après le sport ont diminué. Le goût de melon est agréable et pas trop sucré. Seul petit bémol, le prix est un peu élevé mais la qualité est clairement là.",
+          created_at: new Date('2026-03-10T11:15:45Z')
         },
         {
           product_id: "rocenta",
           user_id: admin._id,
           name: "Sandrine P.",
           rating: 3,
-          comment: "Livraison un peu longue (reçu en 5 jours au lieu de 3), mais le produit lui-même est de très bonne qualité. Je commence à voir des effets sur mon sommeil."
+          comment: "Livraison un peu longue (reçu en 5 jours au lieu de 3), mais le produit lui-même est de très bonne qualité. Je commence à voir des effets sur mon sommeil.",
+          created_at: new Date('2026-04-02T16:45:10Z')
         },
         {
           product_id: "tripleroot",
           user_id: admin._id,
           name: "Jean-Pierre L.",
           rating: 4,
-          comment: "Un excellent café qui donne un vrai coup de fouet sans l'effet d'excitation ou de tremblement du café classique. Je le prends tous les matins avant d'aller travailler. Niveau endurance et concentration, c'est le jour et la nuit. Top !"
+          comment: "Un excellent café qui donne un vrai coup de fouet sans l'effet d'excitation ou de tremblement du café classique. Je le prends tous les matins avant d'aller travailler. Niveau endurance et concentration, c'est le jour et la nuit. Top !",
+          created_at: new Date('2025-11-28T08:20:00Z')
         },
         {
           product_id: "tripleroot",
           user_id: admin._id,
           name: "Nicolas M.",
           rating: 5,
-          comment: "Acheté sur recommandation d'un ami pour lutter contre la fatigue chronique. Non seulement le goût est excellent (très riche), mais l'effet sur l'énergie est durable sur toute la journée. Plus besoin de boire 4 cafés par jour."
+          comment: "Acheté sur recommandation d'un ami pour lutter contre la fatigue chronique. Non seulement le goût est excellent (très riche), mais l'effet sur l'énergie est durable sur toute la journée. Plus besoin de boire 4 cafés par jour.",
+          created_at: new Date('2026-01-15T09:40:15Z')
         },
         {
           product_id: "aceguard",
           user_id: admin._id,
           name: "Catherine P.",
           rating: 5,
-          comment: "Je l'utilise depuis le début de l'hiver pour renforcer mon immunité. Normalement, j'attrape tous les rhumes qui passent, mais cette année, rien du tout ! Je me sens protégée et en pleine forme."
+          comment: "Je l'utilise depuis le début de l'hiver pour renforcer mon immunité. Normalement, j'attrape tous les rhumes qui passent, mais cette année, rien du tout ! Je me sens protégée et en pleine forme.",
+          created_at: new Date('2025-12-18T10:12:30Z')
         },
         {
           product_id: "aceguard",
           user_id: admin._id,
           name: "Sébastien G.",
           rating: 3,
-          comment: "Très bon bouclier antioxydant. Digestion impeccable et haleine fraîche. Par contre, le goût est un peu fort au début, il faut s'y habituer. Je mets 3/5 pour le goût, mais l'efficacité est bien là."
+          comment: "Très bon bouclier antioxydant. Digestion impeccable et haleine fraîche. Par contre, le goût est un peu fort au début, il faut s'y habituer. Je mets 3/5 pour le goût, mais l'efficacité est bien là.",
+          created_at: new Date('2026-02-28T15:24:18Z')
         },
         {
           product_id: "collagene",
           user_id: admin._id,
           name: "Sandrine K.",
           rating: 4,
-          comment: "J'ai testé de nombreuses marques de collagène, mais celle-ci est de loin la plus efficace. Mes ongles ne se dédoublent plus et mes cheveux ont retrouvé du volume. Ma peau semble aussi plus repulpée au réveil."
+          comment: "J'ai testé de nombreuses marques de collagène, mais celle-ci est de loin la plus efficace. Mes ongles ne se dédoublent plus et mes cheveux ont retrouvé du volume. Ma peau semble aussi plus repulpée au réveil.",
+          created_at: new Date('2026-03-22T17:10:05Z')
         },
         {
           product_id: "collagene",
           user_id: admin._id,
           name: "Isabelle V.",
           rating: 5,
-          comment: "Excellent produit. Les rides du front se sont estompées après un mois. Je prends un sachet chaque soir avant de dormir et les résultats sont bien visibles."
+          comment: "Excellent produit. Les rides du front se sont estompées après un mois. Je prends un sachet chaque soir avant de dormir et les résultats sont bien visibles.",
+          created_at: new Date('2026-05-05T21:40:00Z')
         },
         {
           product_id: "toothpaste",
           user_id: admin._id,
           name: "Julien R.",
           rating: 4,
-          comment: "Le concept jour/nuit est génial. Le dentifrice du matin donne une fraîcheur incroyable et nettoie bien les taches de café. Celui du soir est très doux pour les gencives. Mes dents sont visiblement plus blanches."
+          comment: "Le concept jour/nuit est génial. Le dentifrice du matin donne une fraîcheur incroyable et nettoie bien les taches de café. Celui du soir est très doux pour les gencives. Mes dents sont visiblement plus blanches.",
+          created_at: new Date('2026-04-18T08:30:12Z')
         },
         {
           product_id: "toothpaste",
           user_id: admin._id,
           name: "Amandine F.",
           rating: 4,
-          comment: "Bonne efficacité sur la sensibilité des gencives et blanchiment progressif. Le goût du thé blanc le matin est très agréable."
+          comment: "Bonne efficacité sur la sensibilité des gencives et blanchiment progressif. Le goût du thé blanc le matin est très agréable.",
+          created_at: new Date('2026-06-12T13:15:20Z')
         },
         {
           product_id: "lyftmax",
           user_id: admin._id,
           name: "Valérie M.",
           rating: 4,
-          comment: "Ce produit a stabilisé mes variations d'humeur et ma fatigue liée aux cycles hormonaux. Je me sens beaucoup plus équilibrée et sereine au quotidien. Une vraie libération pour moi."
+          comment: "Ce produit a stabilisé mes variations d'humeur et ma fatigue liée aux cycles hormonaux. Je me sens beaucoup plus équilibrée et sereine au quotidien. Une vraie libération pour moi.",
+          created_at: new Date('2026-05-19T10:05:30Z')
         },
         {
           product_id: "lyftmax",
           user_id: admin._id,
           name: "Nathalie D.",
           rating: 5,
-          comment: "Excellent pour le bien-être féminin. Ma peau est plus nette et j'ai retrouvé une belle énergie physique. Je ne peux plus m'en passer."
+          comment: "Excellent pour le bien-être féminin. Ma peau est plus nette et j'ai retrouvé une belle énergie physique. Je ne peux plus m'en passer.",
+          created_at: new Date('2026-06-25T16:50:00Z')
         },
         {
           product_id: "acebrew",
           user_id: admin._id,
           name: "Marc A.",
           rating: 4,
-          comment: "Un café de qualité supérieure avec les bienfaits du NMN. Zéro sucre ajouté, ce qui est parfait pour mon régime. Il donne une clarté d'esprit immédiate."
+          comment: "Un café de qualité supérieure avec les bienfaits du NMN. Zéro sucre ajouté, ce qui est parfait pour mon régime. Il donne une clarté d'esprit immédiate.",
+          created_at: new Date('2026-06-30T09:12:45Z')
         },
         {
           product_id: "urbanism",
           user_id: admin._id,
           name: "Chloé B.",
           rating: 4,
-          comment: "Le programme Jour/Nuit fonctionne à merveille. Le sachet Jour coupe la faim et donne de l'énergie, tandis que le sachet Nuit aide à dégonfler le ventre. J'ai perdu 3 kg en 3 semaines sans sensation de manque."
+          comment: "Le programme Jour/Nuit fonctionne à merveille. Le sachet Jour coupe la faim et donne de l'énergie, tandis que le sachet Nuit aide à dégonfler le ventre. J'ai perdu 3 kg en 3 semaines sans sensation de manque.",
+          created_at: new Date('2026-05-28T14:35:10Z')
         },
         {
           product_id: "urbanism",
           user_id: admin._id,
           name: "Émilie T.",
           rating: 3,
-          comment: "Très bon allié minceur. Il aide vraiment à réguler l'appétit. Par contre, le sachet Nuit me fait boire beaucoup d'eau. 3/5 à cause de ce petit désagrément, mais les kilos s'envolent."
+          comment: "Très bon allié minceur. Il aide vraiment à réguler l'appétit. Par contre, le sachet Nuit me fait boire beaucoup d'eau. 3/5 à cause de ce petit désagrément, mais les kilos s'envolent.",
+          created_at: new Date('2026-06-18T20:15:00Z')
         },
         {
           product_id: "dynafuel",
           user_id: admin._id,
           name: "David P.",
           rating: 4,
-          comment: "Un booster de vitalité extraordinaire. Je ressens une force physique et une endurance décuplées lors de mes séances de sport. Dommage qu'il soit en rupture de stock actuellement, j'attends le réapprovisionnement avec impatience !"
+          comment: "Un booster de vitalité extraordinaire. Je ressens une force physique et une endurance décuplées lors de ses séances de sport. Dommage qu'il soit en rupture de stock actuellement, j'attends le réapprovisionnement avec impatience !",
+          created_at: new Date('2026-07-01T15:20:00Z')
         },
         {
           product_id: "fitmax",
           user_id: admin._id,
           name: "Laurent B.",
           rating: 4,
-          comment: "Le meilleur brûleur de graisses thermogénique que j'ai essayé. Il donne une pêche d'enfer pendant les entraînements et aide à sécher rapidement. Vivement le retour en stock !"
+          comment: "Le meilleur brûleur de graisses thermogénique que j'ai essayé. Il donne une pêche d'enfer pendant les entraînements et aide à sécher rapidement. Vivement le retour en stock !",
+          created_at: new Date('2026-07-04T11:45:00Z')
         }
       ];
       await Review.insertMany(initialReviews);
