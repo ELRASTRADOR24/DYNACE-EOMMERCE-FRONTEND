@@ -47,21 +47,6 @@ export default function Home({ products, loadingProducts, onSelectProduct, onAdd
           <span>Découvrir la gamme</span>
           <ArrowRight size={16} />
         </button>
-
-        <div className="hero-pills">
-          <div className="hero-pill">
-            <ShieldCheck size={14} style={{ color: 'var(--primary-green)' }} />
-            <span>Régénération Cellulaire</span>
-          </div>
-          <div className="hero-pill">
-            <Activity size={14} style={{ color: 'var(--accent-gold)' }} />
-            <span>Énergie & Tonus</span>
-          </div>
-          <div className="hero-pill">
-            <Sparkles size={14} style={{ color: 'var(--primary-green)' }} />
-            <span>Beauté & Éclat</span>
-          </div>
-        </div>
       </section>
 
       <div className="filter-bar">
