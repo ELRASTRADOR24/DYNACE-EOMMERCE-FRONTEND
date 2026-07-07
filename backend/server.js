@@ -1295,11 +1295,46 @@ const verifyAdmin = async (req, res, next) => {
 // GET all orders for admin
 app.get('/api/admin/orders', authenticateToken, verifyAdmin, async (req, res) => {
   try {
-    const orders = await Order.find({}).sort({ created_at: -1 });
+    const showArchived = req.query.showArchived === 'true';
+    const query = showArchived ? {} : { is_archived: { $ne: true } };
+    const orders = await Order.find(query).sort({ created_at: -1 });
     res.json(orders);
   } catch (err) {
     console.error('Erreur lecture commandes admin :', err.message);
     res.status(500).json({ error: 'Erreur lors du chargement de toutes les commandes.' });
+  }
+});
+
+// Batch archive orders
+app.put('/api/admin/orders/batch-archive', authenticateToken, verifyAdmin, async (req, res) => {
+  const { ids } = req.body;
+  if (!ids || !Array.isArray(ids)) {
+    return res.status(400).json({ error: 'Liste d\'identifiants invalide.' });
+  }
+  try {
+    await Order.updateMany(
+      { _id: { $in: ids } },
+      { $set: { is_archived: true } }
+    );
+    res.json({ success: true, message: `${ids.length} commandes masquées avec succès.` });
+  } catch (err) {
+    console.error('Erreur masquage lot commandes :', err.message);
+    res.status(500).json({ error: 'Erreur lors du masquage des commandes.' });
+  }
+});
+
+// Batch delete orders
+app.post('/api/admin/orders/batch-delete', authenticateToken, verifyAdmin, async (req, res) => {
+  const { ids } = req.body;
+  if (!ids || !Array.isArray(ids)) {
+    return res.status(400).json({ error: 'Liste d\'identifiants invalide.' });
+  }
+  try {
+    await Order.deleteMany({ _id: { $in: ids } });
+    res.json({ success: true, message: `${ids.length} commandes supprimées avec succès.` });
+  } catch (err) {
+    console.error('Erreur suppression lot commandes :', err.message);
+    res.status(500).json({ error: 'Erreur lors de la suppression des commandes.' });
   }
 });
 

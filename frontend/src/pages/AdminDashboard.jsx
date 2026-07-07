@@ -41,6 +41,8 @@ export default function AdminDashboard({ onRefreshProducts }) {
   // State for orders
   const [orders, setOrders] = useState([]);
   const [ordersLoading, setOrdersLoading] = useState(false);
+  const [showArchived, setShowArchived] = useState(false);
+  const [selectedOrderIds, setSelectedOrderIds] = useState([]);
   
   // Notification states
   const [errorMsg, setErrorMsg] = useState('');
@@ -75,11 +77,11 @@ export default function AdminDashboard({ onRefreshProducts }) {
   };
 
   // Fetch orders
-  const fetchOrders = async () => {
+  const fetchOrders = async (showArchivedParam = showArchived) => {
     setOrdersLoading(true);
     const token = localStorage.getItem('dynace_jwt');
     try {
-      const res = await fetch('/api/admin/orders', {
+      const res = await fetch(`/api/admin/orders?showArchived=${showArchivedParam}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (res.ok) {
@@ -321,6 +323,78 @@ export default function AdminDashboard({ onRefreshProducts }) {
       }
     } catch (err) {
       showError('Erreur réseau lors de la suppression.');
+    }
+  };
+
+  // Toggle individual order selection
+  const handleToggleOrderSelection = (orderId) => {
+    setSelectedOrderIds(prev => 
+      prev.includes(orderId) ? prev.filter(id => id !== orderId) : [...prev, orderId]
+    );
+  };
+
+  // Toggle select all orders
+  const handleToggleSelectAllOrders = (visibleOrders) => {
+    const visibleIds = visibleOrders.map(o => o._id);
+    const allSelected = visibleIds.every(id => selectedOrderIds.includes(id));
+    if (allSelected) {
+      setSelectedOrderIds(prev => prev.filter(id => !visibleIds.includes(id)));
+    } else {
+      setSelectedOrderIds(prev => [...new Set([...prev, ...visibleIds])]);
+    }
+  };
+
+  // Batch archive selected orders
+  const handleBatchArchiveOrders = async () => {
+    if (selectedOrderIds.length === 0) return;
+    if (!window.confirm(`Voulez-vous vraiment masquer les ${selectedOrderIds.length} commandes sélectionnées ?`)) return;
+    const token = localStorage.getItem('dynace_jwt');
+    try {
+      const res = await fetch('/api/admin/orders/batch-archive', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ ids: selectedOrderIds })
+      });
+      if (res.ok) {
+        showSuccess(`${selectedOrderIds.length} commandes masquées.`);
+        setSelectedOrderIds([]);
+        fetchOrders();
+      } else {
+        const data = await res.json();
+        showError(data.error || 'Erreur lors du masquage par lot.');
+      }
+    } catch (err) {
+      showError('Erreur de connexion.');
+    }
+  };
+
+  // Batch delete selected orders
+  const handleBatchDeleteOrders = async () => {
+    if (selectedOrderIds.length === 0) return;
+    if (!window.confirm(`Voulez-vous vraiment supprimer définitivement les ${selectedOrderIds.length} commandes sélectionnées ? cette action est irréversible.`)) return;
+    const token = localStorage.getItem('dynace_jwt');
+    try {
+      const res = await fetch('/api/admin/orders/batch-delete', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ ids: selectedOrderIds })
+      });
+      if (res.ok) {
+        showSuccess(`${selectedOrderIds.length} commandes supprimées définitivement.`);
+        setSelectedOrderIds([]);
+        fetchOrders();
+      } else {
+        const data = await res.json();
+        showError(data.error || 'Erreur lors de la suppression par lot.');
+      }
+    } catch (err) {
+      showError('Erreur de connexion.');
     }
   };
 
@@ -802,9 +876,121 @@ export default function AdminDashboard({ onRefreshProducts }) {
       {/* ORDERS PANEL */}
       {activeSubTab === 'orders' && (
         <div>
-          <h3 style={{ fontSize: '1.8rem', fontFamily: 'var(--serif)', color: 'var(--primary-green)', marginBottom: '1.5rem', borderBottom: '2px solid var(--primary-gold)', paddingBottom: '0.5rem' }}>
-            📦 Commandes clients ({orders.length})
-          </h3>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem', borderBottom: '2px solid var(--primary-gold)', paddingBottom: '0.5rem' }}>
+            <h3 style={{ fontSize: '1.8rem', fontFamily: 'var(--serif)', color: 'var(--primary-green)', margin: 0 }}>
+              📦 Commandes clients ({orders.length})
+            </h3>
+            
+            <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
+              {/* Show/Hide Archived Toggle */}
+              <button
+                onClick={() => {
+                  const newVal = !showArchived;
+                  setShowArchived(newVal);
+                  fetchOrders(newVal);
+                }}
+                style={{
+                  backgroundColor: showArchived ? 'var(--primary-gold)' : 'var(--bg-secondary)',
+                  color: showArchived ? 'white' : 'var(--text-primary)',
+                  border: '1px solid var(--border-color)',
+                  padding: '0.6rem 1.25rem',
+                  borderRadius: '30px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  transition: 'all 0.2s'
+                }}
+              >
+                <span>📦</span>
+                {showArchived ? 'Masquer les archivées' : 'Afficher les archivées'}
+              </button>
+
+              {orders.length > 0 && (
+                <button
+                  onClick={() => handleToggleSelectAllOrders(orders)}
+                  style={{
+                    backgroundColor: 'var(--bg-secondary)',
+                    color: 'var(--text-primary)',
+                    border: '1px solid var(--border-color)',
+                    padding: '0.6rem 1.25rem',
+                    borderRadius: '30px',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    transition: 'all 0.2s'
+                  }}
+                >
+                  <span>{orders.every(o => selectedOrderIds.includes(o._id)) ? '⬛' : '⬜'}</span>
+                  {orders.every(o => selectedOrderIds.includes(o._id)) ? 'Tout désélectionner' : 'Sélectionner tout'}
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Bulk Action Bar (Only visible when items are selected) */}
+          {selectedOrderIds.length > 0 && (
+            <div style={{ 
+              display: 'flex', 
+              justifyContent: 'space-between', 
+              alignItems: 'center', 
+              backgroundColor: 'rgba(212, 175, 55, 0.08)', 
+              border: '1px solid var(--primary-gold)', 
+              borderRadius: '12px', 
+              padding: '1rem 1.5rem', 
+              marginBottom: '1.5rem',
+              animation: 'fadeIn 0.2s ease',
+              flexWrap: 'wrap',
+              gap: '1rem'
+            }}>
+              <span style={{ fontWeight: '700', color: 'var(--primary-gold)', fontSize: '0.95rem' }}>
+                🔔 {selectedOrderIds.length} commande(s) sélectionnée(s)
+              </span>
+              <div style={{ display: 'flex', gap: '0.75rem' }}>
+                <button
+                  onClick={handleBatchArchiveOrders}
+                  style={{
+                    backgroundColor: 'rgba(253, 185, 19, 0.15)',
+                    border: '1px solid var(--primary-gold)',
+                    color: 'var(--primary-gold)',
+                    padding: '0.5rem 1.25rem',
+                    borderRadius: '8px',
+                    fontSize: '0.85rem',
+                    fontWeight: '700',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.35rem',
+                    transition: 'all 0.2s'
+                  }}
+                >
+                  Masquer la sélection 📦
+                </button>
+                <button
+                  onClick={handleBatchDeleteOrders}
+                  style={{
+                    backgroundColor: 'rgba(219, 68, 85, 0.1)',
+                    border: '1px solid var(--danger)',
+                    color: 'var(--danger)',
+                    padding: '0.5rem 1.25rem',
+                    borderRadius: '8px',
+                    fontSize: '0.85rem',
+                    fontWeight: '700',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.35rem',
+                    transition: 'all 0.2s'
+                  }}
+                >
+                  Supprimer la sélection 🗑️
+                </button>
+              </div>
+            </div>
+          )}
 
           {ordersLoading ? (
             <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-secondary)' }}>
@@ -850,9 +1036,18 @@ export default function AdminDashboard({ onRefreshProducts }) {
                     flexWrap: 'wrap',
                     gap: '0.75rem'
                   }}>
-                    <div>
-                      <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: '700', letterSpacing: '0.5px' }}>Commande n°</span>
-                      <div style={{ fontFamily: 'monospace', fontWeight: 'bold', fontSize: '1.2rem', color: 'var(--primary-green)', marginTop: '0.1rem' }}>{o.order_number}</div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                      <input 
+                        type="checkbox" 
+                        checked={selectedOrderIds.includes(o._id)}
+                        onChange={() => handleToggleOrderSelection(o._id)}
+                        onClick={(e) => e.stopPropagation()}
+                        style={{ width: '1.2rem', height: '1.2rem', cursor: 'pointer', accentColor: 'var(--primary-gold)' }}
+                      />
+                      <div>
+                        <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: '700', letterSpacing: '0.5px' }}>Commande n°</span>
+                        <div style={{ fontFamily: 'monospace', fontWeight: 'bold', fontSize: '1.2rem', color: 'var(--primary-green)', marginTop: '0.1rem' }}>{o.order_number}</div>
+                      </div>
                     </div>
                     <div>
                       <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: '700', letterSpacing: '0.5px' }}>Date</span>

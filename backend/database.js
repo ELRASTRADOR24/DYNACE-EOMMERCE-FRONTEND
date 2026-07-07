@@ -67,6 +67,7 @@ const orderSchema = new mongoose.Schema({
   total: { type: Number, required: true },
   status: { type: String, default: 'Payé' }, // 'Payé', 'En préparation', 'Expédié', 'Livré'
   tracking_number: { type: String, default: '' },
+  is_archived: { type: Boolean, default: false },
   created_at: { type: Date, default: Date.now }
 });
 
