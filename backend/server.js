@@ -1377,6 +1377,26 @@ app.put('/api/admin/users/:id/toggle-test-payment', authenticateToken, verifyAdm
   }
 });
 
+// DELETE user (Admin)
+app.delete('/api/admin/users/:id', authenticateToken, verifyAdmin, async (req, res) => {
+  try {
+    if (req.params.id === req.userId) {
+      return res.status(400).json({ error: 'Vous ne pouvez pas supprimer votre propre compte administrateur.' });
+    }
+
+    const user = await User.findByIdAndDelete(req.params.id);
+    if (!user) {
+      return res.status(404).json({ error: 'Utilisateur non trouvé.' });
+    }
+
+    console.log(`Utilisateur supprimé par l'admin (${req.userId}) : ${user.email}`);
+    res.json({ success: true, message: 'Utilisateur supprimé avec succès.' });
+  } catch (err) {
+    console.error('Erreur suppression utilisateur admin :', err.message);
+    res.status(500).json({ error: 'Erreur lors de la suppression de l\'utilisateur.' });
+  }
+});
+
 // Create product (Admin)
 app.post('/api/admin/products', authenticateToken, verifyAdmin, upload.single('imageFile'), async (req, res) => {
   const { id, name, price, category, image, images, summary, description, benefits, usage, stock } = req.body;

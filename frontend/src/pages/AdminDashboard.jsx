@@ -395,6 +395,30 @@ export default function AdminDashboard({ onRefreshProducts }) {
     } catch (err) {
       showError('Erreur de connexion.');
     }
+  // Delete user account by Admin
+  const handleDeleteUser = async (userId, userEmail) => {
+    if (!window.confirm(`Êtes-vous sûr de vouloir supprimer définitivement l'utilisateur ${userEmail} ? Cette action est irréversible.`)) {
+      return;
+    }
+
+    const token = localStorage.getItem('dynace_jwt');
+    try {
+      const res = await fetch(`/api/admin/users/${userId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      const data = await res.json();
+      if (res.ok) {
+        showSuccess('Utilisateur supprimé avec succès.');
+        fetchUsers();
+      } else {
+        showError(data.error || 'Erreur lors de la suppression de l’utilisateur.');
+      }
+    } catch (err) {
+      showError('Erreur de connexion.');
+    }
   };
 
   const getStatusBadgeStyle = (status) => {
@@ -993,6 +1017,7 @@ export default function AdminDashboard({ onRefreshProducts }) {
                     <th style={{ padding: '1.25rem 1.5rem', color: 'var(--text-secondary)', fontWeight: '700', fontSize: '0.85rem', textTransform: 'uppercase' }}>Adresse E-mail</th>
                     <th style={{ padding: '1.25rem 1.5rem', color: 'var(--text-secondary)', fontWeight: '700', fontSize: '0.85rem', textTransform: 'uppercase' }}>Rôle</th>
                     <th style={{ padding: '1.25rem 1.5rem', color: 'var(--text-secondary)', fontWeight: '700', fontSize: '0.85rem', textTransform: 'uppercase', textAlign: 'center' }}>Mode Test (Bypass Stripe)</th>
+                    <th style={{ padding: '1.25rem 1.5rem', color: 'var(--text-secondary)', fontWeight: '700', fontSize: '0.85rem', textTransform: 'uppercase', textAlign: 'right' }}>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1034,6 +1059,28 @@ export default function AdminDashboard({ onRefreshProducts }) {
                         >
                           {u.allow_test_payment ? 'Autorisé 🧪' : 'Interdit 🔒'}
                         </button>
+                      </td>
+                      <td style={{ padding: '1.25rem 1.5rem', textAlign: 'right' }}>
+                        {!u.is_admin ? (
+                          <button
+                            onClick={() => handleDeleteUser(u._id, u.email)}
+                            style={{
+                              background: 'rgba(219, 68, 85, 0.1)',
+                              border: '1px solid var(--danger)',
+                              color: 'var(--danger)',
+                              padding: '0.4rem 1.25rem',
+                              borderRadius: '8px',
+                              fontSize: '0.8rem',
+                              fontWeight: '600',
+                              cursor: 'pointer',
+                              transition: 'all 0.2s'
+                            }}
+                          >
+                            Supprimer
+                          </button>
+                        ) : (
+                          <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontStyle: 'italic' }}>Protégé 🛡️</span>
+                        )}
                       </td>
                     </tr>
                   ))}
