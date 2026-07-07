@@ -1400,6 +1400,48 @@ app.delete('/api/admin/users/:id', authenticateToken, verifyAdmin, async (req, r
   }
 });
 
+// GET all reviews (Admin)
+app.get('/api/admin/reviews', authenticateToken, verifyAdmin, async (req, res) => {
+  res.setHeader('Cache-Control', 'no-store, max-age=0');
+  try {
+    const reviews = await Review.find({}).sort({ created_at: -1 });
+    res.json(reviews);
+  } catch (err) {
+    console.error('Erreur lecture tous avis admin :', err.message);
+    res.status(500).json({ error: 'Erreur lors de la récupération des avis.' });
+  }
+});
+
+// DELETE review (Admin)
+app.delete('/api/admin/reviews/:id', authenticateToken, verifyAdmin, async (req, res) => {
+  try {
+    const deletedReview = await Review.findByIdAndDelete(req.params.id);
+    if (!deletedReview) {
+      return res.status(404).json({ error: 'Avis non trouvé.' });
+    }
+    res.json({ success: true, message: 'Avis supprimé avec succès.' });
+  } catch (err) {
+    console.error('Erreur suppression avis admin :', err.message);
+    res.status(500).json({ error: 'Erreur lors de la suppression de l\'avis.' });
+  }
+});
+
+// DELETE review video only (Admin)
+app.delete('/api/admin/reviews/:id/video', authenticateToken, verifyAdmin, async (req, res) => {
+  try {
+    const review = await Review.findById(req.params.id);
+    if (!review) {
+      return res.status(404).json({ error: 'Avis non trouvé.' });
+    }
+    review.video_url = null;
+    await review.save();
+    res.json({ success: true, message: 'Vidéo de l\'avis retirée avec succès.', review });
+  } catch (err) {
+    console.error('Erreur suppression vidéo avis admin :', err.message);
+    res.status(500).json({ error: 'Erreur lors de la suppression de la vidéo.' });
+  }
+});
+
 // Create product (Admin)
 app.post('/api/admin/products', authenticateToken, verifyAdmin, upload.single('imageFile'), async (req, res) => {
   const { id, name, price, category, image, images, summary, description, benefits, usage, stock } = req.body;
