@@ -16,7 +16,7 @@ export default function Navbar({
 }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isSearchExpanded, setIsSearchExpanded] = useState(false);
 
   const handleTabClick = (tab) => {
     setCurrentTab(tab);
@@ -63,6 +63,84 @@ export default function Navbar({
             >
               Accueil
             </a>
+          </li>
+          <li>
+            {!isSearchExpanded ? (
+              <button 
+                onClick={() => setIsSearchExpanded(true)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: 'var(--text-secondary)',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  padding: '0.25rem 0.5rem',
+                  transition: 'color 0.2s',
+                  outline: 'none'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.color = 'var(--primary-gold)'}
+                onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-secondary)'}
+                title="Rechercher"
+              >
+                <Search size={18} />
+              </button>
+            ) : (
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.35rem',
+                position: 'relative',
+                width: '180px',
+                animation: 'expandWidth 0.3s ease-out',
+                transition: 'width 0.3s ease'
+              }}>
+                <Search size={15} style={{ color: 'var(--primary-gold)' }} />
+                <input
+                  type="text"
+                  placeholder="Rechercher..."
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    if (currentTab !== 'home') {
+                      handleTabClick('home');
+                    }
+                  }}
+                  style={{
+                    width: '100%',
+                    background: 'none',
+                    border: 'none',
+                    borderBottom: '1.5px solid var(--primary-gold)',
+                    color: 'var(--text-primary)',
+                    fontSize: '0.8rem',
+                    padding: '0.1rem 1.25rem 0.1rem 0.1rem',
+                    outline: 'none',
+                    fontFamily: 'var(--sans)'
+                  }}
+                  autoFocus
+                />
+                <button
+                  onClick={() => {
+                    setSearchQuery('');
+                    setIsSearchExpanded(false);
+                  }}
+                  style={{
+                    position: 'absolute',
+                    right: 0,
+                    background: 'none',
+                    border: 'none',
+                    color: 'var(--text-secondary)',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '0.15rem'
+                  }}
+                >
+                  <X size={12} />
+                </button>
+              </div>
+            )}
           </li>
           <li>
             {currentUser ? (
@@ -190,16 +268,6 @@ export default function Navbar({
           )}
 
           <button
-            className="theme-toggle"
-            onClick={() => setIsSearchOpen(!isSearchOpen)}
-            title="Rechercher"
-            aria-label="Rechercher"
-            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-          >
-            <Search size={20} />
-          </button>
-
-          <button
             className="cart-btn"
             onClick={() => handleTabClick('cart')}
             title="Ouvrir le panier"
@@ -210,71 +278,6 @@ export default function Navbar({
           </button>
         </div>
       </nav>
-
-      {/* Slide-down Search Bar */}
-      {isSearchOpen && (
-        <div style={{
-          position: 'absolute',
-          top: '100%',
-          left: 0,
-          width: '100%',
-          backgroundColor: 'var(--bg-glass)',
-          backdropFilter: 'blur(20px)',
-          borderBottom: '1px solid var(--border-color)',
-          padding: '1rem 4%',
-          boxShadow: '0 8px 30px rgba(0,0,0,0.08)',
-          zIndex: 49,
-          animation: 'slideDown 0.25s ease-out',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center'
-        }}>
-          <div style={{ position: 'relative', width: '100%', maxWidth: '600px', display: 'flex', alignItems: 'center' }}>
-            <Search size={18} style={{ position: 'absolute', left: '1.25rem', color: 'var(--text-secondary)' }} />
-            <input
-              type="text"
-              placeholder="Rechercher un produit, une cure (ex: Rocenta)..."
-              value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                if (currentTab !== 'home') {
-                  handleTabClick('home');
-                }
-              }}
-              style={{
-                width: '100%',
-                padding: '0.8rem 1.5rem 0.8rem 3rem',
-                borderRadius: '50px',
-                border: '1.5px solid var(--border-color)',
-                backgroundColor: 'var(--bg-primary)',
-                color: 'var(--text-primary)',
-                fontSize: '0.95rem',
-                outline: 'none',
-                transition: 'border-color 0.2s',
-                fontFamily: 'var(--sans)'
-              }}
-              className="search-dropdown-input"
-              autoFocus
-            />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery('')}
-                style={{
-                  position: 'absolute',
-                  right: '1.25rem',
-                  background: 'none',
-                  border: 'none',
-                  color: 'var(--text-secondary)',
-                  cursor: 'pointer',
-                  fontSize: '0.95rem'
-                }}
-              >
-                Vider
-              </button>
-            )}
-          </div>
-        </div>
-      )}
 
       {/* Mobile Drawer Navigation */}
       <div className={`mobile-nav-drawer-overlay ${mobileMenuOpen ? 'open' : ''}`} onClick={() => setMobileMenuOpen(false)} />
@@ -289,6 +292,48 @@ export default function Navbar({
 
         <div className="drawer-body">
           <ul className="drawer-links">
+            <li>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                padding: '0.6rem 1rem',
+                borderRadius: '50px',
+                border: '1px solid var(--border-color)',
+                backgroundColor: 'var(--bg-primary)',
+                margin: '0 0.5rem 1rem 0.5rem'
+              }}>
+                <Search size={16} style={{ color: 'var(--text-secondary)' }} />
+                <input
+                  type="text"
+                  placeholder="Rechercher..."
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    if (currentTab !== 'home') {
+                      handleTabClick('home');
+                    }
+                  }}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: 'var(--text-primary)',
+                    fontSize: '0.9rem',
+                    width: '100%',
+                    outline: 'none',
+                    fontFamily: 'var(--sans)'
+                  }}
+                />
+                {searchQuery && (
+                  <button 
+                    onClick={() => setSearchQuery('')}
+                    style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+                  >
+                    <X size={14} />
+                  </button>
+                )}
+              </div>
+            </li>
             <li>
               <button 
                 className={`drawer-link-btn ${currentTab === 'home' ? 'active' : ''}`}

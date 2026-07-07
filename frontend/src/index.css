@@ -3442,3 +3442,14 @@ body {
     opacity: 1;
   }
 }
+
+@keyframes expandWidth {
+  from {
+    width: 30px;
+    opacity: 0;
+  }
+  to {
+    width: 180px;
+    opacity: 1;
+  }
+}
