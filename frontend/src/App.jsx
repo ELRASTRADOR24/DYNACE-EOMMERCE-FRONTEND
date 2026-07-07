@@ -39,6 +39,20 @@ function App() {
   const [loadingProducts, setLoadingProducts] = useState(true);
   const [currentUser, setCurrentUser] = useState(null);
   const [loadingSession, setLoadingSession] = useState(true);
+  const [resetToken, setResetToken] = useState('');
+
+  // Capture password reset token from URL parameters
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const tabParam = params.get('tab');
+    const tokenParam = params.get('token');
+    
+    if (tabParam === 'reset-password' && tokenParam) {
+      setCurrentTab('reset-password');
+      setResetToken(tokenParam);
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, []);
 
   // Cart state with localStorage persistence
   const [cartItems, setCartItems] = useState(() => {
@@ -289,6 +303,41 @@ function App() {
         onLogout={handleLogout}
       />
 
+      {currentUser && (!currentUser.address || !currentUser.phone) && (
+        <div style={{
+          backgroundColor: 'var(--accent-gold)',
+          color: 'var(--bg-primary)',
+          textAlign: 'center',
+          padding: '0.6rem 1rem',
+          fontSize: '0.85rem',
+          fontWeight: '700',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          gap: '0.5rem',
+          letterSpacing: '0.02em',
+          borderBottom: '1px solid var(--border-color)'
+        }}>
+          <span>⚠️ Profil incomplet : veuillez ajouter votre adresse de livraison et numéro de téléphone pour commander plus rapidement.</span>
+          <button 
+            onClick={() => setCurrentTab('profile')} 
+            style={{
+              background: 'var(--bg-primary)',
+              color: 'var(--text-primary)',
+              border: 'none',
+              padding: '0.25rem 0.75rem',
+              fontSize: '0.75rem',
+              fontWeight: '700',
+              cursor: 'pointer',
+              marginLeft: '0.5rem',
+              borderRadius: '3px'
+            }}
+          >
+            Compléter mon profil
+          </button>
+        </div>
+      )}
+
       <main className="main-content">
         {currentTab === 'home' && (
           <Home
@@ -347,6 +396,16 @@ function App() {
           />
         )}
 
+        {currentTab === 'reset-password' && (
+          <ResetPassword
+            token={resetToken}
+            onSuccess={() => {
+              setCurrentTab('home');
+              setIsAuthOpen(true);
+            }}
+          />
+        )}
+
         {currentTab === 'legal' && <Legal />}
         {currentTab === 'terms' && <Terms />}
         {currentTab === 'contact' && <Contact />}
@@ -370,6 +429,108 @@ function App() {
 
       <Footer setCurrentTab={setCurrentTab} />
       <CookieBanner />
+    </div>
+  );
+}
+
+// Sub-component for password reset tab
+function ResetPassword({ token, onSuccess }) {
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setSuccess('');
+
+    if (newPassword !== confirmPassword) {
+      setError('Les mots de passe ne correspondent pas.');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const res = await fetch('/api/auth/reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token, newPassword })
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Erreur de réinitialisation.');
+      }
+
+      setSuccess('Votre mot de passe a été réinitialisé avec succès ! Redirection...');
+      setTimeout(() => {
+        onSuccess();
+      }, 3000);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div style={{ maxWidth: '450px', margin: '80px auto', padding: '2.5rem', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-primary)' }}>
+      <h2 style={{ fontFamily: 'var(--serif)', fontSize: '1.8rem', marginBottom: '1rem', color: 'var(--text-primary)' }}>Définir un nouveau mot de passe</h2>
+      <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>Veuillez choisir votre nouveau mot de passe de connexion.</p>
+
+      {error && (
+        <div style={{ backgroundColor: 'var(--danger-bg)', color: 'var(--danger)', padding: '0.8rem 1rem', borderRadius: '8px', fontSize: '0.9rem', marginBottom: '1.25rem', border: '1px solid rgba(217,48,37,0.2)' }}>
+          {error}
+        </div>
+      )}
+
+      {success && (
+        <div style={{ backgroundColor: 'rgba(16, 185, 129, 0.1)', color: 'var(--success)', padding: '0.8rem 1rem', borderRadius: '8px', fontSize: '0.9rem', marginBottom: '1.25rem', border: '1px solid var(--success)' }}>
+          {success}
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+        <div className="form-group-review">
+          <label className="comment-label">Nouveau mot de passe</label>
+          <input
+            type="password"
+            className="review-textarea"
+            style={{ height: '42px', padding: '0.5rem 1rem' }}
+            required
+            minLength={6}
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            placeholder="••••••••"
+          />
+        </div>
+
+        <div className="form-group-review">
+          <label className="comment-label">Confirmer le mot de passe</label>
+          <input
+            type="password"
+            className="review-textarea"
+            style={{ height: '42px', padding: '0.5rem 1rem' }}
+            required
+            minLength={6}
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            placeholder="••••••••"
+          />
+        </div>
+
+        <button
+          type="submit"
+          className="continue-shopping-btn"
+          style={{ width: '100%', marginTop: '0.5rem' }}
+          disabled={loading}
+        >
+          {loading ? 'Mise à jour...' : 'Mettre à jour le mot de passe'}
+        </button>
+      </form>
     </div>
   );
 }

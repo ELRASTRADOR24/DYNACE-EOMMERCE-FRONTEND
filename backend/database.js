@@ -19,11 +19,13 @@ const userSchema = new mongoose.Schema({
   first_name: { type: String, required: true },
   last_name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
-  address: { type: String, required: true },
-  postal_code: { type: String, required: true },
-  city: { type: String, required: true },
+  password: { type: String }, // Optional for Social login
+  address: { type: String, default: '' }, // Optional initially
+  postal_code: { type: String, default: '' }, // Optional initially
+  city: { type: String, default: '' }, // Optional initially
   phone: { type: String, default: '' },
+  reset_password_token: { type: String },
+  reset_password_expires: { type: Date },
   is_admin: { type: Boolean, default: false },
   allow_test_payment: { type: Boolean, default: false }
 });

@@ -10,6 +10,8 @@ import fs from 'fs';
 import path from 'path';
 import nodemailer from 'nodemailer';
 import dns from 'dns';
+import dotenv from 'dotenv';
+import crypto from 'crypto';
 import { v2 as cloudinary } from 'cloudinary';
 import { CloudinaryStorage } from 'multer-storage-cloudinary';
 import { sendContactEmail, sendOrderNotificationEmail, sendCustomerOrderConfirmationEmail, sendShippingConfirmationEmail, sendEmail } from './utils/email.js';
@@ -324,6 +326,152 @@ app.delete('/api/auth/delete-account', authenticateToken, async (req, res) => {
   } catch (err) {
     console.error("Erreur suppression compte:", err.message);
     res.status(500).json({ error: 'Erreur lors de la suppression de votre compte.' });
+  }
+});
+
+// Forgot Password Request
+app.post('/api/auth/forgot-password', async (req, res) => {
+  const { email } = req.body;
+  if (!email) {
+    return res.status(400).json({ error: 'Veuillez renseigner votre email.' });
+  }
+
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.json({ success: true, message: 'Si cette adresse existe, un email de réinitialisation a été envoyé.' });
+    }
+
+    // Generate random hex token
+    const token = crypto.randomBytes(20).toString('hex');
+    user.reset_password_token = token;
+    user.reset_password_expires = Date.now() + 3600000; // 1 Hour from now
+    await user.save();
+
+    // Send reset email
+    const resetUrl = `https://xn--dynaceglobalesant-top-r5b.com/?tab=reset-password&token=${token}`;
+    const emailHtml = `
+      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 8px;">
+        <h2 style="color: #10b981; text-align: center;">Réinitialisation de votre mot de passe</h2>
+        <p>Bonjour ${user.first_name},</p>
+        <p>Vous avez demandé la réinitialisation du mot de passe de votre compte sur <strong>Dynace Global Santé Top</strong>.</p>
+        <p>Veuillez cliquer sur le bouton ci-dessous pour définir un nouveau mot de passe (ce lien est valable pendant 1 heure) :</p>
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${resetUrl}" style="background-color: #10b981; color: white; padding: 12px 24px; text-decoration: none; font-weight: bold; border-radius: 4px; display: inline-block;">Réinitialiser mon mot de passe</a>
+        </div>
+        <p style="font-size: 0.85rem; color: #666;">Si le bouton ne fonctionne pas, vous pouvez copier et coller le lien suivant dans votre navigateur :</p>
+        <p style="font-size: 0.85rem; color: #10b981; word-break: break-all;">${resetUrl}</p>
+        <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;" />
+        <p style="font-size: 0.8rem; color: #999; text-align: center;">Si vous n'avez pas demandé cette réinitialisation, vous pouvez ignorer cet e-mail en toute sécurité.</p>
+      </div>
+    `;
+
+    await sendEmail({
+      to: user.email,
+      subject: 'Réinitialisation de votre mot de passe - Dynace Global',
+      html: emailHtml
+    });
+
+    res.json({ success: true, message: 'Si cette adresse existe, un email de réinitialisation a été envoyé.' });
+  } catch (err) {
+    console.error("Forgot password error:", err.message);
+    res.status(500).json({ error: 'Erreur lors de la demande de réinitialisation.' });
+  }
+});
+
+// Reset Password
+app.post('/api/auth/reset-password', async (req, res) => {
+  const { token, newPassword } = req.body;
+
+  if (!token || !newPassword) {
+    return res.status(400).json({ error: 'Données manquantes (jeton ou mot de passe).' });
+  }
+
+  if (newPassword.length < 6) {
+    return res.status(400).json({ error: 'Le mot de passe doit faire au moins 6 caractères.' });
+  }
+
+  try {
+    const user = await User.findOne({
+      reset_password_token: token,
+      reset_password_expires: { $gt: Date.now() }
+    });
+
+    if (!user) {
+      return res.status(400).json({ error: 'Le jeton de réinitialisation est invalide ou a expiré.' });
+    }
+
+    // Set new password
+    user.password = await bcrypt.hash(newPassword, 10);
+    user.reset_password_token = undefined;
+    user.reset_password_expires = undefined;
+    await user.save();
+
+    res.json({ success: true, message: 'Votre mot de passe a été réinitialisé avec succès. Vous pouvez maintenant vous connecter.' });
+  } catch (err) {
+    console.error("Reset password error:", err.message);
+    res.status(500).json({ error: 'Erreur lors de la réinitialisation du mot de passe.' });
+  }
+});
+
+// Google Sign-In Verification
+app.post('/api/auth/google', async (req, res) => {
+  const { credential } = req.body;
+  if (!credential) {
+    return res.status(400).json({ error: 'Jeton Google manquant.' });
+  }
+
+  try {
+    const googleVerifyRes = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${credential}`);
+    if (!googleVerifyRes.ok) {
+      return res.status(400).json({ error: 'Le jeton de connexion Google est invalide.' });
+    }
+
+    const payload = await googleVerifyRes.json();
+    
+    if (payload.email_verified !== 'true' && payload.email_verified !== true) {
+      return res.status(400).json({ error: 'Votre adresse e-mail Google n’est pas vérifiée.' });
+    }
+
+    const email = payload.email.toLowerCase();
+    const firstName = payload.given_name || 'Utilisateur';
+    const lastName = payload.family_name || 'Google';
+
+    let user = await User.findOne({ email });
+    if (!user) {
+      user = new User({
+        first_name: firstName,
+        last_name: lastName,
+        email,
+        password: '',
+        address: '',
+        postal_code: '',
+        city: '',
+        phone: ''
+      });
+      await user.save();
+      console.log(`Nouvel utilisateur enregistré via Google : ${email}`);
+    }
+
+    const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: '24h' });
+
+    res.json({
+      token,
+      user: {
+        id: user._id,
+        firstName: user.first_name,
+        lastName: user.last_name,
+        email: user.email,
+        address: user.address || '',
+        postalCode: user.postal_code || '',
+        city: user.city || '',
+        phone: user.phone || '',
+        isAdmin: user.is_admin || false
+      }
+    });
+  } catch (err) {
+    console.error("Google sign-in server error:", err.message);
+    res.status(500).json({ error: 'Erreur interne lors de la connexion Google.' });
   }
 });
 
