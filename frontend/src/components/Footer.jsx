@@ -114,7 +114,10 @@ export default function Footer({ setCurrentTab }) {
 
       <div className="footer-bottom">
         <p>&copy; {new Date().getFullYear()} Dynace Global Distributeur. Tous droits réservés.</p>
-        <p className="medical-disclaimer">
+        <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.5rem', opacity: 0.85 }}>
+          Site créé et développé par <span style={{ color: 'var(--primary-gold)', fontWeight: '600' }}>Johanson nzoda</span>
+        </p>
+        <p className="medical-disclaimer" style={{ marginTop: '1rem' }}>
           Les produits vendus sur ce site sont des compléments alimentaires. Ils ne sont pas destinés à diagnostiquer, traiter, guérir ou prévenir une maladie. Consultez un professionnel de santé en cas de doute.
         </p>
       </div>
