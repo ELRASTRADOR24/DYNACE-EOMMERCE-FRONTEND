@@ -178,33 +178,38 @@ const initialProducts = [
 
 export const seedProducts = async () => {
   try {
-    console.log('Synchronisation du catalogue des produits (MongoDB)...');
-    for (const prod of initialProducts) {
-      const updateData = {
-        name: prod.name,
-        price: prod.price,
-        category: prod.category,
-        image: prod.image,
-        images: prod.images,
-        summary: prod.summary,
-        description: prod.description,
-        benefits: prod.benefits,
-        usage: prod.usage,
-      };
+    const count = await Product.countDocuments();
+    if (count === 0) {
+      console.log('Synchronisation du catalogue des produits (MongoDB)...');
+      for (const prod of initialProducts) {
+        const updateData = {
+          name: prod.name,
+          price: prod.price,
+          category: prod.category,
+          image: prod.image,
+          images: prod.images,
+          summary: prod.summary,
+          description: prod.description,
+          benefits: prod.benefits,
+          usage: prod.usage,
+        };
 
-      if (prod.stock !== undefined) {
-        updateData.stock = prod.stock;
-      } else {
-        updateData.$setOnInsert = { stock: 50 };
+        if (prod.stock !== undefined) {
+          updateData.stock = prod.stock;
+        } else {
+          updateData.$setOnInsert = { stock: 50 };
+        }
+
+        await Product.findByIdAndUpdate(
+          prod.id,
+          updateData,
+          { upsert: true, new: true }
+        );
       }
-
-      await Product.findByIdAndUpdate(
-        prod.id,
-        updateData,
-        { upsert: true, new: true }
-      );
+      console.log('✅ Catalogue Dynace Global synchronisé avec succès.');
+    } else {
+      console.log('Catalogue déjà existant en base de données, pas de ré-initialisation.');
     }
-    console.log('✅ Catalogue Dynace Global synchronisé avec succès.');
 
     // Seeding de l'utilisateur Administrateur par défaut
     const adminEmail = 'admin@dynace.com';
