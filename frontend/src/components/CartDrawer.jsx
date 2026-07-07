@@ -9,8 +9,8 @@ export default function CartDrawer({
   onRemoveItem, 
   onCheckout 
 }) {
-  const [shippingThreshold, setShippingThreshold] = useState(60);
-  const [shippingCostBase, setShippingCostBase] = useState(6.90);
+  const [shippingThreshold, setShippingThreshold] = useState(999999);
+  const [shippingCostBase, setShippingCostBase] = useState(10.50);
 
   useEffect(() => {
     if (isOpen) {
@@ -25,7 +25,7 @@ export default function CartDrawer({
   }, [isOpen]);
 
   const subtotal = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
-  const shippingCost = subtotal >= shippingThreshold || subtotal === 0 ? 0 : shippingCostBase;
+  const shippingCost = subtotal === 0 ? 0 : shippingCostBase;
   const grandTotal = subtotal + shippingCost;
 
   return (
@@ -104,11 +104,7 @@ export default function CartDrawer({
                   <span>{shippingCost.toFixed(2)} €</span>
                 )}
               </div>
-              {shippingCost > 0 && (
-                <div className="form-hint" style={{ textAlign: 'right', marginTop: '-0.25rem' }}>
-                  Livraison gratuite à partir de {shippingThreshold} € (plus {(shippingThreshold - subtotal).toFixed(2)} € restants)
-                </div>
-              )}
+
               <div className="totals-row grand-total">
                 <span>Total</span>
                 <span>{grandTotal.toFixed(2)} €</span>

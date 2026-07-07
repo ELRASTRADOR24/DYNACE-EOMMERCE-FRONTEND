@@ -2,30 +2,37 @@ import React, { useState, useEffect } from 'react';
 import { CreditCard, Truck, User, Check, ArrowRight, Lock, Loader } from 'lucide-react';
 
 const COUNTRY_CONFIGS = {
-  FR: { name: 'France (Métropolitaine)', shippingCost: 6.90, freeThreshold: 60, status: 'allowed' },
-  BE: { name: 'Belgique', shippingCost: 12.90, freeThreshold: 120, status: 'allowed' },
-  CH: { name: 'Suisse', shippingCost: 12.90, freeThreshold: 120, status: 'allowed' },
-  LU: { name: 'Luxembourg', shippingCost: 12.90, freeThreshold: 120, status: 'allowed' },
-  DE: { name: 'Allemagne', shippingCost: 12.90, freeThreshold: 120, status: 'allowed' },
-  ES: { name: 'Espagne', shippingCost: 12.90, freeThreshold: 120, status: 'allowed' },
-  IT: { name: 'Italie', shippingCost: 12.90, freeThreshold: 120, status: 'allowed' },
-  PT: { name: 'Portugal', shippingCost: 12.90, freeThreshold: 120, status: 'allowed' },
-  NL: { name: 'Pays-Bas', shippingCost: 12.90, freeThreshold: 120, status: 'allowed' },
+  FR: { name: 'France (Métropolitaine)', shippingCost: 10.50, status: 'allowed' },
+  BE: { name: 'Belgique', shippingCost: 19.00, status: 'allowed' },
+  CH: { name: 'Suisse', shippingCost: 19.00, status: 'allowed' },
+  LU: { name: 'Luxembourg', shippingCost: 19.00, status: 'allowed' },
+  DE: { name: 'Allemagne', shippingCost: 19.00, status: 'allowed' },
+  ES: { name: 'Espagne', shippingCost: 19.00, status: 'allowed' },
+  IT: { name: 'Italie', shippingCost: 19.00, status: 'allowed' },
+  PT: { name: 'Portugal', shippingCost: 19.00, status: 'allowed' },
+  NL: { name: 'Pays-Bas', shippingCost: 19.00, status: 'allowed' },
   
-  SN: { name: 'Sénégal', shippingCost: 24.90, freeThreshold: 200, status: 'allowed' },
-  CI: { name: 'Côte d’Ivoire', shippingCost: 24.90, freeThreshold: 200, status: 'allowed' },
-  CM: { name: 'Cameroun', shippingCost: 24.90, freeThreshold: 200, status: 'allowed' },
-  GA: { name: 'Gabon', shippingCost: 24.90, freeThreshold: 200, status: 'allowed' },
-  CG: { name: 'Congo', shippingCost: 24.90, freeThreshold: 200, status: 'allowed' },
-  BJ: { name: 'Bénin', shippingCost: 24.90, freeThreshold: 200, status: 'allowed' },
-  TG: { name: 'Togo', shippingCost: 24.90, freeThreshold: 200, status: 'allowed' },
-  ML: { name: 'Mali', shippingCost: 24.90, freeThreshold: 200, status: 'allowed' },
-  GN: { name: 'Guinée', shippingCost: 24.90, freeThreshold: 200, status: 'allowed' },
+  SN: { name: 'Sénégal', shippingCost: 35.00, status: 'allowed' },
+  CI: { name: 'Côte d’Ivoire', shippingCost: 35.00, status: 'allowed' },
+  CM: { name: 'Cameroun', shippingCost: 35.00, status: 'allowed' },
+  GA: { name: 'Gabon', shippingCost: 35.00, status: 'allowed' },
+  CG: { name: 'Congo', shippingCost: 35.00, status: 'allowed' },
+  BJ: { name: 'Bénin', shippingCost: 35.00, status: 'allowed' },
+  TG: { name: 'Togo', shippingCost: 35.00, status: 'allowed' },
+  ML: { name: 'Mali', shippingCost: 35.00, status: 'allowed' },
+  GN: { name: 'Guinée', shippingCost: 35.00, status: 'allowed' },
   
-  US: { name: 'États-Unis', status: 'blocked', reason: 'Les réglementations douanières et sanitaires américaines (FDA) bloquent actuellement l’importation de compléments alimentaires Dynace par des particuliers.' },
-  CA: { name: 'Canada', status: 'blocked', reason: 'Les douanes canadiennes bloquent actuellement les livraisons de compléments alimentaires Dynace Global.' },
+  US: { name: 'États-Unis', status: 'blocked', reason: 'Les réglementations douanières et sanitaires américaines (FDA) bloquent actuellement l’importation de compléments alimentaires par des particuliers.' },
+  CA: { name: 'Canada', status: 'blocked', reason: 'Les douanes canadiennes bloquent actuellement l’importation de compléments alimentaires.' },
+  RU: { name: 'Russie', status: 'blocked', reason: 'Le service postal Colissimo/La Poste vers la Russie est actuellement suspendu.' },
+  BY: { name: 'Biélorussie', status: 'blocked', reason: 'Le service postal Colissimo/La Poste vers la Biélorussie est actuellement suspendu.' },
+  UA: { name: 'Ukraine', status: 'blocked', reason: 'Les services postaux vers l’Ukraine sont actuellement suspendus.' },
+  SY: { name: 'Syrie', status: 'blocked', reason: 'Les services d’expédition postale vers la Syrie sont suspendus.' },
+  YE: { name: 'Yémen', status: 'blocked', reason: 'Les services d’expédition postale vers le Yémen sont suspendus.' },
+  KP: { name: 'Corée du Nord', status: 'blocked', reason: 'Les services d’expédition postale vers la Corée du Nord sont suspendus.' },
+  SO: { name: 'Somalie', status: 'blocked', reason: 'Les services d’expédition postale vers la Somalie sont suspendus.' },
   
-  WORLD: { name: 'Reste du monde', shippingCost: 24.90, freeThreshold: 200, status: 'allowed' }
+  WORLD: { name: 'Reste du monde', shippingCost: 35.00, status: 'allowed' }
 };
 
 export default function Checkout({ cartItems, onClearCart, onBackToShopping, currentUser, onLogin }) {
@@ -61,8 +68,8 @@ export default function Checkout({ cartItems, onClearCart, onBackToShopping, cur
   const [regPostalCode, setRegPostalCode] = useState('');
   const [regCity, setRegCity] = useState('');
 
-  const [shippingThreshold, setShippingThreshold] = useState(60);
-  const [shippingCostBase, setShippingCostBase] = useState(6.90);
+  const [shippingThreshold, setShippingThreshold] = useState(999999);
+  const [shippingCostBase, setShippingCostBase] = useState(10.50);
   const [useTestPayment, setUseTestPayment] = useState(false);
 
   useEffect(() => {
@@ -83,16 +90,14 @@ export default function Checkout({ cartItems, onClearCart, onBackToShopping, cur
       return { cost: 0, threshold: 0, isBlocked: true, reason: config.reason };
     }
     
-    let threshold = config.freeThreshold;
     let cost = config.shippingCost;
     
     if (selectedCountryCode === 'FR') {
-      threshold = shippingThreshold;
       cost = shippingCostBase;
     }
     
-    const costFinal = currentSubtotal >= threshold || currentSubtotal === 0 ? 0 : cost;
-    return { cost: costFinal, threshold, isBlocked: false };
+    const costFinal = currentSubtotal === 0 ? 0 : cost;
+    return { cost: costFinal, threshold: Infinity, isBlocked: false };
   };
 
   const shippingDetails = getShippingDetails(country, subtotal);

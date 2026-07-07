@@ -1344,9 +1344,9 @@ app.get('/api/settings/shipping', async (req, res) => {
   try {
     const setting = await Setting.findOne({ key: 'shipping' });
     if (setting && setting.value) {
-      res.json(setting.value);
+      res.json({ threshold: 999999, cost: setting.value.cost || 10.50 });
     } else {
-      res.json({ threshold: 60, cost: 6.90 }); // Default values
+      res.json({ threshold: 999999, cost: 10.50 }); // Default values
     }
   } catch (err) {
     console.error('Erreur lecture paramètres de livraison:', err.message);

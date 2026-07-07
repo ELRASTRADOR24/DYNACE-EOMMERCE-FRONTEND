@@ -927,33 +927,20 @@ export default function AdminDashboard({ onRefreshProducts }) {
               </div>
 
               <div>
-                <label style={{ display: 'block', marginBottom: '0.75rem', fontWeight: '700', color: 'var(--text-primary)', fontSize: '1.1rem' }}>
-                  Seuil de livraison gratuite (€)
+                <label style={{ display: 'block', marginBottom: '0.75rem', fontWeight: '700', color: 'var(--text-secondary)', fontSize: '1.1rem', opacity: 0.6 }}>
+                  Seuil de livraison gratuite (Désactivé)
                 </label>
-                <input 
-                  type="number" 
-                  step="0.01"
-                  min="0"
-                  value={shippingThreshold}
-                  onChange={(e) => setShippingThreshold(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '1rem 1.25rem',
-                    borderRadius: '12px',
-                    border: '2px solid var(--border-color)',
-                    background: 'var(--bg-primary)',
-                    fontSize: '1.1rem',
-                    color: 'var(--text-primary)',
-                    fontWeight: '600',
-                    outline: 'none',
-                    transition: 'all 0.3s ease',
-                    boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)'
-                  }}
-                  required
-                />
-                <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginTop: '0.5rem', fontStyle: 'italic' }}>
-                  Le montant minimum d'achat pour lequel la livraison devient gratuite (ex : 60.00 €).
-                </p>
+                <div style={{
+                  padding: '1rem 1.25rem',
+                  borderRadius: '12px',
+                  border: '1px dashed var(--border-color)',
+                  background: 'rgba(239, 68, 68, 0.05)',
+                  color: '#ef4444',
+                  fontSize: '0.95rem',
+                  fontWeight: '600'
+                }}>
+                  La livraison gratuite est actuellement suspendue par ordre administratif. Les frais de port Colissimo s'appliquent systématiquement.
+                </div>
               </div>
 
               <button 
