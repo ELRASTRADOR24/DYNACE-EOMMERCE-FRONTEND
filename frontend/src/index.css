@@ -355,6 +355,8 @@ body {
   scrollbar-width: none;
   padding-bottom: 0.5rem;
   margin-bottom: -0.5rem;
+  width: 100%;
+  max-width: 100%;
 }
 .categories-container::-webkit-scrollbar {
   display: none;
@@ -1803,6 +1805,9 @@ body {
     align-items: stretch;
     gap: 1.25rem;
     margin-bottom: 3rem;
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
   }
 
   .search-container {
@@ -1813,6 +1818,9 @@ body {
     justify-content: flex-start;
     padding-left: 1rem;
     padding-right: 1rem;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
   }
 
   .product-grid {
