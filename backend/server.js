@@ -416,26 +416,36 @@ app.post('/api/auth/reset-password', async (req, res) => {
 
 // Google Sign-In Verification
 app.post('/api/auth/google', async (req, res) => {
-  const { credential } = req.body;
-  if (!credential) {
+  const { credential, accessToken } = req.body;
+  if (!credential && !accessToken) {
     return res.status(400).json({ error: 'Jeton Google manquant.' });
   }
 
   try {
-    const googleVerifyRes = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${credential}`);
-    if (!googleVerifyRes.ok) {
-      return res.status(400).json({ error: 'Le jeton de connexion Google est invalide.' });
+    let payload;
+    if (credential) {
+      const googleVerifyRes = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${credential}`);
+      if (!googleVerifyRes.ok) {
+        return res.status(400).json({ error: 'Le jeton de connexion Google est invalide.' });
+      }
+      payload = await googleVerifyRes.json();
+    } else {
+      const googleUserinfoRes = await fetch(`https://www.googleapis.com/oauth2/v3/userinfo?access_token=${accessToken}`);
+      if (!googleUserinfoRes.ok) {
+        return res.status(400).json({ error: 'Le jeton d’accès Google est invalide.' });
+      }
+      payload = await googleUserinfoRes.json();
     }
-
-    const payload = await googleVerifyRes.json();
     
-    if (payload.email_verified !== 'true' && payload.email_verified !== true) {
+    // Normalise fields between tokeninfo and userinfo
+    const emailVerified = payload.email_verified === 'true' || payload.email_verified === true || payload.verified_email === true;
+    if (!emailVerified) {
       return res.status(400).json({ error: 'Votre adresse e-mail Google n’est pas vérifiée.' });
     }
 
     const email = payload.email.toLowerCase();
-    const firstName = payload.given_name || 'Utilisateur';
-    const lastName = payload.family_name || 'Google';
+    const firstName = payload.given_name || payload.first_name || 'Utilisateur';
+    const lastName = payload.family_name || payload.last_name || 'Google';
 
     let user = await User.findOne({ email });
     if (!user) {
