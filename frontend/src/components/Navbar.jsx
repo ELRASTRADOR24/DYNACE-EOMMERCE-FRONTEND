@@ -62,11 +62,29 @@ export default function Navbar({
             </a>
           </li>
           <li>
+            {currentUser ? (
+              <a
+                className={currentTab === 'orders' ? 'active' : ''}
+                onClick={() => handleTabClick('orders')}
+              >
+                Mes Commandes
+              </a>
+            ) : (
+              <a
+                className={currentTab === 'track' ? 'active' : ''}
+                onClick={() => handleTabClick('track')}
+              >
+                Suivi de Commande
+              </a>
+            )}
+          </li>
+          <li>
             <a
-              className={currentTab === 'about' ? 'active' : ''}
-              onClick={() => handleTabClick('about')}
+              className={currentTab === 'diagnostic' ? 'active' : ''}
+              onClick={() => handleTabClick('diagnostic')}
+              style={{ color: 'var(--primary-gold)', fontWeight: 'bold' }}
             >
-              À propos
+              Diagnostic Cure
             </a>
           </li>
           <li>
@@ -79,23 +97,12 @@ export default function Navbar({
           </li>
           <li>
             <a
-              className={currentTab === 'diagnostic' ? 'active' : ''}
-              onClick={() => handleTabClick('diagnostic')}
-              style={{ color: 'var(--primary-gold)', fontWeight: 'bold' }}
+              className={currentTab === 'about' ? 'active' : ''}
+              onClick={() => handleTabClick('about')}
             >
-              Diagnostic Cure
+              À propos
             </a>
           </li>
-          {currentUser && (
-            <li>
-              <a
-                className={currentTab === 'orders' ? 'active' : ''}
-                onClick={() => handleTabClick('orders')}
-              >
-                Mes Commandes
-              </a>
-            </li>
-          )}
           {currentUser?.isAdmin && (
             <li>
               <a
@@ -181,7 +188,7 @@ export default function Navbar({
 
           <button
             className="cart-btn"
-            onClick={() => setIsCartOpen(true)}
+            onClick={() => handleTabClick('cart')}
             title="Ouvrir le panier"
             aria-label="Ouvrir le panier"
           >
@@ -213,11 +220,29 @@ export default function Navbar({
               </button>
             </li>
             <li>
+              {currentUser ? (
+                <button 
+                  className={`drawer-link-btn ${currentTab === 'orders' ? 'active' : ''}`}
+                  onClick={() => handleTabClick('orders')}
+                >
+                  Mes Commandes
+                </button>
+              ) : (
+                <button 
+                  className={`drawer-link-btn ${currentTab === 'track' ? 'active' : ''}`}
+                  onClick={() => handleTabClick('track')}
+                >
+                  Suivi de Commande
+                </button>
+              )}
+            </li>
+            <li>
               <button 
-                className={`drawer-link-btn ${currentTab === 'about' ? 'active' : ''}`}
-                onClick={() => handleTabClick('about')}
+                className={`drawer-link-btn ${currentTab === 'diagnostic' ? 'active' : ''}`}
+                onClick={() => handleTabClick('diagnostic')}
+                style={{ color: 'var(--primary-gold)', fontWeight: 'bold' }}
               >
-                À propos
+                Diagnostic Cure
               </button>
             </li>
             <li>
@@ -230,32 +255,21 @@ export default function Navbar({
             </li>
             <li>
               <button 
-                className={`drawer-link-btn ${currentTab === 'diagnostic' ? 'active' : ''}`}
-                onClick={() => handleTabClick('diagnostic')}
-                style={{ color: 'var(--primary-gold)', fontWeight: 'bold' }}
+                className={`drawer-link-btn ${currentTab === 'about' ? 'active' : ''}`}
+                onClick={() => handleTabClick('about')}
               >
-                Diagnostic Cure
+                À propos
               </button>
             </li>
             {currentUser && (
-              <>
-                <li>
-                  <button 
-                    className={`drawer-link-btn ${currentTab === 'profile' ? 'active' : ''}`}
-                    onClick={() => handleTabClick('profile')}
-                  >
-                    Mon Compte
-                  </button>
-                </li>
-                <li>
-                  <button 
-                    className={`drawer-link-btn ${currentTab === 'orders' ? 'active' : ''}`}
-                    onClick={() => handleTabClick('orders')}
-                  >
-                    Mes Commandes
-                  </button>
-                </li>
-              </>
+              <li>
+                <button 
+                  className={`drawer-link-btn ${currentTab === 'profile' ? 'active' : ''}`}
+                  onClick={() => handleTabClick('profile')}
+                >
+                  Mon Compte
+                </button>
+              </li>
             )}
             {currentUser?.isAdmin && (
               <li>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Minus, Plus, Trash2, ArrowRight } from 'lucide-react';
+import { ShoppingBag, X, Minus, Plus, Trash2, ArrowRight } from 'lucide-react';
 
 export default function CartDrawer({ 
   isOpen, 
@@ -7,7 +7,8 @@ export default function CartDrawer({
   cartItems, 
   onUpdateQty, 
   onRemoveItem, 
-  onCheckout 
+  onCheckout,
+  onViewCart 
 }) {
   const [shippingThreshold, setShippingThreshold] = useState(999999);
   const [shippingCostBase, setShippingCostBase] = useState(10.50);
@@ -110,15 +111,42 @@ export default function CartDrawer({
                 <span>{grandTotal.toFixed(2)} €</span>
               </div>
             </div>
-            <button 
-              className="checkout-btn" 
-              onClick={() => {
-                onClose();
-                onCheckout();
-              }}
-            >
-              Commander <ArrowRight size={18} />
-            </button>
+            <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.25rem' }}>
+              <button 
+                className="checkout-btn" 
+                style={{ 
+                  backgroundColor: 'transparent', 
+                  border: '1.5px solid var(--primary-gold)', 
+                  color: 'var(--primary-gold)',
+                  boxShadow: 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.5rem',
+                  padding: '0.8rem',
+                  borderRadius: '30px',
+                  fontWeight: '700',
+                  cursor: 'pointer',
+                  flex: 1
+                }}
+                onClick={() => {
+                  onClose();
+                  onViewCart();
+                }}
+              >
+                Panier
+              </button>
+              <button 
+                className="checkout-btn" 
+                onClick={() => {
+                  onClose();
+                  onCheckout();
+                }}
+                style={{ flex: 1, padding: '0.8rem', borderRadius: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
+              >
+                Commander <ArrowRight size={18} />
+              </button>
+            </div>
           </div>
         )}
       </div>

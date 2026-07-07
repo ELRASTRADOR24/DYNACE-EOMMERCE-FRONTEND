@@ -16,6 +16,7 @@ import Checkout from './pages/Checkout';
 import Orders from './pages/Orders';
 import Contact from './pages/Contact';
 import OrderTracking from './pages/OrderTracking';
+import Cart from './pages/Cart';
 import Footer from './components/Footer';
 
 function App() {
@@ -146,6 +147,11 @@ function App() {
     document.documentElement.setAttribute('data-theme', theme);
     localStorage.setItem('dynace_theme', theme);
   }, [theme]);
+
+  // Auto-scroll to top when active tab changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, [currentTab]);
 
   // Dynamic SEO title & description
   useEffect(() => {
@@ -417,6 +423,14 @@ function App() {
         {currentTab === 'contact' && <Contact />}
         {currentTab === 'track' && <OrderTracking />}
         {currentTab === 'diagnostic' && <Diagnostic onAddToCart={handleAddToCart} onNavigate={setCurrentTab} />}
+        {currentTab === 'cart' && (
+          <Cart
+            cartItems={cartItems}
+            onUpdateQty={handleUpdateQty}
+            onRemoveItem={handleRemoveItem}
+            onNavigate={setCurrentTab}
+          />
+        )}
       </main>
 
       <CartDrawer
@@ -426,6 +440,7 @@ function App() {
         onUpdateQty={handleUpdateQty}
         onRemoveItem={handleRemoveItem}
         onCheckout={() => setCurrentTab('checkout')}
+        onViewCart={() => setCurrentTab('cart')}
       />
 
       <AuthModal
