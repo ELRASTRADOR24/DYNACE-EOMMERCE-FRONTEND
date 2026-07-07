@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import ProductCard from '../components/ProductCard';
 import { Search, Plus, ArrowRight, ShieldCheck, Activity, Sparkles } from 'lucide-react';
 
-export default function Home({ products, loadingProducts, onSelectProduct, onAddToCart }) {
+        export default function Home({ products, loadingProducts, onSelectProduct, onAddToCart, onNavigate }) {
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
 
@@ -43,10 +43,25 @@ export default function Home({ products, loadingProducts, onSelectProduct, onAdd
           Des formules cliniquement étayées à base de cellules souches végétales pour régénérer votre organisme, renforcer vos défenses et révéler votre éclat.
         </p>
         
-        <button className="hero-cta-btn" onClick={handleExploreClick}>
-          <span>Découvrir la gamme</span>
-          <ArrowRight size={16} />
-        </button>
+        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap', marginTop: '1.5rem' }}>
+          <button className="hero-cta-btn" onClick={handleExploreClick} style={{ margin: 0 }}>
+            <span>Découvrir la gamme</span>
+            <ArrowRight size={16} />
+          </button>
+          <button 
+            className="hero-cta-btn" 
+            onClick={() => onNavigate('diagnostic')}
+            style={{ 
+              margin: 0,
+              backgroundColor: 'rgba(255, 255, 255, 0.03)', 
+              border: '1.5px solid var(--primary-gold)', 
+              color: 'var(--primary-gold)',
+              boxShadow: 'none'
+            }}
+          >
+            <span>Trouver ma cure 🧪</span>
+          </button>
+        </div>
       </section>
 
       <div className="filter-bar">

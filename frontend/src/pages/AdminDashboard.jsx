@@ -395,6 +395,8 @@ export default function AdminDashboard({ onRefreshProducts }) {
     } catch (err) {
       showError('Erreur de connexion.');
     }
+  };
+
   // Delete user account by Admin
   const handleDeleteUser = async (userId, userEmail) => {
     if (!window.confirm(`Êtes-vous sûr de vouloir supprimer définitivement l'utilisateur ${userEmail} ? Cette action est irréversible.`)) {

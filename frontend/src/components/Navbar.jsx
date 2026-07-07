@@ -77,6 +77,15 @@ export default function Navbar({
               Avis Clients
             </a>
           </li>
+          <li>
+            <a
+              className={currentTab === 'diagnostic' ? 'active' : ''}
+              onClick={() => handleTabClick('diagnostic')}
+              style={{ color: 'var(--primary-gold)', fontWeight: 'bold' }}
+            >
+              Diagnostic Cure 🧪
+            </a>
+          </li>
           {currentUser && (
             <li>
               <a
@@ -217,6 +226,15 @@ export default function Navbar({
                 onClick={() => handleTabClick('reviews')}
               >
                 Avis Clients
+              </button>
+            </li>
+            <li>
+              <button 
+                className={`drawer-link-btn ${currentTab === 'diagnostic' ? 'active' : ''}`}
+                onClick={() => handleTabClick('diagnostic')}
+                style={{ color: 'var(--primary-gold)', fontWeight: 'bold' }}
+              >
+                Diagnostic Cure 🧪
               </button>
             </li>
             {currentUser && (

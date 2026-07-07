@@ -15,6 +15,7 @@ import crypto from 'crypto';
 import { v2 as cloudinary } from 'cloudinary';
 import { CloudinaryStorage } from 'multer-storage-cloudinary';
 import { sendContactEmail, sendOrderNotificationEmail, sendCustomerOrderConfirmationEmail, sendShippingConfirmationEmail, sendEmail } from './utils/email.js';
+import { sendAdminOrderSMS } from './utils/sms.js';
 
 // Charge les variables d'environnement depuis le fichier .env
 try {
@@ -1180,6 +1181,7 @@ app.post('/api/payment/create-test-order', authenticateToken, async (req, res) =
     }).catch(err => console.error("Admin order notification email error:", err.message));
 
     sendCustomerOrderConfirmationEmail(newOrder).catch(err => console.error("Customer order confirmation email error:", err.message));
+    sendAdminOrderSMS(newOrder).catch(err => console.error("Admin order SMS notification error:", err.message));
 
     res.status(201).json({ success: true, orderNumber });
   } catch (err) {
@@ -1267,6 +1269,7 @@ app.post('/api/payment/confirm-order', async (req, res) => {
 
     // Envoi de l'e-mail de confirmation au client
     sendCustomerOrderConfirmationEmail(newOrder).catch(err => console.error("Customer order confirmation email error:", err.message));
+    sendAdminOrderSMS(newOrder).catch(err => console.error("Admin order SMS notification error:", err.message));
 
     res.status(201).json({ success: true, orderNumber });
   } catch (err) {

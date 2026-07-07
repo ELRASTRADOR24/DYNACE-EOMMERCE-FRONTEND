@@ -10,12 +10,13 @@ import AdminDashboard from './pages/AdminDashboard';
 import Terms from './pages/Terms';
 import Legal from './pages/Legal';
 import CookieBanner from './components/CookieBanner';
+import Profile from './pages/Profile';
+import Diagnostic from './pages/Diagnostic';
 import Checkout from './pages/Checkout';
 import Orders from './pages/Orders';
 import Contact from './pages/Contact';
-import Footer from './components/Footer';
 import OrderTracking from './pages/OrderTracking';
-import Profile from './pages/Profile';
+import Footer from './components/Footer';
 
 function App() {
   const [currentTab, setCurrentTab] = useState(() => {
@@ -193,6 +194,10 @@ function App() {
         title = "Administration | Dynace Global";
         description = "Tableau de bord administrateur de la boutique Dynace Global.";
         break;
+      case 'diagnostic':
+        title = "Diagnostic Santé | Trouvez votre cure Dynace personnalisée";
+        description = "Faites notre test de diagnostic santé interactif de 2 minutes pour découvrir les produits Dynace adaptés à vos objectifs et besoins cellulaires.";
+        break;
       default:
         break;
     }
@@ -348,6 +353,7 @@ function App() {
               setCurrentTab('detail');
             }}
             onAddToCart={handleAddToCart}
+            onNavigate={setCurrentTab}
           />
         )}
 
@@ -410,6 +416,7 @@ function App() {
         {currentTab === 'terms' && <Terms />}
         {currentTab === 'contact' && <Contact />}
         {currentTab === 'track' && <OrderTracking />}
+        {currentTab === 'diagnostic' && <Diagnostic onAddToCart={handleAddToCart} onNavigate={setCurrentTab} />}
       </main>
 
       <CartDrawer
