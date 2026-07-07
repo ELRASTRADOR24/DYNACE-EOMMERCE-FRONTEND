@@ -59,7 +59,7 @@ import { Search, Plus, ArrowRight, ShieldCheck, Activity, Sparkles } from 'lucid
               boxShadow: 'none'
             }}
           >
-            <span>Trouver ma cure 🧪</span>
+            <span>Trouver ma cure</span>
           </button>
         </div>
       </section>

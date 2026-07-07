@@ -1059,7 +1059,7 @@ export default function AdminDashboard({ onRefreshProducts }) {
                             color: u.allow_test_payment ? 'var(--success)' : 'var(--text-secondary)'
                           }}
                         >
-                          {u.allow_test_payment ? 'Autorisé 🧪' : 'Interdit 🔒'}
+                          {u.allow_test_payment ? 'Autorisé' : 'Interdit'}
                         </button>
                       </td>
                       <td style={{ padding: '1.25rem 1.5rem', textAlign: 'right' }}>

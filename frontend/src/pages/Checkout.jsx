@@ -951,7 +951,7 @@ export default function Checkout({ cartItems, onClearCart, onBackToShopping, cur
                   style={{ width: '1.25rem', height: '1.25rem', cursor: 'pointer', accentColor: 'var(--primary-gold)' }}
                 />
                 <label htmlFor="useTestPayment" style={{ fontWeight: '700', fontSize: '0.95rem', color: 'var(--text-primary)', cursor: 'pointer', flex: 1 }}>
-                  🧪 Activer le Paiement de Test (Bypass Stripe)
+                  Activer le Paiement de Test (Bypass Stripe)
                 </label>
               </div>
             </div>

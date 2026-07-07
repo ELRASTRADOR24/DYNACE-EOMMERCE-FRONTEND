@@ -83,7 +83,7 @@ export default function Navbar({
               onClick={() => handleTabClick('diagnostic')}
               style={{ color: 'var(--primary-gold)', fontWeight: 'bold' }}
             >
-              Diagnostic Cure 🧪
+              Diagnostic Cure
             </a>
           </li>
           {currentUser && (
@@ -234,7 +234,7 @@ export default function Navbar({
                 onClick={() => handleTabClick('diagnostic')}
                 style={{ color: 'var(--primary-gold)', fontWeight: 'bold' }}
               >
-                Diagnostic Cure 🧪
+                Diagnostic Cure
               </button>
             </li>
             {currentUser && (
