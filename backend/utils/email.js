@@ -408,7 +408,7 @@ export const sendCustomerOrderConfirmationEmail = async (order) => {
           </div>
           
           <div class="cta-container">
-            <a href="${frontendUrl}/track?order=${order.order_number}&email=${encodeURIComponent(order.email)}" class="cta-button">
+            <a href="${frontendUrl}/track?order=${order.order_number}" class="cta-button">
               Suivre ma commande en temps réel
             </a>
           </div>
@@ -478,7 +478,7 @@ export const sendShippingConfirmationEmail = async (order, trackingNumber) => {
           </div>
           <div style="font-size: 14px; color: #64748b; line-height: 1.5;">
             Vous pouvez également suivre l'avancée de votre préparation et la livraison directement sur notre boutique en cliquant sur le lien ci-dessous :<br/>
-            <a href="${frontendUrl}/track?order=${order.order_number}&email=${encodeURIComponent(order.email)}" style="color: #153A89; font-weight: 600; text-decoration: none;">Suivre sur notre site</a>
+            <a href="${frontendUrl}/track?order=${order.order_number}" style="color: #153A89; font-weight: 600; text-decoration: none;">Suivre sur notre site</a>
           </div>
         </div>
         <div class="footer">
