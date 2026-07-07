@@ -64,82 +64,108 @@ export default function Navbar({
               Accueil
             </a>
           </li>
-          <li>
-            {!isSearchExpanded ? (
-              <button 
-                onClick={() => setIsSearchExpanded(true)}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: 'var(--text-secondary)',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  padding: '0.25rem 0.5rem',
-                  transition: 'color 0.2s',
-                  outline: 'none'
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.color = 'var(--primary-gold)'}
-                onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-secondary)'}
-                title="Rechercher"
-              >
-                <Search size={18} />
-              </button>
-            ) : (
-              <div style={{
+          <li style={{ position: 'relative' }}>
+            <button 
+              onClick={() => setIsSearchExpanded(!isSearchExpanded)}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: 'var(--text-secondary)',
+                cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '0.35rem',
-                position: 'relative',
-                width: '180px',
-                animation: 'expandWidth 0.3s ease-out',
-                transition: 'width 0.3s ease'
-              }}>
-                <Search size={15} style={{ color: 'var(--primary-gold)' }} />
-                <input
-                  type="text"
-                  placeholder="Rechercher..."
-                  value={searchQuery}
-                  onChange={(e) => {
-                    setSearchQuery(e.target.value);
-                    if (currentTab !== 'home') {
-                      handleTabClick('home');
-                    }
-                  }}
+                gap: '0.2rem',
+                padding: '0.25rem 0.5rem',
+                transition: 'color 0.2s',
+                outline: 'none'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.color = 'var(--primary-gold)'}
+              onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-secondary)'}
+              title="Rechercher"
+            >
+              <Search size={18} />
+              <ChevronDown size={12} style={{ opacity: 0.7 }} />
+            </button>
+
+            {isSearchExpanded && (
+              <>
+                {/* Overlay to close popover when clicking outside */}
+                <div 
+                  onClick={() => setIsSearchExpanded(false)}
                   style={{
-                    width: '100%',
-                    background: 'none',
-                    border: 'none',
-                    borderBottom: '1.5px solid var(--primary-gold)',
-                    color: 'var(--text-primary)',
-                    fontSize: '0.8rem',
-                    padding: '0.1rem 1.25rem 0.1rem 0.1rem',
-                    outline: 'none',
-                    fontFamily: 'var(--sans)'
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    width: '100vw',
+                    height: '100vh',
+                    zIndex: 998,
+                    cursor: 'default',
+                    background: 'none'
                   }}
-                  autoFocus
                 />
-                <button
-                  onClick={() => {
-                    setSearchQuery('');
-                    setIsSearchExpanded(false);
-                  }}
-                  style={{
-                    position: 'absolute',
-                    right: 0,
-                    background: 'none',
-                    border: 'none',
-                    color: 'var(--text-secondary)',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    padding: '0.15rem'
-                  }}
-                >
-                  <X size={12} />
-                </button>
-              </div>
+                
+                {/* Floating Search Popover */}
+                <div style={{
+                  position: 'absolute',
+                  top: '110%',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  width: '260px',
+                  backgroundColor: 'var(--bg-glass)',
+                  backdropFilter: 'blur(20px)',
+                  border: '1.5px solid var(--primary-gold)',
+                  borderRadius: '12px',
+                  padding: '0.75rem',
+                  boxShadow: 'var(--shadow-premium)',
+                  zIndex: 999,
+                  animation: 'slideDown 0.2s ease-out'
+                }}>
+                  <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                    <Search size={14} style={{ position: 'absolute', left: '0.75rem', color: 'var(--text-secondary)' }} />
+                    <input
+                      type="text"
+                      placeholder="Rechercher un produit..."
+                      value={searchQuery}
+                      onChange={(e) => {
+                        setSearchQuery(e.target.value);
+                        if (currentTab !== 'home') {
+                          handleTabClick('home');
+                        }
+                      }}
+                      style={{
+                        width: '100%',
+                        padding: '0.5rem 1.75rem 0.5rem 2rem',
+                        borderRadius: '30px',
+                        border: '1px solid var(--border-color)',
+                        backgroundColor: 'var(--bg-primary)',
+                        color: 'var(--text-primary)',
+                        fontSize: '0.85rem',
+                        outline: 'none',
+                        fontFamily: 'var(--sans)'
+                      }}
+                      autoFocus
+                    />
+                    {searchQuery && (
+                      <button
+                        onClick={() => setSearchQuery('')}
+                        style={{
+                          position: 'absolute',
+                          right: '0.75rem',
+                          background: 'none',
+                          border: 'none',
+                          color: 'var(--text-secondary)',
+                          cursor: 'pointer',
+                          fontSize: '0.8rem',
+                          display: 'flex',
+                          alignItems: 'center'
+                        }}
+                      >
+                        <X size={12} />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </>
             )}
           </li>
           <li>
