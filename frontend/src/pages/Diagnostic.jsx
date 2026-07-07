@@ -1,50 +1,63 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowRight, RotateCcw, ShoppingCart } from 'lucide-react';
+import { 
+  ArrowRight, 
+  RotateCcw, 
+  ShoppingCart, 
+  Sparkles, 
+  Zap, 
+  Flame, 
+  Shield, 
+  Battery, 
+  Check, 
+  Moon, 
+  Sun,
+  Activity
+} from 'lucide-react';
 
 const QUESTIONS = [
   {
     id: 1,
     question: "Quel est votre objectif principal ?",
     options: [
-      { text: "Améliorer l'aspect de ma peau et ralentir les signes de l'âge", points: { rocenta: 3, collagene: 2 } },
-      { text: "Retrouver de l'énergie physique, de la force et du tonus", points: { tripleroot: 3, dynafuel: 2 } },
-      { text: "Perdre du poids et affiner ma silhouette", points: { fitmax: 3, urbanism: 2 } },
-      { text: "Renforcer ma santé globale et mes défenses naturelles", points: { aceguard: 3, acebrew: 1 } }
+      { text: "Améliorer l'aspect de ma peau et ralentir les signes de l'âge", points: { rocenta: 3, collagene: 2 }, icon: Sparkles },
+      { text: "Retrouver de l'énergie physique, de la force et du tonus", points: { tripleroot: 3, dynafuel: 2 }, icon: Zap },
+      { text: "Perdre du poids et affiner ma silhouette", points: { fitmax: 3, urbanism: 2 }, icon: Flame },
+      { text: "Renforcer ma santé globale et mes défenses naturelles", points: { aceguard: 3, acebrew: 1 }, icon: Shield }
     ]
   },
   {
     id: 2,
     question: "Comment évaluez-vous votre niveau de fatigue au quotidien ?",
     options: [
-      { text: "Je me sens constamment fatigué(e) ou épuisé(e)", points: { rocenta: 2, tripleroot: 2 } },
-      { text: "J'ai des baisses d'énergie régulières, notamment après les repas", points: { fitmax: 1, acebrew: 2 } },
-      { text: "Je me sens généralement en forme, mais je souhaite optimiser mes capacités", points: { tripleroot: 3, dynafuel: 2 } }
+      { text: "Je me sens constamment fatigué(e) ou épuisé(e)", points: { rocenta: 2, tripleroot: 2 }, icon: Battery },
+      { text: "J'ai des baisses d'énergie régulières, notamment après les repas", points: { fitmax: 1, acebrew: 2 }, icon: Activity },
+      { text: "Je me sens généralement en forme, mais je souhaite optimiser mes capacités", points: { tripleroot: 3, dynafuel: 2 }, icon: Zap }
     ]
   },
   {
     id: 3,
     question: "Ressentez-vous régulièrement des douleurs physiques (muscles ou articulations) ?",
     options: [
-      { text: "Oui, j'ai souvent des douleurs ou des raideurs physiques", points: { rocenta: 3, collagene: 2 } },
-      { text: "Non, je n'ai pas de douleurs particulières", points: {} }
+      { text: "Oui, j'ai souvent des douleurs ou des raideurs physiques", points: { rocenta: 3, collagene: 2 }, icon: Activity },
+      { text: "Non, je n'ai pas de douleurs particulières", points: {}, icon: Check }
     ]
   },
   {
     id: 4,
     question: "Qu'aimeriez-vous améliorer en priorité ?",
     options: [
-      { text: "L'éclat et la fermeté de ma peau, ou la force de mes cheveux", points: { rocenta: 2, collagene: 3 } },
-      { text: "Mon poids, ma digestion et l'élimination des toxines", points: { fitmax: 3, urbanism: 2 } },
-      { text: "Mon endurance et mes performances lors d'efforts physiques", points: { tripleroot: 2, dynafuel: 3 } }
+      { text: "L'éclat et la fermeté de ma peau, ou la force de mes cheveux", points: { rocenta: 2, collagene: 3 }, icon: Sparkles },
+      { text: "Mon poids, ma digestion et l'élimination des toxines", points: { fitmax: 3, urbanism: 2 }, icon: Flame },
+      { text: "Mon endurance et mes performances lors d'efforts physiques", points: { tripleroot: 2, dynafuel: 3 }, icon: Zap }
     ]
   },
   {
     id: 5,
     question: "Comment décririez-vous la qualité de votre sommeil ?",
     options: [
-      { text: "Difficile : je dors mal ou je me réveille souvent la nuit", points: { rocenta: 3, aceguard: 1 } },
-      { text: "Moyenne : je dors mais je me réveille fatigué(e) le matin", points: { tripleroot: 2, acebrew: 1 } },
-      { text: "Bonne : je dors bien et je me sens reposé(e)", points: {} }
+      { text: "Difficile : je dors mal ou je me réveille souvent la nuit", points: { rocenta: 3, aceguard: 1 }, icon: Moon },
+      { text: "Moyenne : je dors mais je me réveille fatigué(e) le matin", points: { tripleroot: 2, acebrew: 1 }, icon: Sun },
+      { text: "Bonne : je dors bien et je me sens reposé(e)", points: {}, icon: Check }
     ]
   }
 ];
@@ -234,6 +247,9 @@ export default function Diagnostic({ onAddToCart, onNavigate }) {
                   key={idx}
                   onClick={() => handleAnswerSelect(option)}
                   style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '1rem',
                     width: '100%',
                     padding: '1.1rem 1.5rem',
                     background: 'rgba(255, 255, 255, 0.02)',
@@ -255,7 +271,17 @@ export default function Diagnostic({ onAddToCart, onNavigate }) {
                     e.currentTarget.style.borderColor = 'var(--border-color)';
                   }}
                 >
-                  {option.text}
+                  {option.icon && (
+                    <option.icon 
+                      size={18} 
+                      style={{ 
+                        color: 'var(--primary-gold)', 
+                        opacity: 0.8,
+                        flexShrink: 0
+                      }} 
+                    />
+                  )}
+                  <span style={{ flexGrow: 1 }}>{option.text}</span>
                 </button>
               ))}
             </div>
