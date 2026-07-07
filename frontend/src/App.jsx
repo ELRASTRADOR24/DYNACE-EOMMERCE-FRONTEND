@@ -74,6 +74,8 @@ function App() {
     return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   });
 
+  const [searchQuery, setSearchQuery] = useState('');
+
   const fetchProducts = async () => {
     try {
       setLoadingProducts(true);
@@ -312,6 +314,8 @@ function App() {
         currentUser={currentUser}
         onOpenAuth={() => setIsAuthOpen(true)}
         onLogout={handleLogout}
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
       />
 
       {currentUser && (!currentUser.address || !currentUser.phone) && (
@@ -360,6 +364,7 @@ function App() {
             }}
             onAddToCart={handleAddToCart}
             onNavigate={setCurrentTab}
+            searchQuery={searchQuery}
           />
         )}
 

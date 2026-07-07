@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ShoppingBag, Sun, Moon, User, LogOut, Menu, X, ChevronDown, Package } from 'lucide-react';
+import { ShoppingBag, Sun, Moon, User, LogOut, Menu, X, ChevronDown, Package, Search } from 'lucide-react';
 
 export default function Navbar({
   currentTab,
@@ -10,10 +10,13 @@ export default function Navbar({
   toggleTheme,
   currentUser,
   onOpenAuth,
-  onLogout
+  onLogout,
+  searchQuery,
+  setSearchQuery
 }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   const handleTabClick = (tab) => {
     setCurrentTab(tab);
@@ -187,6 +190,16 @@ export default function Navbar({
           )}
 
           <button
+            className="theme-toggle"
+            onClick={() => setIsSearchOpen(!isSearchOpen)}
+            title="Rechercher"
+            aria-label="Rechercher"
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          >
+            <Search size={20} />
+          </button>
+
+          <button
             className="cart-btn"
             onClick={() => handleTabClick('cart')}
             title="Ouvrir le panier"
@@ -197,6 +210,71 @@ export default function Navbar({
           </button>
         </div>
       </nav>
+
+      {/* Slide-down Search Bar */}
+      {isSearchOpen && (
+        <div style={{
+          position: 'absolute',
+          top: '100%',
+          left: 0,
+          width: '100%',
+          backgroundColor: 'var(--bg-glass)',
+          backdropFilter: 'blur(20px)',
+          borderBottom: '1px solid var(--border-color)',
+          padding: '1rem 4%',
+          boxShadow: '0 8px 30px rgba(0,0,0,0.08)',
+          zIndex: 49,
+          animation: 'slideDown 0.25s ease-out',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center'
+        }}>
+          <div style={{ position: 'relative', width: '100%', maxWidth: '600px', display: 'flex', alignItems: 'center' }}>
+            <Search size={18} style={{ position: 'absolute', left: '1.25rem', color: 'var(--text-secondary)' }} />
+            <input
+              type="text"
+              placeholder="Rechercher un produit, une cure (ex: Rocenta)..."
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                if (currentTab !== 'home') {
+                  handleTabClick('home');
+                }
+              }}
+              style={{
+                width: '100%',
+                padding: '0.8rem 1.5rem 0.8rem 3rem',
+                borderRadius: '50px',
+                border: '1.5px solid var(--border-color)',
+                backgroundColor: 'var(--bg-primary)',
+                color: 'var(--text-primary)',
+                fontSize: '0.95rem',
+                outline: 'none',
+                transition: 'border-color 0.2s',
+                fontFamily: 'var(--sans)'
+              }}
+              className="search-dropdown-input"
+              autoFocus
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                style={{
+                  position: 'absolute',
+                  right: '1.25rem',
+                  background: 'none',
+                  border: 'none',
+                  color: 'var(--text-secondary)',
+                  cursor: 'pointer',
+                  fontSize: '0.95rem'
+                }}
+              >
+                Vider
+              </button>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Mobile Drawer Navigation */}
       <div className={`mobile-nav-drawer-overlay ${mobileMenuOpen ? 'open' : ''}`} onClick={() => setMobileMenuOpen(false)} />

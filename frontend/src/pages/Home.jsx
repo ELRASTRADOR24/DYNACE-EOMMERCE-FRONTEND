@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import ProductCard from '../components/ProductCard';
 import { Search, Plus, ArrowRight, ShieldCheck, Activity, Sparkles } from 'lucide-react';
 
-        export default function Home({ products, loadingProducts, onSelectProduct, onAddToCart, onNavigate }) {
-  const [search, setSearch] = useState('');
+export default function Home({ products, loadingProducts, onSelectProduct, onAddToCart, onNavigate, searchQuery = '' }) {
   const [selectedCategory, setSelectedCategory] = useState('all');
 
   const categories = [
@@ -16,8 +15,8 @@ import { Search, Plus, ArrowRight, ShieldCheck, Activity, Sparkles } from 'lucid
 
   const filteredProducts = products.filter(product => {
     const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory;
-    const matchesSearch = product.name.toLowerCase().includes(search.toLowerCase()) || 
-                          product.summary.toLowerCase().includes(search.toLowerCase());
+    const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                          product.summary.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
   });
 
@@ -75,17 +74,6 @@ import { Search, Plus, ArrowRight, ShieldCheck, Activity, Sparkles } from 'lucid
               {cat.label}
             </button>
           ))}
-        </div>
-
-        <div className="search-container">
-          <Search className="search-icon" size={18} />
-          <input
-            type="text"
-            className="search-input"
-            placeholder="Rechercher un produit..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
         </div>
       </div>
 
