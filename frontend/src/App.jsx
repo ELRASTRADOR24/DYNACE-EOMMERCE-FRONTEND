@@ -15,6 +15,7 @@ import Orders from './pages/Orders';
 import Contact from './pages/Contact';
 import Footer from './components/Footer';
 import OrderTracking from './pages/OrderTracking';
+import Profile from './pages/Profile';
 
 function App() {
   const [currentTab, setCurrentTab] = useState(() => {
@@ -336,6 +337,14 @@ function App() {
 
         {currentTab === 'orders' && currentUser && (
           <Orders onBackToShopping={() => setCurrentTab('home')} />
+        )}
+
+        {currentTab === 'profile' && currentUser && (
+          <Profile
+            currentUser={currentUser}
+            onUpdateUser={(updatedUser) => setCurrentUser(updatedUser)}
+            onLogout={handleLogout}
+          />
         )}
 
         {currentTab === 'legal' && <Legal />}

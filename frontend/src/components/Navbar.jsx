@@ -135,6 +135,10 @@ export default function Navbar({
                     <button onClick={() => handleTabClick('home')} className="dropdown-item">
                       Boutique / Accueil
                     </button>
+                    <button onClick={() => handleTabClick('profile')} className="dropdown-item">
+                      <User size={14} style={{ marginRight: '0.5rem' }} />
+                      Mon Compte
+                    </button>
                     <button onClick={() => handleTabClick('orders')} className="dropdown-item">
                       <Package size={14} style={{ marginRight: '0.5rem' }} />
                       Mes Commandes
@@ -216,14 +220,24 @@ export default function Navbar({
               </button>
             </li>
             {currentUser && (
-              <li>
-                <button 
-                  className={`drawer-link-btn ${currentTab === 'orders' ? 'active' : ''}`}
-                  onClick={() => handleTabClick('orders')}
-                >
-                  Mes Commandes
-                </button>
-              </li>
+              <>
+                <li>
+                  <button 
+                    className={`drawer-link-btn ${currentTab === 'profile' ? 'active' : ''}`}
+                    onClick={() => handleTabClick('profile')}
+                  >
+                    Mon Compte
+                  </button>
+                </li>
+                <li>
+                  <button 
+                    className={`drawer-link-btn ${currentTab === 'orders' ? 'active' : ''}`}
+                    onClick={() => handleTabClick('orders')}
+                  >
+                    Mes Commandes
+                  </button>
+                </li>
+              </>
             )}
             {currentUser?.isAdmin && (
               <li>

@@ -203,11 +203,124 @@ app.get('/api/auth/me', authenticateToken, async (req, res) => {
       address: user.address,
       postalCode: user.postal_code,
       city: user.city,
+      phone: user.phone || '',
       isAdmin: user.is_admin || false,
       allowTestPayment: user.allow_test_payment || false
     });
   } catch (err) {
     res.status(500).json({ error: 'Erreur lors de la récupération du profil.' });
+  }
+});
+
+// Update User Profile Details
+app.put('/api/auth/profile', authenticateToken, async (req, res) => {
+  const { firstName, lastName, phone, address, postalCode, city } = req.body;
+  
+  if (!firstName || !lastName || !address || !postalCode || !city) {
+    return res.status(400).json({ error: 'Tous les champs obligatoires doivent être remplis.' });
+  }
+  
+  try {
+    const user = await User.findById(req.userId);
+    if (!user) {
+      return res.status(404).json({ error: 'Utilisateur non trouvé.' });
+    }
+    
+    user.first_name = firstName;
+    user.last_name = lastName;
+    user.phone = phone || '';
+    user.address = address;
+    user.postal_code = postalCode;
+    user.city = city;
+    
+    await user.save();
+    
+    res.json({
+      success: true,
+      user: {
+        id: user._id,
+        firstName: user.first_name,
+        lastName: user.last_name,
+        email: user.email,
+        address: user.address,
+        postalCode: user.postal_code,
+        city: user.city,
+        phone: user.phone,
+        isAdmin: user.is_admin || false,
+        allowTestPayment: user.allow_test_payment || false
+      }
+    });
+  } catch (err) {
+    console.error("Erreur mise à jour profil:", err.message);
+    res.status(500).json({ error: 'Erreur lors de la mise à jour du profil.' });
+  }
+});
+
+// Change Password
+app.put('/api/auth/change-password', authenticateToken, async (req, res) => {
+  const { oldPassword, newPassword } = req.body;
+  
+  if (!oldPassword || !newPassword) {
+    return res.status(400).json({ error: 'Veuillez remplir tous les champs.' });
+  }
+  
+  if (newPassword.length < 6) {
+    return res.status(400).json({ error: 'Le nouveau mot de passe doit faire au moins 6 caractères.' });
+  }
+  
+  try {
+    const user = await User.findById(req.userId);
+    if (!user) {
+      return res.status(404).json({ error: 'Utilisateur non trouvé.' });
+    }
+    
+    const matches = await bcrypt.compare(oldPassword, user.password);
+    if (!matches) {
+      return res.status(400).json({ error: 'L\'ancien mot de passe est incorrect.' });
+    }
+    
+    user.password = await bcrypt.hash(newPassword, 10);
+    await user.save();
+    
+    res.json({ success: true, message: 'Mot de passe mis à jour avec succès.' });
+  } catch (err) {
+    console.error("Erreur modification mot de passe:", err.message);
+    res.status(500).json({ error: 'Erreur lors de la modification du mot de passe.' });
+  }
+});
+
+// Delete Account (GDPR Compliance / Droit à l'oubli)
+app.delete('/api/auth/delete-account', authenticateToken, async (req, res) => {
+  try {
+    const user = await User.findById(req.userId);
+    if (!user) {
+      return res.status(404).json({ error: 'Utilisateur non trouvé.' });
+    }
+    
+    // Supprimer l'utilisateur de la base de données
+    await User.findByIdAndDelete(req.userId);
+    
+    // Anonymiser les commandes associées pour la comptabilité
+    await Order.updateMany(
+      { user_id: req.userId },
+      { 
+        $unset: { user_id: "" }, 
+        $set: { 
+          first_name: "Client", 
+          last_name: "Supprimé (RGPD)", 
+          email: "anonymous@dynaceglobalesante.com",
+          phone: "",
+          address: "Adresse Supprimée",
+          postal_code: "00000",
+          city: "Ville Supprimée"
+        } 
+      }
+    );
+    
+    res.json({ success: true, message: 'Votre compte a été supprimé avec succès.' });
+  } catch (err) {
+    console.error("Erreur suppression compte:", err.message);
+    res.status(500).json({ error: 'Erreur lors de la suppression de votre compte.' });
   }
 });
 

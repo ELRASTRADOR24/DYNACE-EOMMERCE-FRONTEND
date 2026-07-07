@@ -23,6 +23,7 @@ const userSchema = new mongoose.Schema({
   address: { type: String, required: true },
   postal_code: { type: String, required: true },
   city: { type: String, required: true },
+  phone: { type: String, default: '' },
   is_admin: { type: Boolean, default: false },
   allow_test_payment: { type: Boolean, default: false }
 });
