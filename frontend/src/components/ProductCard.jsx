@@ -8,7 +8,7 @@ export default function ProductCard({ product, onSelect, onAddToCart }) {
         {product.image ? (
           <img 
             src={product.image} 
-            alt={product.name} 
+            alt={`${product.name} - Dynace Global`} 
             className="product-img" 
             loading="lazy"
           />

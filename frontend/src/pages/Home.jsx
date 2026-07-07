@@ -39,7 +39,7 @@ export default function Home({ products, loadingProducts, onSelectProduct, onAdd
         </h1>
         
         <p className="hero-subtitle">
-          Des formules cliniquement étayées à base de cellules souches végétales pour régénérer votre organisme, renforcer vos défenses et révéler votre éclat.
+          Découvrez la gamme Dynace Global Santé Top : des formules cliniquement étayées à base de cellules souches végétales pour régénérer votre organisme, renforcer vos défenses et révéler votre éclat.
         </p>
         
         <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap', marginTop: '1.5rem' }}>
