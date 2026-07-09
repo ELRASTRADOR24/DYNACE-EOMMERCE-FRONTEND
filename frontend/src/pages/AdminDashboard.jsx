@@ -43,6 +43,8 @@ export default function AdminDashboard({ onRefreshProducts }) {
   const [ordersLoading, setOrdersLoading] = useState(false);
   const [showArchived, setShowArchived] = useState(false);
   const [selectedOrderIds, setSelectedOrderIds] = useState([]);
+  const [orderSearchQuery, setOrderSearchQuery] = useState('');
+  const [orderStatusFilter, setOrderStatusFilter] = useState('ALL');
   
   // Notification states
   const [errorMsg, setErrorMsg] = useState('');
@@ -433,6 +435,34 @@ export default function AdminDashboard({ onRefreshProducts }) {
       }
     } catch (err) {
       showError('Erreur réseau lors de la sauvegarde.');
+    }
+  };
+
+  const handleQuickStockChange = async (productId, newStock) => {
+    if (newStock < 0) return;
+    const token = localStorage.getItem('dynace_jwt');
+    const formData = new FormData();
+    formData.append('stock', newStock.toString());
+
+    try {
+      const res = await fetch(`/api/admin/products/${productId}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        body: formData
+      });
+
+      if (res.ok) {
+        showSuccess('Stock mis à jour !');
+        fetchProducts();
+        if (onRefreshProducts) onRefreshProducts();
+      } else {
+        const data = await res.json();
+        showError(data.error || 'Erreur de mise à jour du stock.');
+      }
+    } catch (err) {
+      showError('Erreur réseau lors de la mise à jour.');
     }
   };
 
@@ -1017,6 +1047,42 @@ export default function AdminDashboard({ onRefreshProducts }) {
                   </div>
                 )}
               </div>
+
+              {/* Daily Revenue Chart */}
+              {analytics.dailyRevenue && analytics.dailyRevenue.length > 0 && (() => {
+                const maxRev = Math.max(...analytics.dailyRevenue.map(d => d.revenue), 1);
+                return (
+                  <div style={{ backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--border-color)', padding: '1.5rem', borderRadius: '12px' }}>
+                    <h4 style={{ fontSize: '1.2rem', fontFamily: 'var(--serif)', color: 'var(--text-primary)', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      📈 Évolution du Chiffre d'Affaires (30 derniers jours)
+                    </h4>
+                    <div style={{ display: 'flex', alignItems: 'flex-end', gap: '3px', height: '180px', borderBottom: '2px solid var(--border-color)', paddingBottom: '0.5rem', overflowX: 'auto' }}>
+                      {analytics.dailyRevenue.map((day, i) => {
+                        const pct = maxRev > 0 ? (day.revenue / maxRev) * 100 : 0;
+                        const dateLabel = new Date(day.date + 'T00:00:00').toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' });
+                        return (
+                          <div key={day.date} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: '1 0 22px', minWidth: '22px' }} title={`${dateLabel} — ${day.revenue.toFixed(2)} €`}>
+                            <div style={{
+                              width: '100%',
+                              maxWidth: '24px',
+                              height: `${Math.max(pct, 2)}%`,
+                              background: day.revenue > 0 ? 'linear-gradient(to top, var(--primary-green), hsl(150, 60%, 50%))' : 'var(--border-color)',
+                              borderRadius: '4px 4px 0 0',
+                              transition: 'height 0.4s ease',
+                              cursor: 'pointer',
+                              position: 'relative'
+                            }} />
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.5rem', fontSize: '0.7rem', color: 'var(--text-secondary)' }}>
+                      <span>{new Date(analytics.dailyRevenue[0].date + 'T00:00:00').toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })}</span>
+                      <span>{new Date(analytics.dailyRevenue[analytics.dailyRevenue.length - 1].date + 'T00:00:00').toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })}</span>
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
           ) : (
             <p style={{ color: 'var(--text-secondary)' }}>Impossible de charger les statistiques.</p>
@@ -1111,13 +1177,22 @@ export default function AdminDashboard({ onRefreshProducts }) {
                         <strong style={{ fontSize: '1.1rem', color: 'var(--text-primary)' }}>{p.price.toFixed(2)} €</strong>
                       </div>
                       <div style={{ textAlign: 'right' }}>
-                        <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'block' }}>Stock disponible</span>
-                        <strong style={{ 
-                          fontSize: '1.1rem', 
-                          color: p.stock < 10 ? 'var(--danger)' : 'var(--text-primary)' 
-                        }}>{p.stock} unités</strong>
+                        <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.25rem' }}>Stock disponible</span>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '0.4rem' }}>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); handleQuickStockChange(p.id, p.stock - 1); }}
+                            style={{ width: '28px', height: '28px', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)', cursor: 'pointer', fontWeight: 'bold', fontSize: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.15s' }}
+                            title="Retirer 1 unité"
+                          >−</button>
+                          <strong style={{ fontSize: '1.1rem', color: p.stock < 10 ? 'var(--danger)' : 'var(--text-primary)', minWidth: '40px', textAlign: 'center' }}>{p.stock}</strong>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); handleQuickStockChange(p.id, p.stock + 1); }}
+                            style={{ width: '28px', height: '28px', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)', cursor: 'pointer', fontWeight: 'bold', fontSize: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.15s' }}
+                            title="Ajouter 1 unité"
+                          >+</button>
+                        </div>
                         {p.stock < 10 && p.stock > 0 && (
-                          <span style={{ display: 'block', fontSize: '0.75rem', color: 'var(--danger)', fontWeight: 'bold' }}>⚠️ Stock faible !</span>
+                          <span style={{ display: 'block', fontSize: '0.75rem', color: 'var(--danger)', fontWeight: 'bold', marginTop: '0.2rem' }}>⚠️ Stock faible !</span>
                         )}
                       </div>
                     </div>
@@ -1251,6 +1326,33 @@ export default function AdminDashboard({ onRefreshProducts }) {
             </div>
           </div>
 
+          {/* Search & Filter Bar */}
+          <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+            <div style={{ flex: '1 1 250px', position: 'relative' }}>
+              <input
+                type="text"
+                placeholder="🔍 Rechercher par nom, e-mail ou n° de commande..."
+                value={orderSearchQuery}
+                onChange={e => setOrderSearchQuery(e.target.value)}
+                className="form-input"
+                style={{ width: '100%', padding: '0.7rem 1rem', borderRadius: '10px', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-secondary)', color: 'var(--text-primary)', fontSize: '0.9rem' }}
+              />
+            </div>
+            <select
+              value={orderStatusFilter}
+              onChange={e => setOrderStatusFilter(e.target.value)}
+              className="form-input"
+              style={{ padding: '0.7rem 1rem', borderRadius: '10px', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-secondary)', color: 'var(--text-primary)', fontSize: '0.9rem', cursor: 'pointer', minWidth: '180px' }}
+            >
+              <option value="ALL">Tous les statuts</option>
+              <option value="Payé">🟢 Payé</option>
+              <option value="En préparation">🟡 En préparation</option>
+              <option value="Expédié">🔵 Expédié</option>
+              <option value="Livré">✅ Livré</option>
+              <option value="Archivé">📦 Archivé</option>
+            </select>
+          </div>
+
           {/* Bulk Action Bar (Only visible when items are selected) */}
           {selectedOrderIds.length > 0 && (
             <div style={{ 
@@ -1322,7 +1424,15 @@ export default function AdminDashboard({ onRefreshProducts }) {
             </div>
           ) : (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(400px, 1fr))', gap: '2rem' }}>
-              {orders.map(o => (
+              {orders.filter(o => {
+                const q = orderSearchQuery.toLowerCase();
+                const matchesSearch = !q || 
+                  (o.firstName + ' ' + o.lastName).toLowerCase().includes(q) ||
+                  (o.email || '').toLowerCase().includes(q) ||
+                  (o.order_number || '').toLowerCase().includes(q);
+                const matchesStatus = orderStatusFilter === 'ALL' || o.status === orderStatusFilter;
+                return matchesSearch && matchesStatus;
+              }).map(o => (
                 <div 
                   key={o._id} 
                   id={`order-${o.order_number}`}
@@ -1742,12 +1852,17 @@ export default function AdminDashboard({ onRefreshProducts }) {
                     <th style={{ padding: '1.25rem 1.5rem', color: 'var(--text-secondary)', fontWeight: '700', fontSize: '0.85rem', textTransform: 'uppercase' }}>Utilisateur</th>
                     <th style={{ padding: '1.25rem 1.5rem', color: 'var(--text-secondary)', fontWeight: '700', fontSize: '0.85rem', textTransform: 'uppercase' }}>Adresse E-mail</th>
                     <th style={{ padding: '1.25rem 1.5rem', color: 'var(--text-secondary)', fontWeight: '700', fontSize: '0.85rem', textTransform: 'uppercase' }}>Rôle</th>
+                    <th style={{ padding: '1.25rem 1.5rem', color: 'var(--text-secondary)', fontWeight: '700', fontSize: '0.85rem', textTransform: 'uppercase', textAlign: 'center' }}>Commandes</th>
+                    <th style={{ padding: '1.25rem 1.5rem', color: 'var(--text-secondary)', fontWeight: '700', fontSize: '0.85rem', textTransform: 'uppercase', textAlign: 'center' }}>Total dépensé</th>
                     <th style={{ padding: '1.25rem 1.5rem', color: 'var(--text-secondary)', fontWeight: '700', fontSize: '0.85rem', textTransform: 'uppercase', textAlign: 'center' }}>Mode Test (Bypass Stripe)</th>
                     <th style={{ padding: '1.25rem 1.5rem', color: 'var(--text-secondary)', fontWeight: '700', fontSize: '0.85rem', textTransform: 'uppercase', textAlign: 'right' }}>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {users.map((u) => (
+                  {users.map((u) => {
+                    const userOrders = orders.filter(o => (o.email || '').toLowerCase() === (u.email || '').toLowerCase());
+                    const userTotal = userOrders.reduce((sum, o) => sum + (o.total || 0), 0);
+                    return (
                     <tr key={u._id} style={{ borderBottom: '1px solid var(--border-color)', transition: 'background 0.2s' }}>
                       <td style={{ padding: '1.25rem 1.5rem', color: 'var(--text-primary)', fontWeight: '600' }}>
                         {u.first_name} {u.last_name}
@@ -1766,6 +1881,12 @@ export default function AdminDashboard({ onRefreshProducts }) {
                         }}>
                           {u.is_admin ? 'Administrateur' : 'Client'}
                         </span>
+                      </td>
+                      <td style={{ padding: '1.25rem 1.5rem', textAlign: 'center' }}>
+                        <span style={{ fontWeight: '700', color: userOrders.length > 0 ? 'var(--text-primary)' : 'var(--text-secondary)' }}>{userOrders.length}</span>
+                      </td>
+                      <td style={{ padding: '1.25rem 1.5rem', textAlign: 'center' }}>
+                        <span style={{ fontWeight: '700', color: userTotal > 0 ? 'var(--primary-gold)' : 'var(--text-secondary)' }}>{userTotal.toFixed(2)} €</span>
                       </td>
                       <td style={{ padding: '1.25rem 1.5rem', textAlign: 'center' }}>
                         <button
@@ -1809,7 +1930,8 @@ export default function AdminDashboard({ onRefreshProducts }) {
                         )}
                       </td>
                     </tr>
-                  ))}
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

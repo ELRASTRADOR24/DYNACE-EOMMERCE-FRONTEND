@@ -1803,11 +1803,39 @@ app.get('/api/admin/analytics', authenticateToken, verifyAdmin, async (req, res)
     // Transformer l'objet ventes par produit en tableau trié par quantité vendue décroissante
     const topProducts = Object.values(salesByProduct).sort((a, b) => b.quantity - a.quantity);
 
+    // Calculer le chiffre d'affaires journalier des 30 derniers jours
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 29);
+    thirtyDaysAgo.setHours(0, 0, 0, 0);
+
+    const dailyMap = {};
+    for (let i = 0; i < 30; i++) {
+      const d = new Date(thirtyDaysAgo);
+      d.setDate(d.getDate() + i);
+      const key = d.toISOString().split('T')[0]; // YYYY-MM-DD
+      dailyMap[key] = 0;
+    }
+
+    orders.forEach(order => {
+      if (order.createdAt) {
+        const key = new Date(order.createdAt).toISOString().split('T')[0];
+        if (dailyMap[key] !== undefined) {
+          dailyMap[key] += order.total || 0;
+        }
+      }
+    });
+
+    const dailyRevenue = Object.entries(dailyMap).map(([date, revenue]) => ({
+      date,
+      revenue: Math.round(revenue * 100) / 100
+    }));
+
     res.json({
       totalRevenue: Math.round(totalRevenue * 100) / 100,
       totalOrders,
       avgOrderValue: Math.round(avgOrderValue * 100) / 100,
-      topProducts
+      topProducts,
+      dailyRevenue
     });
   } catch (err) {
     console.error('Erreur calcul statistiques :', err.message);
