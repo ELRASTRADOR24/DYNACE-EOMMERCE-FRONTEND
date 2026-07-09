@@ -14,8 +14,9 @@ const getProductName = (id) => {
   return mapping[id] || id;
 };
 
-export default function Reviews() {
+export default function Reviews({ products = [], onSelectProduct }) {
   const [playingId, setPlayingId] = useState(null);
+  const [isSelectProductOpen, setIsSelectProductOpen] = useState(false);
   const videoRefs = useRef({});
 
   // Dynamic reviews states
@@ -87,9 +88,9 @@ export default function Reviews() {
             Vous adorez nos compléments de thérapie cellulaire ? Prenez votre téléphone, filmez un court témoignage de 30 secondes en expliquant vos bienfaits, et postez-le directement depuis la fiche de votre produit préféré pour recevoir un **code promo de -10%** !
           </p>
         </div>
-        <a href="/" className="reviews-cta-btn">
+        <button className="reviews-cta-btn" onClick={() => setIsSelectProductOpen(true)}>
           Choisir un produit
-        </a>
+        </button>
       </div>
 
       {/* Vidéo Testimonials */}
@@ -268,6 +269,38 @@ export default function Reviews() {
           </div>
         )}
       </div>
+
+      {isSelectProductOpen && (
+        <div className="product-selector-overlay" onClick={() => setIsSelectProductOpen(false)}>
+          <div className="product-selector-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="selector-header">
+              <h3>Sélectionnez un produit</h3>
+              <button className="close-selector-btn" onClick={() => setIsSelectProductOpen(false)}>×</button>
+            </div>
+            <p className="selector-subtitle">Choisissez le produit pour lequel vous souhaitez partager votre témoignage en vidéo :</p>
+            <div className="selector-products-list">
+              {products.map(product => (
+                <div key={product.id} className="selector-product-item">
+                  <img src={product.image} alt={product.name} className="selector-product-img" />
+                  <div className="selector-product-info">
+                    <h4>{product.name}</h4>
+                    <p>{product.summary}</p>
+                  </div>
+                  <button 
+                    className="selector-choose-btn"
+                    onClick={() => {
+                      setIsSelectProductOpen(false);
+                      onSelectProduct(product.id);
+                    }}
+                  >
+                    Choisir
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -318,48 +318,7 @@ export default function Navbar({
 
         <div className="drawer-body">
           <ul className="drawer-links">
-            <li>
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                padding: '0.6rem 1rem',
-                borderRadius: '50px',
-                border: '1px solid var(--border-color)',
-                backgroundColor: 'var(--bg-primary)',
-                margin: '0 0.5rem 1rem 0.5rem'
-              }}>
-                <Search size={16} style={{ color: 'var(--text-secondary)' }} />
-                <input
-                  type="text"
-                  placeholder="Rechercher..."
-                  value={searchQuery}
-                  onChange={(e) => {
-                    setSearchQuery(e.target.value);
-                    if (currentTab !== 'home') {
-                      handleTabClick('home');
-                    }
-                  }}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    color: 'var(--text-primary)',
-                    fontSize: '0.9rem',
-                    width: '100%',
-                    outline: 'none',
-                    fontFamily: 'var(--sans)'
-                  }}
-                />
-                {searchQuery && (
-                  <button 
-                    onClick={() => setSearchQuery('')}
-                    style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
-                  >
-                    <X size={14} />
-                  </button>
-                )}
-              </div>
-            </li>
+
             <li>
               <button 
                 className={`drawer-link-btn ${currentTab === 'home' ? 'active' : ''}`}

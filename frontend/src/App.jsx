@@ -403,6 +403,7 @@ function App() {
             onAddToCart={handleAddToCart}
             onNavigate={setCurrentTab}
             searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
           />
         )}
 
@@ -418,7 +419,19 @@ function App() {
         )}
 
         {currentTab === 'reviews' && (
-          <Reviews />
+          <Reviews 
+            products={productsList}
+            onSelectProduct={(id) => {
+              setSelectedProductId(id);
+              setCurrentTab('detail');
+              setTimeout(() => {
+                const formCard = document.getElementById('leave-review-section');
+                if (formCard) {
+                  formCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+              }, 400);
+            }}
+          />
         )}
 
         {currentTab === 'about' && (

@@ -426,11 +426,11 @@ export default function Checkout({ cartItems, onClearCart, onBackToShopping, cur
   // Gated Auth Selection Screen
   if (checkoutMode === null) {
     return (
-      <div className="checkout-container" style={{ gridTemplateColumns: '1.2fr 1fr' }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+      <div className="checkout-container">
+        <div className="checkout-form-section">
           <h1 className="checkout-title">Comment souhaitez-vous commander ?</h1>
           
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+          <div className="checkout-auth-options">
             {/* Guest Option */}
             <div className="checkout-card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
               <div>
@@ -503,7 +503,7 @@ export default function Checkout({ cartItems, onClearCart, onBackToShopping, cur
   // Inline Login
   if (checkoutMode === 'login_inline') {
     return (
-      <div className="checkout-container" style={{ gridTemplateColumns: '1.2fr 1fr' }}>
+      <div className="checkout-container">
         <div className="checkout-form-section">
           <h1 className="checkout-title">Connectez-vous</h1>
           
@@ -603,7 +603,7 @@ export default function Checkout({ cartItems, onClearCart, onBackToShopping, cur
   // Inline Signup
   if (checkoutMode === 'signup_inline') {
     return (
-      <div className="checkout-container" style={{ gridTemplateColumns: '1.2fr 1fr' }}>
+      <div className="checkout-container">
         <div className="checkout-form-section">
           <h1 className="checkout-title">Créez votre compte</h1>
           

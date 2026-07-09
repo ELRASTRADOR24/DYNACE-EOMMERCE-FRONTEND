@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import ProductCard from '../components/ProductCard';
 import { Search, Plus, ArrowRight, ShieldCheck, Activity, Sparkles } from 'lucide-react';
 
-export default function Home({ products, loadingProducts, onSelectProduct, onAddToCart, onNavigate, searchQuery = '' }) {
+export default function Home({ products, loadingProducts, onSelectProduct, onAddToCart, onNavigate, searchQuery = '', setSearchQuery }) {
   const [selectedCategory, setSelectedCategory] = useState('all');
 
   const categories = [
@@ -62,6 +62,37 @@ export default function Home({ products, loadingProducts, onSelectProduct, onAdd
           </button>
         </div>
       </section>
+
+      {/* Catalog Search Bar */}
+      <div className="catalog-search-section">
+        <form onSubmit={(e) => {
+          e.preventDefault();
+          const target = document.querySelector('.product-grid') || document.querySelector('.filter-bar');
+          if (target) {
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }} className="catalog-search-form">
+          <div className="catalog-search-input-wrapper">
+            <Search size={18} className="catalog-search-icon" />
+            <input
+              type="text"
+              className="catalog-search-input"
+              placeholder="Rechercher un complément (ex: Rocenta, Lyftmax...)"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            {searchQuery && (
+              <button 
+                type="button" 
+                className="catalog-search-clear"
+                onClick={() => setSearchQuery('')}
+              >
+                ×
+              </button>
+            )}
+          </div>
+        </form>
+      </div>
 
       <div className="filter-bar">
         <div className="categories-container">

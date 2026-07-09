@@ -293,7 +293,7 @@ export default function ProductDetail({ product, onBack, onAddToCart, onBuyNow, 
           </div>
 
           {/* Formulaire de rédaction d'avis */}
-          <div className="reviews-form-card">
+          <div className="reviews-form-card" id="leave-review-section">
             <h3>Laisser un avis</h3>
             {currentUser ? (
               <form onSubmit={handleReviewSubmit} className="review-submit-form">
