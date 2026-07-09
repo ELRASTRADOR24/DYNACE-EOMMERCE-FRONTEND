@@ -121,7 +121,7 @@ export default function OrderTracking() {
             <button 
               type="submit" 
               disabled={isLoading}
-              style={{ width: '100%', padding: '1rem', borderRadius: '8px', backgroundColor: 'var(--primary-gold)', color: 'var(--bg-primary)', fontWeight: 'bold', border: 'none', cursor: isLoading ? 'not-allowed' : 'pointer', fontSize: '1.1rem', marginTop: '1rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem' }}
+              style={{ width: '100%', padding: '1rem', borderRadius: '8px', backgroundColor: 'var(--primary-gold)', color: '#fff', fontWeight: 'bold', border: 'none', cursor: isLoading ? 'not-allowed' : 'pointer', fontSize: '1.1rem', marginTop: '1rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem' }}
             >
               <Search size={20} />
               {isLoading ? 'Recherche...' : 'Rechercher la commande'}
