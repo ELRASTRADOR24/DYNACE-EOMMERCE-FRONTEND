@@ -493,8 +493,24 @@ app.get('/api/products', async (req, res) => {
   res.setHeader('Cache-Control', 'no-store, max-age=0');
   try {
     const rows = await Product.find({});
-    const productsList = await Promise.all(rows.map(async (row) => {
-      const reviews = await Review.find({ product_id: row._id });
+    
+    // Fetch all reviews for these products in a single database query to avoid N+1 queries
+    const productIds = rows.map(r => r._id);
+    const allReviews = await Review.find({ product_id: { $in: productIds } });
+    
+    // Group reviews by product_id
+    const reviewsByProduct = {};
+    productIds.forEach(id => {
+      reviewsByProduct[id] = [];
+    });
+    allReviews.forEach(review => {
+      if (reviewsByProduct[review.product_id]) {
+        reviewsByProduct[review.product_id].push(review);
+      }
+    });
+
+    const productsList = rows.map(row => {
+      const reviews = reviewsByProduct[row._id] || [];
       const avgRating = reviews.length > 0
         ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
         : 0;
@@ -513,7 +529,7 @@ app.get('/api/products', async (req, res) => {
         avgRating: Math.round(avgRating * 10) / 10,
         reviewCount: reviews.length
       };
-    }));
+    });
     res.json(productsList);
   } catch (err) {
     console.error('Erreur chargement produits :', err.message);

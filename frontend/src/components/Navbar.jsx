@@ -369,6 +369,23 @@ export default function Navbar({
               </button>
             </li>
             <li>
+              <button 
+                className="drawer-link-btn"
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  setIsCartOpen(true);
+                }}
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}
+              >
+                <span>Mon Panier</span>
+                {cartCount > 0 && (
+                  <span className="cart-badge" style={{ position: 'relative', top: 0, right: 0, padding: '2px 8px', fontSize: '0.75rem', borderRadius: '50px' }}>
+                    {cartCount}
+                  </span>
+                )}
+              </button>
+            </li>
+            <li>
               {currentUser ? (
                 <button 
                   className={`drawer-link-btn ${currentTab === 'orders' ? 'active' : ''}`}
