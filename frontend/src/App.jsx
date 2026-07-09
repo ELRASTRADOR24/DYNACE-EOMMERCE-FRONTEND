@@ -37,8 +37,15 @@ function App() {
   }, [currentTab, selectedProductId]);
 
   // Products and Auth states
-  const [productsList, setProductsList] = useState([]);
-  const [loadingProducts, setLoadingProducts] = useState(true);
+  const [productsList, setProductsList] = useState(() => {
+    try {
+      const cached = localStorage.getItem('dynace_products_cache');
+      return cached ? JSON.parse(cached) : [];
+    } catch (e) {
+      return [];
+    }
+  });
+  const [loadingProducts, setLoadingProducts] = useState(productsList.length === 0);
   const [currentUser, setCurrentUser] = useState(null);
   const [loadingSession, setLoadingSession] = useState(true);
   const [resetToken, setResetToken] = useState('');
@@ -85,11 +92,14 @@ function App() {
 
   const fetchProducts = async () => {
     try {
-      setLoadingProducts(true);
+      if (productsList.length === 0) {
+        setLoadingProducts(true);
+      }
       const res = await fetch('/api/products');
       if (res.ok) {
         const data = await res.json();
         setProductsList(data);
+        localStorage.setItem('dynace_products_cache', JSON.stringify(data));
       }
     } catch (err) {
       console.error('Erreur de chargement des produits :', err);

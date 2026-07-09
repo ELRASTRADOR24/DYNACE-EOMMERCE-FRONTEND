@@ -488,9 +488,25 @@ app.post('/api/auth/google', async (req, res) => {
 
 // --- PRODUCTS ROUTES ---
 
+let productsCache = null;
+let productsCacheTime = 0;
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes cache
+
+// Helper to clear products cache
+const clearProductsCache = () => {
+  productsCache = null;
+  productsCacheTime = 0;
+};
+
 // Get all products
 app.get('/api/products', async (req, res) => {
   res.setHeader('Cache-Control', 'no-store, max-age=0');
+  
+  const now = Date.now();
+  if (productsCache && (now - productsCacheTime < CACHE_DURATION)) {
+    return res.json(productsCache);
+  }
+
   try {
     const rows = await Product.find({});
     
@@ -530,6 +546,11 @@ app.get('/api/products', async (req, res) => {
         reviewCount: reviews.length
       };
     });
+    
+    // Save to cache
+    productsCache = productsList;
+    productsCacheTime = Date.now();
+    
     res.json(productsList);
   } catch (err) {
     console.error('Erreur chargement produits :', err.message);
@@ -632,6 +653,7 @@ app.post('/api/products/:productId/reviews', authenticateToken, upload.single('v
     });
 
     const saved = await newReview.save();
+    clearProductsCache(); // Clear RAM cache
     res.status(201).json(saved);
   } catch (err) {
     console.error('Erreur enregistrement avis :', err.message);
@@ -1541,6 +1563,7 @@ app.post('/api/admin/products', authenticateToken, verifyAdmin, upload.single('i
     });
 
     await newProduct.save();
+    clearProductsCache(); // Clear RAM cache
     res.status(201).json(newProduct);
   } catch (err) {
     console.error('Erreur création produit :', err.message);
@@ -1589,6 +1612,7 @@ app.put('/api/admin/products/:id', authenticateToken, verifyAdmin, upload.single
       return res.status(404).json({ error: 'Produit non trouvé.' });
     }
 
+    clearProductsCache(); // Clear RAM cache
     res.json(updatedProduct);
   } catch (err) {
     console.error('Erreur mise à jour produit :', err.message);
@@ -1603,6 +1627,7 @@ app.delete('/api/admin/products/:id', authenticateToken, verifyAdmin, async (req
     if (!deletedProduct) {
       return res.status(404).json({ error: 'Produit non trouvé.' });
     }
+    clearProductsCache(); // Clear RAM cache
     res.json({ success: true, message: 'Produit supprimé avec succès.' });
   } catch (err) {
     console.error('Erreur suppression produit :', err.message);
