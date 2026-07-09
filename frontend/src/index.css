@@ -3648,6 +3648,36 @@ body {
     gap: 1rem !important;
     margin-bottom: 1.5rem !important;
   }
+
+  /* Premium Mobile Checkout layout overrides */
+  .checkout-container {
+    grid-template-columns: 1fr !important;
+    gap: 2rem !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  .order-summary-card {
+    order: -1 !important;
+    width: 100% !important;
+    margin-bottom: 1rem !important;
+  }
+
+  .checkout-form-section {
+    order: 1 !important;
+    width: 100% !important;
+  }
+
+  .checkout-auth-options {
+    grid-template-columns: 1fr !important;
+    gap: 1.25rem !important;
+  }
+
+  .checkout-title {
+    font-size: 1.5rem !important;
+    text-align: center !important;
+    line-height: 1.3 !important;
+  }
 }
 
 @media (max-width: 480px) {
