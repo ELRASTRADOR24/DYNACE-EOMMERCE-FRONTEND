@@ -99,11 +99,7 @@ export default function CartDrawer({
               </div>
               <div className="totals-row">
                 <span>Livraison</span>
-                {shippingCost === 0 ? (
-                  <span style={{ color: 'var(--success)', fontWeight: '600' }}>Gratuite</span>
-                ) : (
-                  <span>{shippingCost.toFixed(2)} €</span>
-                )}
+                <span>{shippingCost.toFixed(2)} €</span>
               </div>
 
               <div className="totals-row grand-total">

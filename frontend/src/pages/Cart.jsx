@@ -18,10 +18,7 @@ export default function Cart({ cartItems, onUpdateQty, onRemoveItem, onNavigate 
 
   const subtotal = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
   
-  // Shipping is free if subtotal > 150 (example threshold or dynamic threshold)
-  // Let's make it €150 or show €10.50 shipping cost.
-  const shippingThreshold = 150; 
-  const currentShipping = subtotal >= shippingThreshold ? 0 : shippingCost;
+  const currentShipping = subtotal === 0 ? 0 : shippingCost;
   const total = subtotal + currentShipping;
 
   const handleCheckoutClick = () => {
@@ -173,18 +170,10 @@ export default function Cart({ cartItems, onUpdateQty, onRemoveItem, onNavigate 
 
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.95rem' }}>
                 <span style={{ color: 'var(--text-secondary)' }}>Livraison</span>
-                <span style={{ fontWeight: '600', color: currentShipping === 0 ? 'var(--success)' : 'var(--text-primary)' }}>
-                  {currentShipping === 0 ? 'Gratuite' : `${currentShipping.toFixed(2)} €`}
+                <span style={{ fontWeight: '600', color: 'var(--text-primary)' }}>
+                  {currentShipping.toFixed(2)} €
                 </span>
               </div>
-
-              {/* Free delivery encouragement */}
-              {subtotal < shippingThreshold && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', backgroundColor: 'rgba(212, 175, 55, 0.08)', padding: '0.75rem', borderRadius: '8px', border: '1px solid rgba(212, 175, 55, 0.2)', color: 'var(--primary-gold)' }}>
-                  <Truck size={14} />
-                  <span>Ajoutez <strong>{(shippingThreshold - subtotal).toFixed(0)} €</strong> de plus pour la livraison gratuite !</span>
-                </div>
-              )}
             </div>
 
             {/* Total Row */}

@@ -488,7 +488,7 @@ export default function Checkout({ cartItems, onClearCart, onBackToShopping, cur
             </div>
             <div className="totals-row">
               <span>Livraison</span>
-              {shippingCost === 0 ? <span style={{ color: 'var(--success)', fontWeight: '600' }}>Gratuit</span> : <span>{shippingCost.toFixed(2)} €</span>}
+              <span>{shippingCost.toFixed(2)} €</span>
             </div>
             <div className="totals-row grand-total">
               <span>Total</span>
@@ -588,7 +588,7 @@ export default function Checkout({ cartItems, onClearCart, onBackToShopping, cur
             </div>
             <div className="totals-row">
               <span>Livraison</span>
-              {shippingCost === 0 ? <span style={{ color: 'var(--success)', fontWeight: '600' }}>Gratuit</span> : <span>{shippingCost.toFixed(2)} €</span>}
+              <span>{shippingCost.toFixed(2)} €</span>
             </div>
             <div className="totals-row grand-total">
               <span>Total</span>
@@ -742,7 +742,7 @@ export default function Checkout({ cartItems, onClearCart, onBackToShopping, cur
             </div>
             <div className="totals-row">
               <span>Livraison</span>
-              {shippingCost === 0 ? <span style={{ color: 'var(--success)', fontWeight: '600' }}>Gratuit</span> : <span>{shippingCost.toFixed(2)} €</span>}
+              <span>{shippingCost.toFixed(2)} €</span>
             </div>
             <div className="totals-row grand-total">
               <span>Total</span>
@@ -1014,7 +1014,7 @@ export default function Checkout({ cartItems, onClearCart, onBackToShopping, cur
           </div>
           <div className="totals-row">
             <span>Livraison</span>
-            {shippingCost === 0 ? <span style={{ color: 'var(--success)', fontWeight: '600' }}>Gratuit</span> : <span>{shippingCost.toFixed(2)} €</span>}
+            <span>{shippingCost.toFixed(2)} €</span>
           </div>
           <div className="totals-row grand-total" style={{ borderTop: '1px solid var(--border-color)', paddingTop: '0.75rem' }}>
             <span>Total</span>
