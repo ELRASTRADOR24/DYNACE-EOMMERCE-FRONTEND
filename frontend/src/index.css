@@ -1428,8 +1428,7 @@ body {
   border-radius: 0;
   padding: 2.5rem;
   box-shadow: none;
-  position: sticky;
-  top: 120px;
+  position: relative;
 }
 
 .summary-title {
@@ -3665,6 +3664,7 @@ body {
     order: -1 !important;
     width: 100% !important;
     margin-bottom: 1rem !important;
+    position: static !important;
   }
 
   .checkout-form-section {
