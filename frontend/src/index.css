@@ -1297,6 +1297,10 @@ body {
     grid-template-columns: 1fr;
     gap: 4rem;
   }
+  
+  .order-summary-card {
+    position: static !important;
+  }
 }
 
 .checkout-form-section {
