@@ -73,6 +73,11 @@ export default function Checkout({ cartItems, onClearCart, onBackToShopping, cur
   const [shippingCostBase, setShippingCostBase] = useState(10.50);
   const [useTestPayment, setUseTestPayment] = useState(false);
 
+  const [couponInput, setCouponInput] = useState('');
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
+  const [couponError, setCouponError] = useState('');
+  const [couponSuccess, setCouponSuccess] = useState('');
+
   useEffect(() => {
     fetch('/api/settings/shipping')
       .then(res => res.json())
@@ -82,6 +87,63 @@ export default function Checkout({ cartItems, onClearCart, onBackToShopping, cur
       })
       .catch(err => console.error(err));
   }, []);
+
+  useEffect(() => {
+    const saved = sessionStorage.getItem('dynace_applied_coupon');
+    if (saved) {
+      fetch('/api/coupons/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: saved })
+      })
+      .then(res => {
+        if (res.ok) return res.json();
+        throw new Error();
+      })
+      .then(data => {
+        setAppliedCoupon(data);
+        setCouponInput(data.code);
+      })
+      .catch(() => {
+        sessionStorage.removeItem('dynace_applied_coupon');
+      });
+    }
+  }, []);
+
+  const handleValidateCoupon = async () => {
+    setCouponError('');
+    setCouponSuccess('');
+    if (!couponInput) return;
+
+    try {
+      const res = await fetch('/api/coupons/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: couponInput })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setAppliedCoupon(data);
+        sessionStorage.setItem('dynace_applied_coupon', data.code);
+        setCouponSuccess(`Code promo '${data.code}' appliqué !`);
+      } else {
+        const errData = await res.json();
+        setCouponError(errData.error || 'Code promo invalide.');
+        setAppliedCoupon(null);
+        sessionStorage.removeItem('dynace_applied_coupon');
+      }
+    } catch (err) {
+      setCouponError('Erreur de connexion.');
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponInput('');
+    setCouponSuccess('');
+    setCouponError('');
+    sessionStorage.removeItem('dynace_applied_coupon');
+  };
 
   const subtotal = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
 
@@ -103,7 +165,18 @@ export default function Checkout({ cartItems, onClearCart, onBackToShopping, cur
 
   const shippingDetails = getShippingDetails(country, subtotal);
   const shippingCost = shippingDetails.cost;
-  const grandTotal = subtotal + shippingCost;
+
+  let discountAmount = 0;
+  if (appliedCoupon) {
+    if (appliedCoupon.discount_type === 'percentage') {
+      discountAmount = subtotal * (appliedCoupon.discount_value / 100);
+    } else {
+      discountAmount = appliedCoupon.discount_value;
+    }
+    discountAmount = Math.min(discountAmount, subtotal);
+  }
+
+  const grandTotal = subtotal - discountAmount + shippingCost;
 
   // Effect to automatically set registered mode if currentUser logs in
   useEffect(() => {
@@ -148,6 +221,7 @@ export default function Checkout({ cartItems, onClearCart, onBackToShopping, cur
             setIsOrdered(true);
             setTrackerStep(0);
             onClearCart();
+            sessionStorage.removeItem('dynace_applied_coupon');
             // Clean up query parameters from URL
             window.history.replaceState({}, document.title, window.location.pathname);
           }
@@ -281,7 +355,8 @@ export default function Checkout({ cartItems, onClearCart, onBackToShopping, cur
               name: item.name,
               price: item.price,
               quantity: item.quantity
-            }))
+            })),
+            couponCode: appliedCoupon ? appliedCoupon.code : ''
           })
         });
 
@@ -296,6 +371,7 @@ export default function Checkout({ cartItems, onClearCart, onBackToShopping, cur
         setOrderNumber(data.orderNumber);
         setTrackerStep(0);
         onClearCart();
+        sessionStorage.removeItem('dynace_applied_coupon');
       } else {
         const res = await fetch('/api/payment/create-checkout-session', {
           method: 'POST',
@@ -314,7 +390,8 @@ export default function Checkout({ cartItems, onClearCart, onBackToShopping, cur
               name: item.name,
               price: item.price,
               quantity: item.quantity
-            }))
+            })),
+            couponCode: appliedCoupon ? appliedCoupon.code : ''
           })
         });
 
@@ -490,6 +567,12 @@ export default function Checkout({ cartItems, onClearCart, onBackToShopping, cur
               <span>Livraison</span>
               <span>{shippingCost.toFixed(2)} €</span>
             </div>
+            {appliedCoupon && (
+              <div className="totals-row" style={{ color: 'var(--success)' }}>
+                <span>Remise ({appliedCoupon.code})</span>
+                <span>-{discountAmount.toFixed(2)} €</span>
+              </div>
+            )}
             <div className="totals-row grand-total">
               <span>Total</span>
               <span>{grandTotal.toFixed(2)} €</span>
@@ -590,6 +673,12 @@ export default function Checkout({ cartItems, onClearCart, onBackToShopping, cur
               <span>Livraison</span>
               <span>{shippingCost.toFixed(2)} €</span>
             </div>
+            {appliedCoupon && (
+              <div className="totals-row" style={{ color: 'var(--success)' }}>
+                <span>Remise ({appliedCoupon.code})</span>
+                <span>-{discountAmount.toFixed(2)} €</span>
+              </div>
+            )}
             <div className="totals-row grand-total">
               <span>Total</span>
               <span>{grandTotal.toFixed(2)} €</span>
@@ -744,6 +833,12 @@ export default function Checkout({ cartItems, onClearCart, onBackToShopping, cur
               <span>Livraison</span>
               <span>{shippingCost.toFixed(2)} €</span>
             </div>
+            {appliedCoupon && (
+              <div className="totals-row" style={{ color: 'var(--success)' }}>
+                <span>Remise ({appliedCoupon.code})</span>
+                <span>-{discountAmount.toFixed(2)} €</span>
+              </div>
+            )}
             <div className="totals-row grand-total">
               <span>Total</span>
               <span>{grandTotal.toFixed(2)} €</span>
@@ -1016,6 +1111,48 @@ export default function Checkout({ cartItems, onClearCart, onBackToShopping, cur
             <span>Livraison</span>
             <span>{shippingCost.toFixed(2)} €</span>
           </div>
+          {appliedCoupon && (
+            <div className="totals-row" style={{ color: 'var(--success)' }}>
+              <span>Remise ({appliedCoupon.code})</span>
+              <span>-{discountAmount.toFixed(2)} €</span>
+            </div>
+          )}
+          
+          {/* Coupon Input Box */}
+          <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1rem', marginTop: '1rem', marginBottom: '1rem' }}>
+            <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.4rem' }}>Code Promo</label>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <input 
+                type="text" 
+                placeholder="Entrez votre code"
+                value={couponInput}
+                onChange={e => setCouponInput(e.target.value.toUpperCase())}
+                disabled={!!appliedCoupon}
+                className="form-input"
+                style={{ flex: 1, padding: '0.4rem 0.6rem', fontSize: '0.85rem', borderRadius: '6px', border: '1px solid var(--border-color)', backgroundColor: 'transparent', color: 'var(--text-primary)' }}
+              />
+              {appliedCoupon ? (
+                <button 
+                  type="button"
+                  onClick={handleRemoveCoupon}
+                  style={{ backgroundColor: 'var(--danger-bg)', color: 'var(--danger)', border: '1px solid rgba(217, 48, 37, 0.2)', padding: '0.4rem 0.8rem', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.8rem' }}
+                >
+                  Retirer
+                </button>
+              ) : (
+                <button 
+                  type="button"
+                  onClick={handleValidateCoupon}
+                  style={{ backgroundColor: 'var(--primary-gold)', color: 'var(--bg-primary)', border: 'none', padding: '0.4rem 0.8rem', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.8rem' }}
+                >
+                  Appliquer
+                </button>
+              )}
+            </div>
+            {couponError && <span style={{ color: 'var(--danger)', fontSize: '0.7rem', display: 'block', marginTop: '0.25rem' }}>{couponError}</span>}
+            {couponSuccess && <span style={{ color: 'var(--success)', fontSize: '0.7rem', display: 'block', marginTop: '0.25rem' }}>{couponSuccess}</span>}
+          </div>
+
           <div className="totals-row grand-total" style={{ borderTop: '1px solid var(--border-color)', paddingTop: '0.75rem' }}>
             <span>Total</span>
             <span>{grandTotal.toFixed(2)} €</span>

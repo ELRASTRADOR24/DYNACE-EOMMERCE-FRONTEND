@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2, Package, ShoppingCart, RefreshCw, Save, X, Check, Truck, AlertCircle, Settings } from 'lucide-react';
+import { Plus, Edit2, Trash2, Package, ShoppingCart, RefreshCw, Save, X, Check, Truck, AlertCircle, Settings, BarChart2, Percent, Download } from 'lucide-react';
 
 export default function AdminDashboard({ onRefreshProducts }) {
-  const [activeSubTab, setActiveSubTab] = useState('products'); // 'products' or 'orders'
+  const [activeSubTab, setActiveSubTab] = useState('analytics'); // 'analytics', 'products', 'orders', etc.
   const [highlightedOrderNumber, setHighlightedOrderNumber] = useState('');
 
   useEffect(() => {
@@ -56,6 +56,20 @@ export default function AdminDashboard({ onRefreshProducts }) {
   const [usersLoading, setUsersLoading] = useState(false);
   const [reviews, setReviews] = useState([]);
   const [reviewsLoading, setReviewsLoading] = useState(false);
+
+  // State for coupons
+  const [coupons, setCoupons] = useState([]);
+  const [couponsLoading, setCouponsLoading] = useState(false);
+  const [newCouponForm, setNewCouponForm] = useState({
+    code: '',
+    discount_type: 'percentage',
+    discount_value: '',
+    expires_at: ''
+  });
+
+  // State for analytics
+  const [analytics, setAnalytics] = useState(null);
+  const [analyticsLoading, setAnalyticsLoading] = useState(false);
 
   // Fetch products
   const fetchProducts = async () => {
@@ -112,11 +126,174 @@ export default function AdminDashboard({ onRefreshProducts }) {
     }
   };
 
+  const fetchAnalytics = async () => {
+    setAnalyticsLoading(true);
+    const token = localStorage.getItem('dynace_jwt');
+    try {
+      const res = await fetch('/api/admin/analytics', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setAnalytics(data);
+      } else {
+        const errData = await res.json();
+        showError(errData.error || 'Erreur lors de la récupération des statistiques.');
+      }
+    } catch (err) {
+      showError('Erreur lors du chargement des statistiques.');
+    } finally {
+      setAnalyticsLoading(false);
+    }
+  };
+
+  const fetchCoupons = async () => {
+    setCouponsLoading(true);
+    const token = localStorage.getItem('dynace_jwt');
+    try {
+      const res = await fetch('/api/admin/coupons', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setCoupons(data);
+      } else {
+        const errData = await res.json();
+        showError(errData.error || 'Erreur lors de la récupération des codes promos.');
+      }
+    } catch (err) {
+      showError('Erreur de connexion avec le serveur.');
+    } finally {
+      setCouponsLoading(false);
+    }
+  };
+
+  const handleCreateCoupon = async (e) => {
+    e.preventDefault();
+    if (!newCouponForm.code || !newCouponForm.discount_value) {
+      return showError('Veuillez remplir tous les champs obligatoires.');
+    }
+    const token = localStorage.getItem('dynace_jwt');
+    try {
+      const res = await fetch('/api/admin/coupons', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          code: newCouponForm.code,
+          discount_type: newCouponForm.discount_type,
+          discount_value: parseFloat(newCouponForm.discount_value),
+          expires_at: newCouponForm.expires_at || null
+        })
+      });
+
+      if (res.ok) {
+        showSuccess('Code promo créé avec succès !');
+        setNewCouponForm({ code: '', discount_type: 'percentage', discount_value: '', expires_at: '' });
+        fetchCoupons();
+      } else {
+        const errData = await res.json();
+        showError(errData.error || 'Erreur lors de la création du code promo.');
+      }
+    } catch (err) {
+      showError('Erreur de connexion avec le serveur.');
+    }
+  };
+
+  const handleDeleteCoupon = async (id) => {
+    if (!window.confirm('Voulez-vous vraiment supprimer ce code promo ?')) return;
+    const token = localStorage.getItem('dynace_jwt');
+    try {
+      const res = await fetch(`/api/admin/coupons/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        showSuccess('Code promo supprimé !');
+        fetchCoupons();
+      } else {
+        const errData = await res.json();
+        showError(errData.error || 'Erreur lors de la suppression.');
+      }
+    } catch (err) {
+      showError('Erreur de connexion.');
+    }
+  };
+
+  const handleExportOrdersToCSV = () => {
+    if (orders.length === 0) {
+      return showError('Aucune commande à exporter.');
+    }
+    const headers = [
+      'Numéro de Commande',
+      'Date',
+      'Client',
+      'Email',
+      'Téléphone',
+      'Adresse',
+      'Code Postal',
+      'Ville',
+      'Pays',
+      'Articles',
+      'Sous-total (€)',
+      'Remise (€)',
+      'Code Promo',
+      'Livraison (€)',
+      'Total (€)',
+      'Statut'
+    ];
+    const rows = orders.map(order => {
+      const itemsStr = order.items ? order.items.map(i => `${i.name} (x${i.quantity})`).join(' | ') : '';
+      const clientName = `${order.first_name || ''} ${order.last_name || ''}`.trim();
+      const dateStr = order.created_at ? new Date(order.created_at).toLocaleDateString('fr-FR') : '';
+      return [
+        order.order_number || '',
+        dateStr,
+        clientName,
+        order.email || '',
+        `="${order.phone || ''}"`,
+        `="${order.address || ''}"`,
+        order.postal_code || '',
+        order.city || '',
+        order.country || '',
+        `="${itemsStr}"`,
+        (order.subtotal || 0).toFixed(2),
+        (order.discount_amount || 0).toFixed(2),
+        order.coupon_code || '',
+        (order.shipping || 0).toFixed(2),
+        (order.total || 0).toFixed(2),
+        order.status || ''
+      ];
+    });
+    const csvContent = [
+      headers.join(','),
+      ...rows.map(row => row.map(val => {
+        const cell = val === null || val === undefined ? '' : String(val);
+        if (cell.includes(',') || cell.includes('"') || cell.includes('\n')) {
+          return `"${cell.replace(/"/g, '""')}"`;
+        }
+        return cell;
+      }).join(','))
+    ].join('\n');
+    const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `commandes_dynace_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   useEffect(() => {
     fetchProducts();
     fetchOrders();
     fetchSettings();
     fetchUsers();
+    fetchAnalytics();
   }, []);
 
   useEffect(() => {
@@ -124,6 +301,10 @@ export default function AdminDashboard({ onRefreshProducts }) {
       fetchUsers();
     } else if (activeSubTab === 'reviews') {
       fetchAllReviews();
+    } else if (activeSubTab === 'analytics') {
+      fetchAnalytics();
+    } else if (activeSubTab === 'coupons') {
+      fetchCoupons();
     }
   }, [activeSubTab]);
 
@@ -620,8 +801,36 @@ export default function AdminDashboard({ onRefreshProducts }) {
         </div>
       )}
 
+      {/* Alertes de Stock Faible */}
+      {products.filter(p => p.stock < 10).length > 0 && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '1rem', backgroundColor: 'rgba(217, 48, 37, 0.08)', color: 'var(--danger)', borderRadius: '12px', marginBottom: '1.5rem', border: '1px solid rgba(217, 48, 37, 0.2)' }}>
+          <AlertCircle size={20} />
+          <span><strong>⚠️ Alerte Stock Faible :</strong> {products.filter(p => p.stock < 10).map(p => `${p.name} (${p.stock} restant${p.stock > 1 ? 's' : ''})`).join(', ')} approach(ent) de la rupture !</span>
+        </div>
+      )}
+
       {/* Sub Tabs Toggle (Glassmorphism design) */}
-      <div style={{ display: 'flex', borderBottom: '1px solid var(--border-color)', marginBottom: '2rem', gap: '2rem' }}>
+      <div style={{ display: 'flex', borderBottom: '1px solid var(--border-color)', marginBottom: '2rem', gap: '2rem', flexWrap: 'wrap' }}>
+        <button 
+          onClick={() => setActiveSubTab('analytics')}
+          style={{
+            background: 'none',
+            border: 'none',
+            padding: '1rem 0',
+            fontSize: '1.1rem',
+            fontWeight: '600',
+            color: activeSubTab === 'analytics' ? 'var(--primary-green)' : 'var(--text-secondary)',
+            borderBottom: activeSubTab === 'analytics' ? '3px solid var(--primary-green)' : '3px solid transparent',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            transition: 'all 0.2s'
+          }}
+        >
+          <BarChart2 size={18} />
+          Statistiques
+        </button>
         <button 
           onClick={() => setActiveSubTab('products')}
           style={{
@@ -668,15 +877,15 @@ export default function AdminDashboard({ onRefreshProducts }) {
           )}
         </button>
         <button 
-          onClick={() => setActiveSubTab('settings')}
+          onClick={() => setActiveSubTab('coupons')}
           style={{
             background: 'none',
             border: 'none',
             padding: '1rem 0',
             fontSize: '1.1rem',
             fontWeight: '600',
-            color: activeSubTab === 'settings' ? 'var(--primary-green)' : 'var(--text-secondary)',
-            borderBottom: activeSubTab === 'settings' ? '3px solid var(--primary-green)' : '3px solid transparent',
+            color: activeSubTab === 'coupons' ? 'var(--primary-green)' : 'var(--text-secondary)',
+            borderBottom: activeSubTab === 'coupons' ? '3px solid var(--primary-green)' : '3px solid transparent',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
@@ -684,8 +893,8 @@ export default function AdminDashboard({ onRefreshProducts }) {
             transition: 'all 0.2s'
           }}
         >
-          <Settings size={18} />
-          Paramètres
+          <Percent size={18} />
+          Codes Promos
         </button>
         <button 
           onClick={() => setActiveSubTab('users')}
@@ -708,6 +917,26 @@ export default function AdminDashboard({ onRefreshProducts }) {
           Utilisateurs
         </button>
         <button 
+          onClick={() => setActiveSubTab('settings')}
+          style={{
+            background: 'none',
+            border: 'none',
+            padding: '1rem 0',
+            fontSize: '1.1rem',
+            fontWeight: '600',
+            color: activeSubTab === 'settings' ? 'var(--primary-green)' : 'var(--text-secondary)',
+            borderBottom: activeSubTab === 'settings' ? '3px solid var(--primary-green)' : '3px solid transparent',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            transition: 'all 0.2s'
+          }}
+        >
+          <Settings size={18} />
+          Paramètres
+        </button>
+        <button 
           onClick={() => setActiveSubTab('reviews')}
           style={{
             background: 'none',
@@ -728,6 +957,72 @@ export default function AdminDashboard({ onRefreshProducts }) {
           Avis & Médias
         </button>
       </div>
+
+      {/* ANALYTICS PANEL */}
+      {activeSubTab === 'analytics' && (
+        <div>
+          <h3 style={{ fontSize: '1.8rem', fontFamily: 'var(--serif)', color: 'var(--primary-green)', marginBottom: '1.5rem', borderBottom: '2px solid var(--primary-gold)', paddingBottom: '0.5rem' }}>
+            📊 Statistiques & Analyses de Vente
+          </h3>
+
+          {analyticsLoading ? (
+            <div style={{ display: 'flex', justifyContent: 'center', padding: '3rem' }}>
+              <RefreshCw className="spin" size={32} style={{ color: 'var(--primary-green)' }} />
+            </div>
+          ) : analytics ? (
+            <div>
+              {/* KPIs Grid */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.5rem', marginBottom: '2.5rem' }}>
+                <div style={{ backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--border-color)', padding: '1.5rem', borderRadius: '12px' }}>
+                  <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', display: 'block', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.5rem' }}>Chiffre d'Affaires</span>
+                  <strong style={{ fontSize: '2rem', color: 'var(--primary-gold)', fontFamily: 'var(--serif)' }}>{analytics.totalRevenue.toFixed(2)} €</strong>
+                </div>
+                <div style={{ backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--border-color)', padding: '1.5rem', borderRadius: '12px' }}>
+                  <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', display: 'block', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.5rem' }}>Commandes Validées</span>
+                  <strong style={{ fontSize: '2rem', color: 'var(--text-primary)' }}>{analytics.totalOrders}</strong>
+                </div>
+                <div style={{ backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--border-color)', padding: '1.5rem', borderRadius: '12px' }}>
+                  <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', display: 'block', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.5rem' }}>Panier Moyen</span>
+                  <strong style={{ fontSize: '2rem', color: 'var(--text-primary)' }}>{analytics.avgOrderValue.toFixed(2)} €</strong>
+                </div>
+              </div>
+
+              {/* Top Products Sales Table */}
+              <div style={{ backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--border-color)', padding: '1.5rem', borderRadius: '12px', marginBottom: '2rem' }}>
+                <h4 style={{ fontSize: '1.2rem', fontFamily: 'var(--serif)', color: 'var(--text-primary)', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  🏆 Top des Ventes Produits
+                </h4>
+                {analytics.topProducts.length === 0 ? (
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Aucune vente enregistrée pour le moment.</p>
+                ) : (
+                  <div style={{ overflowX: 'auto' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '500px' }}>
+                      <thead>
+                        <tr style={{ borderBottom: '2px solid var(--border-color)' }}>
+                          <th style={{ padding: '0.75rem', color: 'var(--text-secondary)', fontWeight: '600' }}>Produit</th>
+                          <th style={{ padding: '0.75rem', color: 'var(--text-secondary)', fontWeight: '600', textAlign: 'center' }}>Unités Vendues</th>
+                          <th style={{ padding: '0.75rem', color: 'var(--text-secondary)', fontWeight: '600', textAlign: 'right' }}>Revenu Total</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {analytics.topProducts.map(prod => (
+                          <tr key={prod.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
+                            <td style={{ padding: '0.75rem', fontWeight: '600' }}>{prod.name}</td>
+                            <td style={{ padding: '0.75rem', textAlign: 'center' }}>{prod.quantity}</td>
+                            <td style={{ padding: '0.75rem', textAlign: 'right', color: 'var(--primary-gold)', fontWeight: '700' }}>{prod.revenue.toFixed(2)} €</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : (
+            <p style={{ color: 'var(--text-secondary)' }}>Impossible de charger les statistiques.</p>
+          )}
+        </div>
+      )}
 
       {/* PRODUCTS PANEL */}
       {activeSubTab === 'products' && (
@@ -819,8 +1114,11 @@ export default function AdminDashboard({ onRefreshProducts }) {
                         <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'block' }}>Stock disponible</span>
                         <strong style={{ 
                           fontSize: '1.1rem', 
-                          color: p.stock <= 5 ? 'var(--danger)' : 'var(--text-primary)' 
+                          color: p.stock < 10 ? 'var(--danger)' : 'var(--text-primary)' 
                         }}>{p.stock} unités</strong>
+                        {p.stock < 10 && p.stock > 0 && (
+                          <span style={{ display: 'block', fontSize: '0.75rem', color: 'var(--danger)', fontWeight: 'bold' }}>⚠️ Stock faible !</span>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -926,6 +1224,28 @@ export default function AdminDashboard({ onRefreshProducts }) {
                 >
                   <span>{orders.every(o => selectedOrderIds.includes(o._id)) ? '⬛' : '⬜'}</span>
                   {orders.every(o => selectedOrderIds.includes(o._id)) ? 'Tout désélectionner' : 'Sélectionner tout'}
+                </button>
+              )}
+
+              {orders.length > 0 && (
+                <button
+                  onClick={handleExportOrdersToCSV}
+                  style={{
+                    backgroundColor: 'var(--bg-secondary)',
+                    color: 'var(--text-primary)',
+                    border: '1px solid var(--border-color)',
+                    padding: '0.6rem 1.25rem',
+                    borderRadius: '30px',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    transition: 'all 0.2s'
+                  }}
+                >
+                  <Download size={16} style={{ color: 'var(--primary-gold)' }} />
+                  Exporter en CSV
                 </button>
               )}
             </div>
@@ -1196,6 +1516,123 @@ export default function AdminDashboard({ onRefreshProducts }) {
               ))}
             </div>
           )}
+        </div>
+      )}
+
+      {/* COUPONS PANEL */}
+      {activeSubTab === 'coupons' && (
+        <div>
+          <h3 style={{ fontSize: '1.8rem', fontFamily: 'var(--serif)', color: 'var(--primary-green)', marginBottom: '1.5rem', borderBottom: '2px solid var(--primary-gold)', paddingBottom: '0.5rem' }}>
+            🏷️ Gestion des Codes de Réduction (Coupons)
+          </h3>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2rem' }}>
+            {/* Create Coupon Card */}
+            <div style={{ backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--border-color)', padding: '2rem', borderRadius: '12px', height: 'fit-content' }}>
+              <h4 style={{ fontSize: '1.2rem', fontFamily: 'var(--serif)', color: 'var(--text-primary)', marginBottom: '1.5rem' }}>
+                🆕 Créer un Nouveau Code Promo
+              </h4>
+              <form onSubmit={handleCreateCoupon} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                <div>
+                  <label style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.5rem' }}>Code de réduction (ex: NOEL20)</label>
+                  <input 
+                    type="text" 
+                    required 
+                    value={newCouponForm.code} 
+                    onChange={e => setNewCouponForm(prev => ({ ...prev, code: e.target.value.toUpperCase() }))}
+                    className="form-input"
+                    style={{ width: '100%' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.5rem' }}>Type de réduction</label>
+                  <select 
+                    value={newCouponForm.discount_type} 
+                    onChange={e => setNewCouponForm(prev => ({ ...prev, discount_type: e.target.value }))}
+                    className="form-input"
+                    style={{ width: '100%', backgroundColor: 'var(--bg-primary)' }}
+                  >
+                    <option value="percentage">Pourcentage (%)</option>
+                    <option value="fixed">Montant Fixe (€)</option>
+                  </select>
+                </div>
+                <div>
+                  <label style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.5rem' }}>Valeur (ex: 10 pour -10% ou 15 pour -15€)</label>
+                  <input 
+                    type="number" 
+                    required 
+                    min="1"
+                    value={newCouponForm.discount_value} 
+                    onChange={e => setNewCouponForm(prev => ({ ...prev, discount_value: e.target.value }))}
+                    className="form-input"
+                    style={{ width: '100%' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.5rem' }}>Date d'expiration (optionnelle)</label>
+                  <input 
+                    type="date" 
+                    value={newCouponForm.expires_at} 
+                    onChange={e => setNewCouponForm(prev => ({ ...prev, expires_at: e.target.value }))}
+                    className="form-input"
+                    style={{ width: '100%', colorScheme: 'dark' }}
+                  />
+                </div>
+                <button type="submit" className="checkout-btn" style={{ width: '100%', padding: '0.8rem', borderRadius: '30px', fontWeight: 'bold', marginTop: '0.5rem' }}>
+                  Créer le code promo
+                </button>
+              </form>
+            </div>
+
+            {/* Coupons List Table */}
+            <div style={{ backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--border-color)', padding: '2rem', borderRadius: '12px' }}>
+              <h4 style={{ fontSize: '1.2rem', fontFamily: 'var(--serif)', color: 'var(--text-primary)', marginBottom: '1.5rem' }}>
+                📋 Codes Promos Actifs ({coupons.length})
+              </h4>
+              {couponsLoading ? (
+                <div style={{ display: 'flex', justifyContent: 'center', padding: '2rem' }}>
+                  <RefreshCw className="spin" size={24} style={{ color: 'var(--primary-green)' }} />
+                </div>
+              ) : coupons.length === 0 ? (
+                <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Aucun code promo créé pour le moment.</p>
+              ) : (
+                <div style={{ overflowX: 'auto' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                    <thead>
+                      <tr style={{ borderBottom: '2px solid var(--border-color)' }}>
+                        <th style={{ padding: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Code</th>
+                        <th style={{ padding: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Réduction</th>
+                        <th style={{ padding: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Expiration</th>
+                        <th style={{ padding: '0.5rem', textAlign: 'right' }}>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {coupons.map(cp => (
+                        <tr key={cp._id} style={{ borderBottom: '1px solid var(--border-color)' }}>
+                          <td style={{ padding: '0.75rem 0.5rem', fontWeight: 'bold', color: 'var(--primary-gold)' }}>{cp.code}</td>
+                          <td style={{ padding: '0.75rem 0.5rem', fontSize: '0.9rem' }}>
+                            {cp.discount_type === 'percentage' ? `-${cp.discount_value}%` : `-${cp.discount_value} €`}
+                          </td>
+                          <td style={{ padding: '0.75rem 0.5rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                            {cp.expires_at ? new Date(cp.expires_at).toLocaleDateString('fr-FR') : 'Jamais'}
+                          </td>
+                          <td style={{ padding: '0.75rem 0.5rem', textAlign: 'right' }}>
+                            <button 
+                              onClick={() => handleDeleteCoupon(cp._id)}
+                              style={{ background: 'none', border: 'none', color: 'var(--danger)', cursor: 'pointer' }}
+                              title="Supprimer"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       )}
 

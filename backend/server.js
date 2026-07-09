@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
-import { connectDatabase, User, Product, Order, Review, Setting, Newsletter } from './database.js';
+import { connectDatabase, User, Product, Order, Review, Setting, Newsletter, Coupon } from './database.js';
 import { seedProducts } from './seed.js';
 import Stripe from 'stripe';
 import multer from 'multer';
@@ -1014,7 +1014,7 @@ const COUNTRY_CONFIGS = {
 
 // 1. Create Checkout Session
 app.post('/api/payment/create-checkout-session', async (req, res) => {
-  const { items, email, firstName, lastName, phone, address, postalCode, city, country } = req.body;
+  const { items, email, firstName, lastName, phone, address, postalCode, city, country, couponCode } = req.body;
 
   if (!items || items.length === 0 || !email) {
     return res.status(400).json({ error: 'Panier ou email manquant.' });
@@ -1031,20 +1031,40 @@ app.post('/api/payment/create-checkout-session', async (req, res) => {
     const lineItems = [];
     let backendSubtotal = 0;
 
-    // Récupérer et recalculer le prix réel des produits dans MongoDB
+    // First, recalculate real subtotal
     for (const item of items) {
       const dbProduct = await Product.findById(item.id);
       if (!dbProduct) {
         return res.status(404).json({ error: `Produit ${item.name || item.id} non trouvé.` });
       }
-
       if (dbProduct.stock < item.quantity) {
         return res.status(400).json({ error: `Stock insuffisant pour ${dbProduct.name}. (En stock: ${dbProduct.stock})` });
       }
+      backendSubtotal += dbProduct.price * item.quantity;
+    }
 
-      const itemTotal = dbProduct.price * item.quantity;
-      backendSubtotal += itemTotal;
+    // Coupon discount logic
+    let discountAmount = 0;
+    if (couponCode) {
+      const coupon = await Coupon.findOne({ code: couponCode.toUpperCase(), is_active: true });
+      if (coupon) {
+        if (!coupon.expires_at || coupon.expires_at >= new Date()) {
+          if (coupon.discount_type === 'percentage') {
+            discountAmount = backendSubtotal * (coupon.discount_value / 100);
+          } else {
+            discountAmount = coupon.discount_value;
+          }
+          discountAmount = Math.min(discountAmount, backendSubtotal); // Cannot exceed subtotal
+        }
+      }
+    }
 
+    const discountFactor = backendSubtotal > 0 ? (backendSubtotal - discountAmount) / backendSubtotal : 1;
+
+    // Populate line items with discounted pricing
+    for (const item of items) {
+      const dbProduct = await Product.findById(item.id);
+      const discountedUnitPrice = dbProduct.price * discountFactor;
       lineItems.push({
         price_data: {
           currency: 'eur',
@@ -1053,25 +1073,23 @@ app.post('/api/payment/create-checkout-session', async (req, res) => {
             images: dbProduct.image ? [`${process.env.FRONTEND_URL || 'http://localhost:5174'}${dbProduct.image}`] : [],
             description: dbProduct.summary
           },
-          unit_amount: Math.round(dbProduct.price * 100), // Stripe attend des centimes
+          unit_amount: Math.round(discountedUnitPrice * 100), // Stripe expects cents
         },
         quantity: item.quantity
       });
     }
 
     // Récupérer les paramètres de livraison (par défaut du pays ou DB pour la France)
-    let threshold = config.freeThreshold;
     let cost = config.shippingCost;
     if (selectedCountry === 'FR') {
       const shippingSetting = await Setting.findOne({ key: 'shipping' });
       if (shippingSetting && shippingSetting.value) {
-        threshold = shippingSetting.value.threshold;
         cost = shippingSetting.value.cost;
       }
     }
 
-    // Calculer les frais de livraison avec le sous-total du backend
-    const shippingCost = backendSubtotal >= threshold ? 0 : cost;
+    // La livraison est TOUJOURS payante (seuil désactivé)
+    const shippingCost = cost;
 
     if (shippingCost > 0) {
       lineItems.push({
@@ -1111,7 +1129,9 @@ app.post('/api/payment/create-checkout-session', async (req, res) => {
         countryCode: selectedCountry,
         subtotal: backendSubtotal.toFixed(2),
         shipping: shippingCost.toFixed(2),
-        total: (backendSubtotal + shippingCost).toFixed(2),
+        discountAmount: discountAmount.toFixed(2),
+        couponCode: couponCode ? couponCode.toUpperCase() : '',
+        total: (backendSubtotal - discountAmount + shippingCost).toFixed(2),
         items: JSON.stringify(items.map(i => ({ id: i.id, quantity: i.quantity }))) // Ne pas stocker le prix frontend
       }
     });
@@ -1125,7 +1145,7 @@ app.post('/api/payment/create-checkout-session', async (req, res) => {
 
 // Create Test Order (Bypass Stripe for authorized test users)
 app.post('/api/payment/create-test-order', authenticateToken, async (req, res) => {
-  const { items, email, firstName, lastName, phone, address, postalCode, city, country } = req.body;
+  const { items, email, firstName, lastName, phone, address, postalCode, city, country, couponCode } = req.body;
 
   if (!items || items.length === 0 || !email) {
     return res.status(400).json({ error: 'Panier ou email manquant.' });
@@ -1166,19 +1186,34 @@ app.post('/api/payment/create-test-order', authenticateToken, async (req, res) =
       });
     }
 
+    // Coupon discount logic
+    let discountAmount = 0;
+    if (couponCode) {
+      const coupon = await Coupon.findOne({ code: couponCode.toUpperCase(), is_active: true });
+      if (coupon) {
+        if (!coupon.expires_at || coupon.expires_at >= new Date()) {
+          if (coupon.discount_type === 'percentage') {
+            discountAmount = backendSubtotal * (coupon.discount_value / 100);
+          } else {
+            discountAmount = coupon.discount_value;
+          }
+          discountAmount = Math.min(discountAmount, backendSubtotal); // Cannot exceed subtotal
+        }
+      }
+    }
+
     // Récupérer les paramètres de livraison (par défaut du pays ou DB pour la France)
-    let threshold = config.freeThreshold;
     let cost = config.shippingCost;
     if (selectedCountry === 'FR') {
       const shippingSetting = await Setting.findOne({ key: 'shipping' });
       if (shippingSetting && shippingSetting.value) {
-        threshold = shippingSetting.value.threshold;
         cost = shippingSetting.value.cost;
       }
     }
 
-    const shippingCost = backendSubtotal >= threshold ? 0 : cost;
-    const totalAmount = backendSubtotal + shippingCost;
+    // La livraison est TOUJOURS payante (seuil désactivé)
+    const shippingCost = cost;
+    const totalAmount = backendSubtotal - discountAmount + shippingCost;
     const orderNumber = `TEST-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`;
 
     const newOrder = new Order({
@@ -1195,6 +1230,8 @@ app.post('/api/payment/create-test-order', authenticateToken, async (req, res) =
       items: finalItems,
       subtotal: backendSubtotal,
       shipping: shippingCost,
+      discount_amount: discountAmount,
+      coupon_code: couponCode ? couponCode.toUpperCase() : '',
       total: totalAmount,
       status: 'Payé'
     });
@@ -1253,7 +1290,7 @@ app.post('/api/payment/confirm-order', async (req, res) => {
       return res.json({ success: true, orderNumber, alreadyProcessed: true });
     }
 
-    const { firstName, lastName, email, address, postalCode, city, country, subtotal, shipping, total, items } = session.metadata;
+    const { firstName, lastName, email, address, postalCode, city, country, subtotal, shipping, total, items, couponCode, discountAmount } = session.metadata;
     const phone = session.customer_details?.phone || session.metadata.phone || '';
 
     const user = await User.findOne({ email });
@@ -1273,6 +1310,8 @@ app.post('/api/payment/confirm-order', async (req, res) => {
       items: JSON.parse(items),
       subtotal: parseFloat(subtotal),
       shipping: parseFloat(shipping),
+      discount_amount: parseFloat(discountAmount || '0'),
+      coupon_code: couponCode || '',
       total: parseFloat(total),
       status: 'Payé'
     });
@@ -1632,6 +1671,147 @@ app.delete('/api/admin/products/:id', authenticateToken, verifyAdmin, async (req
   } catch (err) {
     console.error('Erreur suppression produit :', err.message);
     res.status(500).json({ error: 'Erreur lors de la suppression du produit.' });
+  }
+});
+
+// --- COUPONS ROUTES ---
+
+// 1. Validate a coupon (Public)
+app.post('/api/coupons/validate', async (req, res) => {
+  const { code } = req.body;
+  if (!code) {
+    return res.status(400).json({ error: 'Code promo manquant.' });
+  }
+
+  try {
+    const coupon = await Coupon.findOne({ code: code.toUpperCase(), is_active: true });
+    if (!coupon) {
+      return res.status(404).json({ error: 'Code promo invalide.' });
+    }
+
+    if (coupon.expires_at && coupon.expires_at < new Date()) {
+      return res.status(400).json({ error: 'Ce code promo a expiré.' });
+    }
+
+    res.json({
+      code: coupon.code,
+      discount_type: coupon.discount_type,
+      discount_value: coupon.discount_value
+    });
+  } catch (err) {
+    console.error('Erreur validation coupon :', err.message);
+    res.status(500).json({ error: 'Erreur serveur lors de la validation.' });
+  }
+});
+
+// 2. Get all coupons (Admin)
+app.get('/api/admin/coupons', authenticateToken, verifyAdmin, async (req, res) => {
+  try {
+    const coupons = await Coupon.find({}).sort({ created_at: -1 });
+    res.json(coupons);
+  } catch (err) {
+    console.error('Erreur lecture coupons :', err.message);
+    res.status(500).json({ error: 'Erreur lors de la récupération des codes promos.' });
+  }
+});
+
+// 3. Create a coupon (Admin)
+app.post('/api/admin/coupons', authenticateToken, verifyAdmin, async (req, res) => {
+  const { code, discount_type, discount_value, expires_at } = req.body;
+  if (!code || !discount_type || discount_value === undefined) {
+    return res.status(400).json({ error: 'Champs obligatoires manquants.' });
+  }
+
+  if (!['percentage', 'fixed'].includes(discount_type)) {
+    return res.status(400).json({ error: 'Type de réduction invalide.' });
+  }
+
+  try {
+    const existing = await Coupon.findOne({ code: code.toUpperCase() });
+    if (existing) {
+      return res.status(400).json({ error: 'Un code promo avec ce nom existe déjà.' });
+    }
+
+    const newCoupon = new Coupon({
+      code: code.toUpperCase(),
+      discount_type,
+      discount_value: parseFloat(discount_value),
+      expires_at: expires_at ? new Date(expires_at) : null
+    });
+
+    await newCoupon.save();
+    res.status(201).json(newCoupon);
+  } catch (err) {
+    console.error('Erreur création coupon :', err.message);
+    res.status(500).json({ error: 'Erreur lors de la création du code promo.' });
+  }
+});
+
+// 4. Delete a coupon (Admin)
+app.delete('/api/admin/coupons/:id', authenticateToken, verifyAdmin, async (req, res) => {
+  try {
+    const deleted = await Coupon.findByIdAndDelete(req.params.id);
+    if (!deleted) {
+      return res.status(404).json({ error: 'Code promo non trouvé.' });
+    }
+    res.json({ success: true, message: 'Code promo supprimé avec succès.' });
+  } catch (err) {
+    console.error('Erreur suppression coupon :', err.message);
+    res.status(500).json({ error: 'Erreur lors de la suppression.' });
+  }
+});
+
+// --- ANALYTICS ROUTES (Admin) ---
+
+app.get('/api/admin/analytics', authenticateToken, verifyAdmin, async (req, res) => {
+  try {
+    // Calculer les statistiques globales des commandes validées
+    const orders = await Order.find({ status: { $ne: 'Annulé' } });
+    
+    let totalRevenue = 0;
+    let totalOrders = orders.length;
+    
+    // Dictionnaire pour cumuler les ventes par produit
+    const salesByProduct = {};
+    
+    orders.forEach(order => {
+      totalRevenue += order.total || 0;
+      
+      if (order.items && Array.isArray(order.items)) {
+        order.items.forEach(item => {
+          const prodId = item.id;
+          const qty = item.quantity || 0;
+          const price = item.price || 0;
+          
+          if (!salesByProduct[prodId]) {
+            salesByProduct[prodId] = {
+              id: prodId,
+              name: item.name || prodId,
+              revenue: 0,
+              quantity: 0
+            };
+          }
+          
+          salesByProduct[prodId].revenue += price * qty;
+          salesByProduct[prodId].quantity += qty;
+        });
+      }
+    });
+
+    const avgOrderValue = totalOrders > 0 ? (totalRevenue / totalOrders) : 0;
+    
+    // Transformer l'objet ventes par produit en tableau trié par quantité vendue décroissante
+    const topProducts = Object.values(salesByProduct).sort((a, b) => b.quantity - a.quantity);
+
+    res.json({
+      totalRevenue: Math.round(totalRevenue * 100) / 100,
+      totalOrders,
+      avgOrderValue: Math.round(avgOrderValue * 100) / 100,
+      topProducts
+    });
+  } catch (err) {
+    console.error('Erreur calcul statistiques :', err.message);
+    res.status(500).json({ error: 'Erreur lors du calcul des statistiques de vente.' });
   }
 });
 

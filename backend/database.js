@@ -67,11 +67,25 @@ const orderSchema = new mongoose.Schema({
   total: { type: Number, required: true },
   status: { type: String, default: 'Payé' }, // 'Payé', 'En préparation', 'Expédié', 'Livré'
   tracking_number: { type: String, default: '' },
+  coupon_code: { type: String, default: '' },
+  discount_amount: { type: Number, default: 0 },
   is_archived: { type: Boolean, default: false },
   created_at: { type: Date, default: Date.now }
 });
 
 export const Order = mongoose.model('Order', orderSchema);
+
+// Schéma Code Promo (Coupon)
+const couponSchema = new mongoose.Schema({
+  code: { type: String, required: true, unique: true, uppercase: true },
+  discount_type: { type: String, required: true, enum: ['percentage', 'fixed'] },
+  discount_value: { type: Number, required: true },
+  is_active: { type: Boolean, default: true },
+  expires_at: { type: Date },
+  created_at: { type: Date, default: Date.now }
+});
+
+export const Coupon = mongoose.model('Coupon', couponSchema);
 
 // Schéma Avis/Commentaire (Review)
 const reviewSchema = new mongoose.Schema({

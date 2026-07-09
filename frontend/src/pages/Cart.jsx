@@ -16,10 +16,83 @@ export default function Cart({ cartItems, onUpdateQty, onRemoveItem, onNavigate 
       .catch(err => console.error("Erreur lecture frais de port :", err));
   }, []);
 
+  const [couponInput, setCouponInput] = useState('');
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
+  const [couponError, setCouponError] = useState('');
+  const [couponSuccess, setCouponSuccess] = useState('');
+
+  useEffect(() => {
+    const saved = sessionStorage.getItem('dynace_applied_coupon');
+    if (saved) {
+      fetch('/api/coupons/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: saved })
+      })
+      .then(res => {
+        if (res.ok) return res.json();
+        throw new Error();
+      })
+      .then(data => {
+        setAppliedCoupon(data);
+        setCouponInput(data.code);
+      })
+      .catch(() => {
+        sessionStorage.removeItem('dynace_applied_coupon');
+      });
+    }
+  }, []);
+
+  const handleValidateCoupon = async () => {
+    setCouponError('');
+    setCouponSuccess('');
+    if (!couponInput) return;
+
+    try {
+      const res = await fetch('/api/coupons/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: couponInput })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setAppliedCoupon(data);
+        sessionStorage.setItem('dynace_applied_coupon', data.code);
+        setCouponSuccess(`Code promo '${data.code}' appliqué !`);
+      } else {
+        const errData = await res.json();
+        setCouponError(errData.error || 'Code promo invalide.');
+        setAppliedCoupon(null);
+        sessionStorage.removeItem('dynace_applied_coupon');
+      }
+    } catch (err) {
+      setCouponError('Erreur de connexion.');
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponInput('');
+    setCouponSuccess('');
+    setCouponError('');
+    sessionStorage.removeItem('dynace_applied_coupon');
+  };
+
   const subtotal = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
   
   const currentShipping = subtotal === 0 ? 0 : shippingCost;
-  const total = subtotal + currentShipping;
+
+  let discountAmount = 0;
+  if (appliedCoupon) {
+    if (appliedCoupon.discount_type === 'percentage') {
+      discountAmount = subtotal * (appliedCoupon.discount_value / 100);
+    } else {
+      discountAmount = appliedCoupon.discount_value;
+    }
+    discountAmount = Math.min(discountAmount, subtotal);
+  }
+
+  const total = subtotal - discountAmount + currentShipping;
 
   const handleCheckoutClick = () => {
     onNavigate('checkout');
@@ -174,6 +247,46 @@ export default function Cart({ cartItems, onUpdateQty, onRemoveItem, onNavigate 
                   {currentShipping.toFixed(2)} €
                 </span>
               </div>
+
+              {appliedCoupon && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.95rem', color: 'var(--success)' }}>
+                  <span>Remise ({appliedCoupon.code})</span>
+                  <span style={{ fontWeight: '600' }}>-{discountAmount.toFixed(2)} €</span>
+                </div>
+              )}
+            </div>
+
+            {/* Coupon Code Input */}
+            <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1.25rem', marginBottom: '1.5rem' }}>
+              <label style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.5rem' }}>Code Promo</label>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <input 
+                  type="text" 
+                  placeholder="Entrez votre code"
+                  value={couponInput}
+                  onChange={e => setCouponInput(e.target.value.toUpperCase())}
+                  disabled={!!appliedCoupon}
+                  className="form-input"
+                  style={{ flex: 1, padding: '0.5rem 0.75rem', fontSize: '0.9rem', borderRadius: '8px', border: '1px solid var(--border-color)', backgroundColor: 'transparent', color: 'var(--text-primary)' }}
+                />
+                {appliedCoupon ? (
+                  <button 
+                    onClick={handleRemoveCoupon}
+                    style={{ backgroundColor: 'var(--danger-bg)', color: 'var(--danger)', border: '1px solid rgba(217, 48, 37, 0.2)', padding: '0.5rem 1rem', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.85rem' }}
+                  >
+                    Retirer
+                  </button>
+                ) : (
+                  <button 
+                    onClick={handleValidateCoupon}
+                    style={{ backgroundColor: 'var(--primary-gold)', color: 'var(--bg-primary)', border: 'none', padding: '0.5rem 1rem', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.85rem' }}
+                  >
+                    Appliquer
+                  </button>
+                )}
+              </div>
+              {couponError && <span style={{ color: 'var(--danger)', fontSize: '0.75rem', display: 'block', marginTop: '0.5rem' }}>{couponError}</span>}
+              {couponSuccess && <span style={{ color: 'var(--success)', fontSize: '0.75rem', display: 'block', marginTop: '0.5rem' }}>{couponSuccess}</span>}
             </div>
 
             {/* Total Row */}
