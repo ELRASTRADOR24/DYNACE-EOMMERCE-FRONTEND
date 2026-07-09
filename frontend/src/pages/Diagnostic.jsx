@@ -160,23 +160,8 @@ export default function Diagnostic({ onAddToCart, onNavigate }) {
   };
 
   return (
-    <div className="contact-container" style={{ minHeight: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem 1rem' }}>
-      <div 
-        style={{
-          width: '100%',
-          maxWidth: '650px',
-          background: 'var(--bg-glass)',
-          backdropFilter: 'blur(20px)',
-          WebkitBackdropFilter: 'blur(20px)',
-          border: '1px solid var(--border-color)',
-          borderRadius: '16px',
-          padding: '2.5rem',
-          boxShadow: 'var(--shadow-premium)',
-          color: 'var(--text-primary)',
-          position: 'relative',
-          overflow: 'hidden'
-        }}
-      >
+    <div className="diagnostic-page-container">
+      <div className="diagnostic-card">
         {/* STEP 0: INTRO SCREEN */}
         {currentStep === 0 && (
           <div style={{ textAlign: 'center' }}>
@@ -246,30 +231,7 @@ export default function Diagnostic({ onAddToCart, onNavigate }) {
                 <button
                   key={idx}
                   onClick={() => handleAnswerSelect(option)}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '1rem',
-                    width: '100%',
-                    padding: '1.1rem 1.5rem',
-                    background: 'rgba(255, 255, 255, 0.02)',
-                    border: '1px solid var(--border-color)',
-                    borderRadius: '8px',
-                    color: 'var(--text-primary)',
-                    fontSize: '0.95rem',
-                    fontWeight: '600',
-                    textAlign: 'left',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = 'rgba(212, 175, 55, 0.04)';
-                    e.currentTarget.style.borderColor = 'var(--primary-gold)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.02)';
-                    e.currentTarget.style.borderColor = 'var(--border-color)';
-                  }}
+                  className="diagnostic-option-btn"
                 >
                   {option.icon && (
                     <option.icon 
@@ -311,20 +273,7 @@ export default function Diagnostic({ onAddToCart, onNavigate }) {
             </h1>
 
             {/* Product card recommendation */}
-            <div 
-              style={{
-                background: 'rgba(0, 0, 0, 0.1)',
-                border: '1px solid var(--border-color)',
-                borderRadius: '12px',
-                padding: '2rem',
-                marginBottom: '2rem',
-                textAlign: 'left',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: '1.5rem'
-              }}
-            >
+            <div className="diagnostic-result-box">
               <img 
                 src={recommendedProduct.image} 
                 alt={recommendedProduct.name} 

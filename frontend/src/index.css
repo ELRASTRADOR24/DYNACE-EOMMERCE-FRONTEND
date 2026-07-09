@@ -3474,3 +3474,137 @@ body {
   transform: translateY(-3px);
   box-shadow: 0 4px 12px rgba(212, 175, 55, 0.15);
 }
+
+/* ==========================================================================
+   DIAGNOSTIC / QUIZ PAGE STYLES
+   ========================================================================== */
+.diagnostic-page-container {
+  min-height: 80vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+}
+
+.diagnostic-card {
+  width: 100%;
+  max-width: 650px;
+  background: var(--bg-glass);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 2.5rem;
+  box-shadow: var(--shadow-premium);
+  color: var(--text-primary);
+  position: relative;
+  overflow: hidden;
+}
+
+.diagnostic-option-btn {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+  padding: 1.1rem 1.5rem;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.diagnostic-option-btn:hover {
+  background-color: rgba(212, 175, 55, 0.04);
+  border-color: var(--primary-gold);
+}
+
+.diagnostic-result-box {
+  background: rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+/* ==========================================================================
+   MOBILE RESPONSIVENESS OVERRIDES
+   ========================================================================== */
+@media (max-width: 600px) {
+  .navbar {
+    padding: 0.85rem 4% !important;
+    flex-wrap: nowrap !important;
+  }
+
+  .hero-cta-btn {
+    width: 100% !important;
+    justify-content: center !important;
+    padding: 0.85rem 1.5rem !important;
+  }
+
+  .product-img-wrapper {
+    padding: 1rem !important;
+  }
+
+  .product-card .product-title {
+    white-space: normal !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    min-height: 2.7rem;
+  }
+
+  .detail-img-card {
+    padding: 1.5rem !important;
+  }
+
+  .cart-header {
+    padding: 1rem 1.25rem !important;
+  }
+
+  .cart-items-list {
+    padding: 1rem !important;
+    gap: 1rem !important;
+  }
+
+  .cart-footer {
+    padding: 1rem !important;
+  }
+
+  .reviews-grid {
+    grid-template-columns: 1fr !important;
+    gap: 2rem !important;
+  }
+
+  .diagnostic-card {
+    padding: 1.5rem 1.1rem !important;
+  }
+
+  .diagnostic-option-btn {
+    padding: 0.9rem 1.1rem !important;
+    font-size: 0.85rem !important;
+    gap: 0.75rem !important;
+  }
+
+  .diagnostic-result-box {
+    padding: 1.25rem 1rem !important;
+    gap: 1rem !important;
+    margin-bottom: 1.5rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .nav-brand img {
+    height: 30px !important;
+    width: auto !important;
+  }
+}
