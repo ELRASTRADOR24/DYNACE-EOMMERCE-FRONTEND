@@ -39,7 +39,12 @@ export default function AdminDashboard({ onRefreshProducts }) {
     description: '',
     usage: '',
     stock: 50,
-    benefits: ''
+    benefits: '',
+    supplier_name: 'Dynace Global',
+    supplier_url: 'https://member.dynaceglobal.com/',
+    supplier_product_url: '',
+    supplier_price: '0',
+    supplier_shipping_cost: '0'
   });
   const [imageFile, setImageFile] = useState(null);
 
@@ -351,7 +356,12 @@ export default function AdminDashboard({ onRefreshProducts }) {
       description: '',
       usage: '',
       stock: 50,
-      benefits: ''
+      benefits: '',
+      supplier_name: 'Dynace Global',
+      supplier_url: 'https://member.dynaceglobal.com/',
+      supplier_product_url: '',
+      supplier_price: '0',
+      supplier_shipping_cost: '0'
     });
     setProductModalOpen(true);
   };
@@ -370,7 +380,12 @@ export default function AdminDashboard({ onRefreshProducts }) {
       description: p.description,
       usage: p.usage,
       stock: p.stock,
-      benefits: p.benefits ? p.benefits.join(', ') : ''
+      benefits: p.benefits ? p.benefits.join(', ') : '',
+      supplier_name: p.supplier_name || 'Dynace Global',
+      supplier_url: p.supplier_url || 'https://member.dynaceglobal.com/',
+      supplier_product_url: p.supplier_product_url || '',
+      supplier_price: (p.supplier_price || 0).toString(),
+      supplier_shipping_cost: (p.supplier_shipping_cost || 0).toString()
     });
     setProductModalOpen(true);
   };
@@ -1007,18 +1022,46 @@ export default function AdminDashboard({ onRefreshProducts }) {
           ) : analytics ? (
             <div>
               {/* KPIs Grid */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.5rem', marginBottom: '2.5rem' }}>
-                <div style={{ backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--border-color)', padding: '1.5rem', borderRadius: '12px' }}>
-                  <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', display: 'block', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.5rem' }}>Chiffre d'Affaires</span>
-                  <strong style={{ fontSize: '2rem', color: 'var(--primary-gold)', fontFamily: 'var(--serif)' }}>{analytics.totalRevenue.toFixed(2)} €</strong>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem', marginBottom: '2.5rem' }}>
+                <div style={{ backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--border-color)', padding: '1.25rem', borderRadius: '12px', boxShadow: '0 4px 6px rgba(0,0,0,0.02)' }}>
+                  <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'block', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.4rem' }}>Chiffre d'Affaires</span>
+                  <strong style={{ fontSize: '1.8rem', color: 'var(--text-primary)', fontFamily: 'var(--serif)' }}>{analytics.totalRevenue.toFixed(2)} €</strong>
                 </div>
-                <div style={{ backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--border-color)', padding: '1.5rem', borderRadius: '12px' }}>
-                  <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', display: 'block', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.5rem' }}>Commandes Validées</span>
-                  <strong style={{ fontSize: '2rem', color: 'var(--text-primary)' }}>{analytics.totalOrders}</strong>
+                <div style={{ backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--primary-gold)', padding: '1.25rem', borderRadius: '12px', boxShadow: 'var(--shadow-glow)' }}>
+                  <span style={{ fontSize: '0.8rem', color: 'var(--primary-gold)', display: 'block', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.4rem', fontWeight: 'bold' }}>💸 Bénéfices Nets</span>
+                  <strong style={{ fontSize: '1.8rem', color: 'var(--primary-gold)', fontFamily: 'var(--serif)' }}>{analytics.totalProfit.toFixed(2)} €</strong>
                 </div>
-                <div style={{ backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--border-color)', padding: '1.5rem', borderRadius: '12px' }}>
-                  <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', display: 'block', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.5rem' }}>Panier Moyen</span>
-                  <strong style={{ fontSize: '2rem', color: 'var(--text-primary)' }}>{analytics.avgOrderValue.toFixed(2)} €</strong>
+                <div style={{ backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--border-color)', padding: '1.25rem', borderRadius: '12px', boxShadow: '0 4px 6px rgba(0,0,0,0.02)' }}>
+                  <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'block', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.4rem' }}>Commandes du Jour</span>
+                  <strong style={{ fontSize: '1.8rem', color: 'var(--primary-green)' }}>{analytics.ordersTodayCount || 0}</strong>
+                </div>
+                <div style={{ backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--border-color)', padding: '1.25rem', borderRadius: '12px', boxShadow: '0 4px 6px rgba(0,0,0,0.02)' }}>
+                  <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'block', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '0.4rem' }}>Nouveaux Clients (30j)</span>
+                  <strong style={{ fontSize: '1.8rem', color: 'var(--text-primary)' }}>{analytics.newCustomersCount || 0}</strong>
+                </div>
+              </div>
+
+              {/* Status Details Grid */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem', marginBottom: '2.5rem' }}>
+                <div style={{ backgroundColor: 'rgba(212, 175, 55, 0.08)', border: '1px solid var(--primary-gold)', padding: '1rem', borderRadius: '10px', textAlign: 'center' }}>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', textTransform: 'uppercase', marginBottom: '0.25rem' }}>En attente (Payé)</span>
+                  <strong style={{ fontSize: '1.5rem', color: 'var(--primary-gold)' }}>{analytics.pendingCount || 0}</strong>
+                </div>
+                <div style={{ backgroundColor: 'rgba(10, 60, 44, 0.05)', border: '1px solid var(--primary-green)', padding: '1rem', borderRadius: '10px', textAlign: 'center' }}>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', textTransform: 'uppercase', marginBottom: '0.25rem' }}>En préparation</span>
+                  <strong style={{ fontSize: '1.5rem', color: 'var(--primary-green)' }}>{analytics.preparingCount || 0}</strong>
+                </div>
+                <div style={{ backgroundColor: 'rgba(59, 130, 246, 0.08)', border: '1px solid #3b82f6', padding: '1rem', borderRadius: '10px', textAlign: 'center' }}>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', textTransform: 'uppercase', marginBottom: '0.25rem' }}>Expédiées</span>
+                  <strong style={{ fontSize: '1.5rem', color: '#3b82f6' }}>{analytics.shippedCount || 0}</strong>
+                </div>
+                <div style={{ backgroundColor: 'rgba(16, 185, 129, 0.08)', border: '1px solid #10b981', padding: '1rem', borderRadius: '10px', textAlign: 'center' }}>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', textTransform: 'uppercase', marginBottom: '0.25rem' }}>Livrées</span>
+                  <strong style={{ fontSize: '1.5rem', color: '#10b981' }}>{analytics.deliveredCount || 0}</strong>
+                </div>
+                <div style={{ backgroundColor: 'rgba(239, 68, 68, 0.08)', border: '1px solid #ef4444', padding: '1rem', borderRadius: '10px', textAlign: 'center' }}>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', textTransform: 'uppercase', marginBottom: '0.25rem' }}>Annulées</span>
+                  <strong style={{ fontSize: '1.5rem', color: '#ef4444' }}>{analytics.cancelledCount || 0}</strong>
                 </div>
               </div>
 
@@ -1515,23 +1558,200 @@ export default function AdminDashboard({ onRefreshProducts }) {
                       <h4 style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: '700', marginBottom: '0.5rem', letterSpacing: '0.5px' }}>Produits Achetés</h4>
                       <div style={{ backgroundColor: 'var(--bg-primary)', padding: '1rem', borderRadius: '12px', border: '1px solid rgba(0,0,0,0.03)' }}>
                         <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-                          {(o.items || []).map((item, idx) => (
-                            <li key={idx} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem 0', borderBottom: idx !== (o.items || []).length - 1 ? '1px solid var(--border-color)' : 'none', color: 'var(--text-primary)', fontSize: '0.95rem' }}>
-                              <span style={{ fontWeight: '500' }}>{item.name || 'Produit'}</span>
-                              <span style={{ fontWeight: '800', color: 'var(--primary-green)', backgroundColor: 'rgba(21, 58, 137, 0.1)', padding: '0.1rem 0.5rem', borderRadius: '20px', fontSize: '0.8rem' }}>x{item.quantity || 1}</span>
-                            </li>
-                          ))}
+                          {(o.items || []).map((item, idx) => {
+                            const p = products.find(prod => prod.id === item.id || prod._id === item.id);
+                            const supplierCost = p ? (p.supplier_price || 0) : (item.price * 0.5);
+                            const supplierShipping = p ? (p.supplier_shipping_cost || 0) : 0;
+                            const itemMargin = item.price - supplierCost - supplierShipping;
+
+                            return (
+                              <li key={idx} style={{ padding: '0.65rem 0', borderBottom: idx !== (o.items || []).length - 1 ? '1px solid var(--border-color)' : 'none', color: 'var(--text-primary)', fontSize: '0.95rem' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                  <span style={{ fontWeight: '600' }}>{item.name || 'Produit'}</span>
+                                  <span style={{ fontWeight: '800', color: 'var(--primary-green)', backgroundColor: 'rgba(21, 58, 137, 0.1)', padding: '0.1rem 0.5rem', borderRadius: '20px', fontSize: '0.8rem' }}>x{item.quantity || 1}</span>
+                                </div>
+                                <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.25rem', backgroundColor: 'var(--bg-secondary)', padding: '0.4rem 0.6rem', borderRadius: '6px', border: '1px solid var(--border-color)' }}>
+                                  <strong>Fournisseur :</strong> {p ? p.supplier_name : 'Dynace Global'} ({supplierCost.toFixed(2)} € + {supplierShipping.toFixed(2)} € port)<br/>
+                                  <strong>Marge estimée :</strong> <span style={{ color: itemMargin >= 0 ? '#10b981' : '#ef4444', fontWeight: 'bold' }}>{itemMargin.toFixed(2)} € / unité</span>
+                                  {p && (p.supplier_url || p.supplier_product_url) && (
+                                    <div style={{ marginTop: '0.35rem', display: 'flex', gap: '0.5rem' }}>
+                                      {p.supplier_url && <a href={p.supplier_url} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary-gold)', textDecoration: 'none', fontWeight: 'bold' }}>🌐 Portail Fournisseur</a>}
+                                      {p.supplier_product_url && <a href={p.supplier_product_url} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary-green)', textDecoration: 'none', fontWeight: 'bold' }}>🔗 Lien Produit</a>}
+                                    </div>
+                                  )}
+                                </div>
+                              </li>
+                            );
+                          })}
                         </ul>
                         {(o.shipping > 0) && (
                           <div style={{ marginTop: '0.5rem', paddingTop: '0.5rem', borderTop: '1px dashed var(--border-color)', display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                            <span>Frais de livraison</span>
+                            <span>Frais de livraison client</span>
                             <span>{(o.shipping || 0).toFixed(2)} €</span>
                           </div>
                         )}
-                        <div style={{ marginTop: '0.75rem', paddingTop: '0.75rem', borderTop: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', fontSize: '1rem', fontWeight: '800', color: 'var(--primary-green)' }}>
+                        <div style={{ marginTop: '0.5rem', display: 'flex', justifyContent: 'space-between', fontSize: '1rem', fontWeight: '800', color: 'var(--primary-green)' }}>
                           <span>Total Payé</span>
                           <span>{(o.total || 0).toFixed(2)} €</span>
                         </div>
+                        {(() => {
+                          // Calculate exact financial net margins
+                          let totalCost = 0;
+                          (o.items || []).forEach(item => {
+                            const p = products.find(prod => prod.id === item.id || prod._id === item.id);
+                            const itemCost = p ? ((p.supplier_price || 0) + (p.supplier_shipping_cost || 0)) : (item.price * 0.5);
+                            totalCost += itemCost * item.quantity;
+                          });
+                          const netProfit = o.total - totalCost;
+
+                          return (
+                            <div style={{ 
+                              marginTop: '0.75rem', 
+                              paddingTop: '0.75rem', 
+                              borderTop: '2px solid var(--primary-gold)', 
+                              display: 'flex', 
+                              justifyContent: 'space-between', 
+                              fontSize: '0.95rem', 
+                              fontWeight: 'bold', 
+                              color: netProfit >= 0 ? '#10b981' : '#ef4444' 
+                            }}>
+                              <span>💸 Bénéfice net estimé</span>
+                              <span>{netProfit.toFixed(2)} €</span>
+                            </div>
+                          );
+                        })()}
+
+                        {/* Order Management Shortcuts */}
+                        <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '2px dashed var(--border-color)', display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                          <a 
+                            href={`/api/orders/packing-slip/${o.order_number}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{
+                              flex: '1 1 45%',
+                              textDecoration: 'none',
+                              textAlign: 'center',
+                              padding: '0.5rem',
+                              backgroundColor: 'var(--bg-secondary)',
+                              border: '1px solid var(--border-color)',
+                              borderRadius: '8px',
+                              fontSize: '0.8rem',
+                              fontWeight: 'bold',
+                              color: 'var(--text-primary)',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: '0.25rem'
+                            }}
+                          >
+                            📃 Bon Préparation
+                          </a>
+                          <a 
+                            href={`/api/orders/invoice/${o.order_number}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{
+                              flex: '1 1 45%',
+                              textDecoration: 'none',
+                              textAlign: 'center',
+                              padding: '0.5rem',
+                              backgroundColor: 'rgba(212, 175, 55, 0.1)',
+                              border: '1px solid var(--primary-gold)',
+                              borderRadius: '8px',
+                              fontSize: '0.8rem',
+                              fontWeight: 'bold',
+                              color: 'var(--primary-gold)',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: '0.25rem'
+                            }}
+                          >
+                            📄 Facture PDF
+                          </a>
+                          
+                          <button
+                            onClick={async () => {
+                              try {
+                                const response = await fetch('/api/admin/marketing/review-request', {
+                                  method: 'POST',
+                                  headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': `Bearer ${localStorage.getItem('dynace_jwt')}`
+                                  },
+                                  body: JSON.stringify({ orderNumber: o.order_number })
+                                });
+                                const data = await response.json();
+                                if (response.ok) {
+                                  alert('📨 E-mail de demande d\'avis envoyé avec succès !');
+                                } else {
+                                  alert(`Erreur: ${data.error}`);
+                                }
+                              } catch(e) {
+                                alert(`Erreur: ${e.message}`);
+                              }
+                            }}
+                            style={{
+                              flex: '1 1 45%',
+                              padding: '0.5rem',
+                              backgroundColor: 'rgba(10, 60, 44, 0.05)',
+                              border: '1px solid var(--primary-green)',
+                              borderRadius: '8px',
+                              fontSize: '0.8rem',
+                              fontWeight: 'bold',
+                              color: 'var(--primary-green)',
+                              cursor: 'pointer',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: '0.25rem'
+                            }}
+                          >
+                            💬 Demande Avis
+                          </button>
+                          <button
+                            onClick={async () => {
+                              const code = prompt('Saisissez le code promo à envoyer (ex: LOYAL15) :', 'LOYAL15');
+                              if (!code) return;
+                              try {
+                                const response = await fetch('/api/admin/marketing/loyalty-promo', {
+                                  method: 'POST',
+                                  headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': `Bearer ${localStorage.getItem('dynace_jwt')}`
+                                  },
+                                  body: JSON.stringify({ email: o.email, couponCode: code })
+                                });
+                                const data = await response.json();
+                                if (response.ok) {
+                                  alert('🏷️ Code de fidélité envoyé avec succès !');
+                                } else {
+                                  alert(`Erreur: ${data.error}`);
+                                }
+                              } catch(e) {
+                                alert(`Erreur: ${e.message}`);
+                              }
+                            }}
+                            style={{
+                              flex: '1 1 45%',
+                              padding: '0.5rem',
+                              backgroundColor: 'rgba(139, 92, 246, 0.08)',
+                              border: '1px solid #8b5cf6',
+                              borderRadius: '8px',
+                              fontSize: '0.8rem',
+                              fontWeight: 'bold',
+                              color: '#8b5cf6',
+                              cursor: 'pointer',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: '0.25rem'
+                            }}
+                          >
+                            🎁 Offrir Fidélité
+                          </button>
+                        </div>
+
                       </div>
                     </div>
 
@@ -2410,6 +2630,138 @@ export default function AdminDashboard({ onRefreshProducts }) {
                     fontSize: '1rem'
                   }}
                 />
+              </div>
+
+              {/* Supplier Info Section */}
+              <div style={{
+                border: '1px dashed var(--primary-green)',
+                padding: '1.25rem',
+                borderRadius: '12px',
+                marginTop: '1.5rem',
+                backgroundColor: 'rgba(10, 60, 44, 0.03)'
+              }}>
+                <h4 style={{ color: 'var(--primary-green)', margin: '0 0 1rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.95rem' }}>
+                  📦 Informations Fournisseur (Marge & Dropshipping)
+                </h4>
+                
+                <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
+                  <div style={{ flex: 1 }}>
+                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '600', marginBottom: '0.4rem', color: 'var(--text-secondary)' }}>
+                      Nom du fournisseur
+                    </label>
+                    <input
+                      type="text"
+                      name="supplier_name"
+                      value={prodForm.supplier_name}
+                      onChange={handleFormChange}
+                      placeholder="Ex: Dynace Global"
+                      style={{
+                        width: '100%',
+                        padding: '0.6rem 0.8rem',
+                        borderRadius: '8px',
+                        border: '1px solid var(--border-color)',
+                        backgroundColor: 'var(--bg-secondary)',
+                        color: 'var(--text-primary)',
+                        outline: 'none',
+                        fontSize: '0.9rem'
+                      }}
+                    />
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '600', marginBottom: '0.4rem', color: 'var(--text-secondary)' }}>
+                      Prix d'achat fournisseur (€)
+                    </label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      name="supplier_price"
+                      value={prodForm.supplier_price}
+                      onChange={handleFormChange}
+                      placeholder="0.00"
+                      style={{
+                        width: '100%',
+                        padding: '0.6rem 0.8rem',
+                        borderRadius: '8px',
+                        border: '1px solid var(--border-color)',
+                        backgroundColor: 'var(--bg-secondary)',
+                        color: 'var(--text-primary)',
+                        outline: 'none',
+                        fontSize: '0.9rem'
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
+                  <div style={{ flex: 1 }}>
+                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '600', marginBottom: '0.4rem', color: 'var(--text-secondary)' }}>
+                      Frais de port fournisseur (€)
+                    </label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      name="supplier_shipping_cost"
+                      value={prodForm.supplier_shipping_cost}
+                      onChange={handleFormChange}
+                      placeholder="0.00"
+                      style={{
+                        width: '100%',
+                        padding: '0.6rem 0.8rem',
+                        borderRadius: '8px',
+                        border: '1px solid var(--border-color)',
+                        backgroundColor: 'var(--bg-secondary)',
+                        color: 'var(--text-primary)',
+                        outline: 'none',
+                        fontSize: '0.9rem'
+                      }}
+                    />
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '600', marginBottom: '0.4rem', color: 'var(--text-secondary)' }}>
+                      URL Portail Fournisseur
+                    </label>
+                    <input
+                      type="text"
+                      name="supplier_url"
+                      value={prodForm.supplier_url}
+                      onChange={handleFormChange}
+                      placeholder="https://..."
+                      style={{
+                        width: '100%',
+                        padding: '0.6rem 0.8rem',
+                        borderRadius: '8px',
+                        border: '1px solid var(--border-color)',
+                        backgroundColor: 'var(--bg-secondary)',
+                        color: 'var(--text-primary)',
+                        outline: 'none',
+                        fontSize: '0.9rem'
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '600', marginBottom: '0.4rem', color: 'var(--text-secondary)' }}>
+                    Lien direct vers la fiche produit fournisseur
+                  </label>
+                  <input
+                    type="text"
+                    name="supplier_product_url"
+                    value={prodForm.supplier_product_url}
+                    onChange={handleFormChange}
+                    placeholder="https://..."
+                    style={{
+                      width: '100%',
+                      padding: '0.6rem 0.8rem',
+                      borderRadius: '8px',
+                      border: '1px solid var(--border-color)',
+                      backgroundColor: 'var(--bg-secondary)',
+                      color: 'var(--text-primary)',
+                      outline: 'none',
+                      fontSize: '0.9rem'
+                    }}
+                  />
+                </div>
               </div>
 
               {/* Form Buttons */}

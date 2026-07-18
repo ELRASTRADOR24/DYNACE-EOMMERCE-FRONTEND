@@ -422,8 +422,264 @@ export const sendCustomerOrderConfirmationEmail = async (order) => {
 };
 
 export const sendShippingConfirmationEmail = async (order, trackingNumber) => {
+  return sendCustomerOrderStatusEmail(order, 'Expédié', trackingNumber);
+};
+
+export const sendCustomerOrderStatusEmail = async (order, status, trackingNumber = '') => {
   const frontendUrl = process.env.FRONTEND_URL || 'https://www.xn--dynaceglobalsant-top-q2b.com';
-  const trackingLink = `https://www.chronopost.fr/fr/chrono_suividecolis?listeNumeros=${trackingNumber}`;
+  const adminEmail = process.env.ADMIN_RECEIVER_EMAIL || process.env.EMAIL_USER || 'dynaceglogal@gmail.com';
+
+  const statusConfigs = {
+    'Payé': {
+      title: 'Paiement confirmé',
+      desc: 'Nous vous confirmons la bonne réception de votre paiement. Votre commande est désormais validée et va être préparée par nos équipes.',
+      color: '#0a3c2c',
+      subject: 'Confirmation de paiement'
+    },
+    'En préparation': {
+      title: 'Préparation en cours',
+      desc: 'Excellente nouvelle ! Nos équipes préparent actuellement vos produits avec le plus grand soin. Nous vous préviendrons dès que le colis sera remis au transporteur.',
+      color: '#3b82f6',
+      subject: 'Votre commande est en cours de préparation'
+    },
+    'Expédié': {
+      title: 'Commande expédiée',
+      desc: `Votre colis a été remis au transporteur. Numéro de suivi Chronopost : <strong>${trackingNumber || order.tracking_number || 'En attente'}</strong>.`,
+      color: '#d4af37',
+      subject: 'Votre commande a été expédiée ! 🚀'
+    },
+    'Colis en transit': {
+      title: 'Colis en transit',
+      desc: 'Votre colis est en cours d\'acheminement vers le centre de distribution de votre région.',
+      color: '#6366f1',
+      subject: 'Suivi de livraison : colis en transit'
+    },
+    'Colis en cours de livraison': {
+      title: 'Colis en cours de livraison',
+      desc: 'Votre colis est en cours de livraison et vous sera remis aujourd\'hui à l\'adresse indiquée.',
+      color: '#10b981',
+      subject: 'Votre colis est en cours de livraison aujourd\'hui !'
+    },
+    'Colis livré': {
+      title: 'Colis livré',
+      desc: 'Votre colis a été livré avec succès. Nous espérons que vos compléments alimentaires Dynace vous apporteront entière satisfaction !',
+      color: '#10b981',
+      subject: 'Votre colis a été livré ! 🎉'
+    },
+    'Livraison échouée': {
+      title: 'Livraison échouée',
+      desc: 'Le transporteur a tenté de livrer votre colis mais n\'a pas pu finaliser la livraison. Veuillez vérifier vos instructions ou contacter le support.',
+      color: '#ef4444',
+      subject: 'Alerte livraison : colis non livré'
+    },
+    'Retour demandé': {
+      title: 'Retour demandé',
+      desc: 'Votre demande de retour a bien été enregistrée. Notre service client examine votre demande et vous contactera rapidement.',
+      color: '#f97316',
+      subject: 'Demande de retour enregistrée'
+    },
+    'Retour accepté': {
+      title: 'Retour accepté',
+      desc: 'Votre demande de retour a été acceptée. Vous pouvez renvoyer le produit à l\'adresse indiquée par notre support pour procéder au remboursement.',
+      color: '#10b981',
+      subject: 'Demande de retour acceptée'
+    },
+    'Remboursement effectué': {
+      title: 'Remboursement effectué',
+      desc: 'Nous vous informons qu\'un remboursement a été effectué sur votre compte bancaire pour cette commande. Le crédit apparaîtra sous 3 à 5 jours selon votre banque.',
+      color: '#10b981',
+      subject: 'Remboursement effectué'
+    },
+    'Annulation de commande': {
+      title: 'Commande annulée',
+      desc: 'Votre commande a été annulée. Si vous avez déjà été débité, un remboursement intégral a été initié automatiquement.',
+      color: '#64748b',
+      subject: 'Votre commande a été annulée'
+    }
+  };
+
+  const conf = statusConfigs[status] || {
+    title: `Statut mis à jour : ${status}`,
+    desc: `Le statut de votre commande #${order.order_number} a été mis à jour : ${status}.`,
+    color: '#0a3c2c',
+    subject: `Mise à jour de commande : ${status}`
+  };
+
+  const itemsHtml = (order.items || []).map(item => `
+    <tr>
+      <td style="padding: 12px 10px; border-bottom: 1px solid #f1f5f9; font-size: 15px; color: #334155; font-weight: 500;">${item.name}</td>
+      <td style="padding: 12px 10px; border-bottom: 1px solid #f1f5f9; font-size: 15px; color: #64748b; text-align: center;">x${item.quantity}</td>
+      <td style="padding: 12px 10px; border-bottom: 1px solid #f1f5f9; font-size: 15px; color: #1e293b; text-align: right; font-weight: 700;">${(item.price * item.quantity).toFixed(2)} €</td>
+    </tr>
+  `).join('');
+
+  const trackingLink = trackingNumber || order.tracking_number
+    ? `https://www.chronopost.fr/fr/chrono_suividecolis?listeNumeros=${trackingNumber || order.tracking_number}`
+    : `${frontendUrl}/track?order=${order.order_number}`;
+
+  const html = `
+    <!DOCTYPE html>
+    <html lang="fr">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <style>
+        body { font-family: 'Inter', Helvetica, Arial, sans-serif; background-color: #f8fafc; margin: 0; padding: 0; }
+        .wrapper { max-width: 600px; margin: 40px auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.04); border: 1px solid #e2e8f0; }
+        .header { background: linear-gradient(135deg, #0a3c2c 0%, #052219 100%); padding: 40px 20px; text-align: center; border-bottom: 4px solid #d4af37; }
+        .logo-img { width: 70px; height: 70px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+        .header h2 { color: #ffffff; font-size: 22px; font-weight: 800; margin: 0; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 5px; }
+        .header h1 { color: #d4af37; font-size: 15px; font-weight: 600; margin: 0; letter-spacing: 0.5px; }
+        .content { padding: 40px 30px; color: #334155; }
+        .status-badge { display: inline-block; padding: 8px 18px; border-radius: 30px; color: #ffffff; font-weight: 800; font-size: 13px; text-transform: uppercase; margin-bottom: 20px; background-color: ${conf.color}; }
+        .greeting { font-size: 18px; font-weight: 700; margin-bottom: 12px; color: #0a3c2c; }
+        .intro-text { font-size: 15px; line-height: 1.6; color: #475569; margin-bottom: 30px; }
+        .order-card { background-color: #fafcfb; border: 1px solid #e2e8f0; border-radius: 10px; padding: 25px; margin-bottom: 30px; }
+        .order-number { font-size: 15px; font-weight: 800; color: #0a3c2c; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 15px; display: block; }
+        .order-items { width: 100%; border-collapse: collapse; }
+        .order-items th { font-size: 11px; text-transform: uppercase; color: #94a3b8; text-align: left; padding-bottom: 10px; }
+        .totals { margin-top: 20px; width: 100%; border-collapse: collapse; text-align: right; }
+        .totals-row { font-size: 14px; color: #64748b; padding: 6px 0; }
+        .grand-total { font-size: 19px; font-weight: 800; color: #0a3c2c; padding-top: 12px; margin-top: 10px; border-top: 2px solid #e2e8f0; }
+        .details-grid { display: table; width: 100%; margin-top: 25px; border-top: 1px solid #f1f5f9; padding-top: 20px; }
+        .details-col { display: table-cell; width: 50%; vertical-align: top; }
+        .details-title { font-size: 11px; text-transform: uppercase; color: #94a3b8; font-weight: 700; margin-bottom: 8px; letter-spacing: 0.5px; }
+        .details-val { font-size: 14px; color: #475569; line-height: 1.6; }
+        .cta-container { text-align: center; margin: 40px 0 20px; }
+        .cta-button { display: inline-block; background-color: #d4af37; color: #0a3c2c !important; font-size: 15px; font-weight: 800; text-decoration: none; padding: 14px 35px; border-radius: 30px; letter-spacing: 0.5px; border: 2px solid #d4af37; box-shadow: 0 4px 12px rgba(212,175,55,0.25); }
+        .cta-button-secondary { display: inline-block; background-color: transparent; color: #0a3c2c !important; font-size: 14px; font-weight: 700; text-decoration: none; padding: 10px 25px; border-radius: 30px; border: 2px solid #0a3c2c; margin-top: 15px; }
+        .footer { text-align: center; padding: 30px; background-color: #f8fafc; font-size: 13px; color: #94a3b8; line-height: 1.6; border-top: 1px solid #e2e8f0; }
+        .footer a { color: #0a3c2c; text-decoration: none; font-weight: 700; }
+      </style>
+    </head>
+    <body>
+      <div class="wrapper">
+        <div class="header">
+          <img class="logo-img" src="${frontendUrl}/favicon.png" alt="Logo Dynace">
+          <h2>DYNACE GLOBAL</h2>
+          <h1>Suivi de Commande</h1>
+        </div>
+        <div class="content">
+          <center>
+            <span class="status-badge">${conf.title}</span>
+          </center>
+          <div class="greeting">Bonjour ${order.first_name},</div>
+          <div class="intro-text">
+            ${conf.desc}
+          </div>
+          
+          <div class="order-card">
+            <span class="order-number">Commande n° ${order.order_number}</span>
+            <table class="order-items">
+              <thead>
+                <tr>
+                  <th style="font-size: 11px; text-transform: uppercase; color: #94a3b8; text-align: left; padding-bottom: 10px;">Produit</th>
+                  <th style="font-size: 11px; text-transform: uppercase; color: #94a3b8; text-align: center; padding-bottom: 10px;">Qté</th>
+                  <th style="font-size: 11px; text-transform: uppercase; color: #94a3b8; text-align: right; padding-bottom: 10px;">Prix</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${itemsHtml}
+              </tbody>
+            </table>
+            
+            <table class="totals">
+              <tr>
+                <td class="totals-row">Frais de livraison :</td>
+                <td class="totals-row" style="font-weight: 600; color: #334155;">${order.shipping === 0 ? 'Offerts' : `${order.shipping.toFixed(2)} €`}</td>
+              </tr>
+              <tr>
+                <td class="totals-row grand-total">Total :</td>
+                <td class="totals-row grand-total">${order.total.toFixed(2)} €</td>
+              </tr>
+            </table>
+
+            <div class="details-grid">
+              <div class="details-col">
+                <div class="details-title">Adresse de Livraison</div>
+                <div class="details-val">
+                  <strong>${order.first_name} ${order.last_name}</strong><br/>
+                  ${order.address}<br/>
+                  ${order.postal_code} ${order.city}
+                </div>
+              </div>
+              <div class="details-col">
+                <div class="details-title">Informations complémentaires</div>
+                <div class="details-val">
+                  <strong>Date :</strong> ${new Date(order.created_at).toLocaleDateString('fr-FR')}<br/>
+                  <strong>Moyen :</strong> ${order.payment_method || 'Stripe'}
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="cta-container">
+            <a href="${trackingLink}" target="_blank" class="cta-button">
+              🚚 Suivre mon colis
+            </a>
+            <br/>
+            <a href="${frontendUrl}" class="cta-button-secondary">
+              👤 Accéder à mon compte
+            </a>
+          </div>
+        </div>
+        <div class="footer">
+          <p>
+            Une question ? Notre support client est à votre disposition par e-mail à <a href="mailto:${adminEmail}">${adminEmail}</a>.<br/>
+            Pour toute demande de retour, veuillez utiliser la page contact du site.
+          </p>
+          <p>© ${new Date().getFullYear()} Dynace Global. Tous droits réservés.</p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  return sendEmail({
+    to: order.email,
+    subject: `${conf.subject} - Commande #${order.order_number}`,
+    html,
+    replyTo: adminEmail
+  });
+};
+
+export const sendStockAlertEmail = async (product) => {
+  const adminEmail = process.env.ADMIN_RECEIVER_EMAIL || process.env.EMAIL_USER || 'dynaceglogal@gmail.com';
+  const frontendUrl = process.env.FRONTEND_URL || 'https://www.xn--dynaceglobalsant-top-q2b.com';
+
+  const html = `
+    <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 25px; border: 2px solid #ef4444; border-radius: 12px; background-color: #fef2f2;">
+      <h2 style="color: #b91c1c; margin-top: 0;">⚠️ ALERTE STOCK CRITIQUE</h2>
+      <p style="font-size: 15px; color: #7f1d1d;">
+        Le produit suivant a atteint un niveau de stock critique ou est en rupture de stock.
+      </p>
+      <div style="background-color: #ffffff; border: 1px solid #fee2e2; border-radius: 8px; padding: 20px; margin: 20px 0;">
+        <p style="margin: 0 0 10px 0; font-size: 16px; font-weight: bold; color: #1e293b;">Produit : ${product.name} (Ref: ${product._id})</p>
+        <p style="margin: 0 0 10px 0; font-size: 20px; font-weight: 800; color: #b91c1c;">Stock Restant : ${product.stock} unité(s)</p>
+        <p style="margin: 0; font-size: 14px; color: #64748b;">Fournisseur : ${product.supplier_name || 'Dynace Global'}</p>
+      </div>
+      <a href="${frontendUrl}/?tab=admin" target="_blank" style="display: block; text-align: center; background-color: #ef4444; color: #ffffff !important; padding: 12px 20px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 14px;">
+        💻 Ouvrir le Tableau de bord Admin pour réapprovisionner
+      </a>
+    </div>
+  `;
+
+  return sendEmail({
+    to: adminEmail,
+    subject: `🚨 ALERTE STOCK : ${product.name} est à ${product.stock} unités !`,
+    html
+  });
+};
+
+export const sendAbandonedCartRecoveryEmail = async (email, cartItems) => {
+  const frontendUrl = process.env.FRONTEND_URL || 'https://www.xn--dynaceglobalsant-top-q2b.com';
+  const adminEmail = process.env.ADMIN_RECEIVER_EMAIL || process.env.EMAIL_USER || 'dynaceglogal@gmail.com';
+
+  const itemsHtml = cartItems.map(item => `
+    <li style="font-size: 15px; color: #334155; margin-bottom: 8px; font-weight: 500;">
+      ${item.name} <span style="color: #64748b;">(x${item.quantity})</span>
+    </li>
+  `).join('');
 
   const html = `
     <!DOCTYPE html>
@@ -431,56 +687,182 @@ export const sendShippingConfirmationEmail = async (order, trackingNumber) => {
     <head>
       <meta charset="UTF-8">
       <style>
-        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f4f7f6; margin: 0; padding: 0; }
-        .email-wrapper { max-width: 600px; margin: 40px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        .header { background-color: #10b981; padding: 40px 20px; text-align: center; }
-        .header h2 { color: #ffffff; font-size: 28px; font-weight: 800; margin: 0; text-transform: uppercase; margin-bottom: 10px; }
-        .header h1 { color: #ffffff; font-size: 18px; font-weight: 400; margin: 0; }
+        body { font-family: 'Inter', Helvetica, Arial, sans-serif; background-color: #f8fafc; margin: 0; padding: 0; }
+        .wrapper { max-width: 600px; margin: 40px auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.04); border: 1px solid #e2e8f0; }
+        .header { background: linear-gradient(135deg, #0a3c2c 0%, #052219 100%); padding: 40px 20px; text-align: center; border-bottom: 4px solid #d4af37; }
+        .logo-img { width: 70px; height: 70px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+        .header h2 { color: #ffffff; font-size: 22px; font-weight: 800; margin: 0; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 5px; }
         .content { padding: 40px 30px; color: #334155; }
-        .greeting { font-size: 18px; font-weight: 600; margin-bottom: 10px; color: #1e293b; }
-        .intro-text { font-size: 15px; line-height: 1.6; color: #475569; margin-bottom: 30px; }
-        .tracking-box { background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 25px; margin-bottom: 30px; text-align: center; }
-        .tracking-number { font-family: monospace; font-size: 20px; font-weight: bold; color: #153A89; margin: 15px 0; letter-spacing: 1px; }
-        .cta-button { display: inline-block; background-color: #10b981; color: #ffffff !important; font-size: 16px; font-weight: 700; text-decoration: none; padding: 15px 35px; border-radius: 30px; letter-spacing: 0.5px; border: 2px solid #10b981; margin-top: 10px; }
-        .footer { text-align: center; padding: 30px; background-color: #f1f5f9; font-size: 13px; color: #94a3b8; line-height: 1.5; }
-        .footer a { color: #153A89; text-decoration: none; }
+        .greeting { font-size: 18px; font-weight: 700; margin-bottom: 12px; color: #0a3c2c; }
+        .intro-text { font-size: 15px; line-height: 1.6; color: #475569; margin-bottom: 25px; }
+        .cart-list { background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 20px 20px 20px 35px; margin-bottom: 30px; }
+        .promo-box { background: linear-gradient(135deg, #fafcfb 0%, #f0fdf4 100%); border: 2px dashed #10b981; border-radius: 10px; padding: 20px; text-align: center; margin-bottom: 30px; }
+        .promo-code { font-family: monospace; font-size: 22px; font-weight: bold; color: #0a3c2c; background-color: #ffffff; padding: 6px 16px; border-radius: 6px; border: 1px solid #10b981; display: inline-block; margin-top: 10px; letter-spacing: 1px; }
+        .cta-button { display: inline-block; background-color: #d4af37; color: #0a3c2c !important; font-size: 15px; font-weight: 800; text-decoration: none; padding: 14px 35px; border-radius: 30px; letter-spacing: 0.5px; border: 2px solid #d4af37; box-shadow: 0 4px 12px rgba(212,175,55,0.25); }
+        .footer { text-align: center; padding: 30px; background-color: #f8fafc; font-size: 13px; color: #94a3b8; border-top: 1px solid #e2e8f0; }
       </style>
     </head>
     <body>
-      <div class="email-wrapper">
+      <div class="wrapper">
         <div class="header">
+          <img class="logo-img" src="${frontendUrl}/favicon.png" alt="Logo Dynace">
           <h2>DYNACE GLOBAL</h2>
-          <h1>Votre commande est en route !</h1>
         </div>
         <div class="content">
-          <div class="greeting">Bonjour ${order.first_name || 'Client'},</div>
+          <div class="greeting">Bonjour,</div>
           <div class="intro-text">
-            Bonne nouvelle ! Votre commande <strong>#${order.order_number}</strong> a été expédiée. Elle est actuellement entre les mains de Chronopost et arrive très bientôt chez vous.
+            Vous avez laissé des articles dans votre panier. Ne passez pas à côté de votre cure naturelle Dynace Global !
           </div>
-          <div class="tracking-box">
-            <div style="font-size: 14px; text-transform: uppercase; color: #94a3b8; font-weight: 700; letter-spacing: 0.5px;">Numéro de suivi Chronopost</div>
-            <div class="tracking-number">${trackingNumber}</div>
-            <a href="${trackingLink}" target="_blank" class="cta-button">Suivre mon colis sur Chronopost</a>
+          <div class="cart-list">
+            <h4 style="margin: 0 0 12px 0; color: #1e293b; font-size: 14px; text-transform: uppercase;">Votre panier sauvegardé :</h4>
+            <ul style="margin: 0; padding: 0;">
+              ${itemsHtml}
+            </ul>
           </div>
-          <div style="font-size: 14px; color: #64748b; line-height: 1.5;">
-            Vous pouvez également suivre l'avancée de votre préparation et la livraison directement sur notre boutique en cliquant sur le lien ci-dessous :<br/>
-            <a href="${frontendUrl}/track?order=${order.order_number}" style="color: #153A89; font-weight: 600; text-decoration: none;">Suivre sur notre site</a>
+          <div class="promo-box">
+            <h4 style="margin: 0; color: #0a3c2c; font-size: 16px;">Profitez de 10% de réduction immédiate !</h4>
+            <p style="margin: 5px 0 0 0; font-size: 13px; color: #475569;">Utilisez le code promo ci-dessous lors de la validation de votre panier :</p>
+            <div class="promo-code">WELCOME10</div>
+          </div>
+          <div style="text-align: center;">
+            <a href="${frontendUrl}" class="cta-button">
+              🛒 Finaliser ma commande →
+            </a>
           </div>
         </div>
         <div class="footer">
-          <p>Ceci est un e-mail automatique, merci de ne pas y répondre directement.<br/>Pour toute question, contactez notre support via la page <a href="${frontendUrl}/contact">Contact</a>.</p>
-          <p>&copy; ${new Date().getFullYear()} Dynace Global. Tous droits réservés.</p>
+          <p>
+            Une question ? Contactez notre support par e-mail à <a href="mailto:${adminEmail}" style="color: #0a3c2c; text-decoration: none; font-weight: bold;">${adminEmail}</a>.
+          </p>
+          <p>© ${new Date().getFullYear()} Dynace Global. Tous droits réservés.</p>
         </div>
       </div>
     </body>
     </html>
   `;
 
-  const adminEmail = process.env.EMAIL_USER || 'dynaceglogal@gmail.com';
+  return sendEmail({
+    to: email,
+    subject: `Votre panier vous attend chez Dynace Global (10% offerts) 🎁`,
+    html,
+    replyTo: adminEmail
+  });
+};
+
+export const sendReviewRequestEmail = async (order) => {
+  const frontendUrl = process.env.FRONTEND_URL || 'https://www.xn--dynaceglobalsant-top-q2b.com';
+  const adminEmail = process.env.ADMIN_RECEIVER_EMAIL || process.env.EMAIL_USER || 'dynaceglogal@gmail.com';
+
+  const html = `
+    <!DOCTYPE html>
+    <html lang="fr">
+    <head>
+      <meta charset="UTF-8">
+      <style>
+        body { font-family: 'Inter', Helvetica, Arial, sans-serif; background-color: #f8fafc; margin: 0; padding: 0; }
+        .wrapper { max-width: 600px; margin: 40px auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.04); border: 1px solid #e2e8f0; }
+        .header { background: linear-gradient(135deg, #0a3c2c 0%, #052219 100%); padding: 40px 20px; text-align: center; border-bottom: 4px solid #d4af37; }
+        .logo-img { width: 70px; height: 70px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+        .header h2 { color: #ffffff; font-size: 22px; font-weight: 800; margin: 0; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 5px; }
+        .content { padding: 40px 30px; color: #334155; text-align: center; }
+        .greeting { font-size: 18px; font-weight: 700; margin-bottom: 12px; color: #0a3c2c; }
+        .intro-text { font-size: 15px; line-height: 1.6; color: #475569; margin-bottom: 30px; }
+        .stars-container { font-size: 32px; color: #d4af37; margin-bottom: 25px; letter-spacing: 5px; }
+        .cta-button { display: inline-block; background-color: #0a3c2c; color: #ffffff !important; font-size: 15px; font-weight: 800; text-decoration: none; padding: 14px 35px; border-radius: 30px; letter-spacing: 0.5px; border: 2px solid #0a3c2c; box-shadow: 0 4px 12px rgba(10,60,44,0.25); }
+        .footer { text-align: center; padding: 30px; background-color: #f8fafc; font-size: 13px; color: #94a3b8; border-top: 1px solid #e2e8f0; }
+      </style>
+    </head>
+    <body>
+      <div class="wrapper">
+        <div class="header">
+          <img class="logo-img" src="${frontendUrl}/favicon.png" alt="Logo Dynace">
+          <h2>DYNACE GLOBAL</h2>
+        </div>
+        <div class="content">
+          <div class="greeting">Bonjour ${order.first_name},</div>
+          <div class="intro-text">
+            Quelques jours se sont écoulés depuis la livraison de votre commande <strong>#${order.order_number}</strong>.<br/>
+            Votre avis nous intéresse énormément ! Partagez votre retour d'expérience avec nous pour nous aider à améliorer notre boutique et conseiller la communauté.
+          </div>
+          <div class="stars-container">⭐⭐⭐⭐⭐</div>
+          <div>
+            <a href="${frontendUrl}/reviews" class="cta-button">
+              ✍️ Donnez mon avis sur mes produits
+            </a>
+          </div>
+        </div>
+        <div class="footer">
+          <p>© ${new Date().getFullYear()} Dynace Global. Tous droits réservés.</p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
 
   return sendEmail({
     to: order.email,
-    subject: `Votre commande #${order.order_number} a été expédiée ! 🚀`,
+    subject: `Votre avis sur votre commande #${order.order_number} chez Dynace Global 🌟`,
+    html,
+    replyTo: adminEmail
+  });
+};
+
+export const sendLoyaltyPromoEmail = async (user, couponCode) => {
+  const frontendUrl = process.env.FRONTEND_URL || 'https://www.xn--dynaceglobalsant-top-q2b.com';
+  const adminEmail = process.env.ADMIN_RECEIVER_EMAIL || process.env.EMAIL_USER || 'dynaceglogal@gmail.com';
+
+  const html = `
+    <!DOCTYPE html>
+    <html lang="fr">
+    <head>
+      <meta charset="UTF-8">
+      <style>
+        body { font-family: 'Inter', Helvetica, Arial, sans-serif; background-color: #f8fafc; margin: 0; padding: 0; }
+        .wrapper { max-width: 600px; margin: 40px auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.04); border: 1px solid #e2e8f0; }
+        .header { background: linear-gradient(135deg, #0a3c2c 0%, #052219 100%); padding: 40px 20px; text-align: center; border-bottom: 4px solid #d4af37; }
+        .logo-img { width: 70px; height: 70px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+        .header h2 { color: #ffffff; font-size: 22px; font-weight: 800; margin: 0; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 5px; }
+        .content { padding: 40px 30px; color: #334155; text-align: center; }
+        .greeting { font-size: 18px; font-weight: 700; margin-bottom: 12px; color: #0a3c2c; }
+        .intro-text { font-size: 15px; line-height: 1.6; color: #475569; margin-bottom: 30px; }
+        .coupon-container { background-color: #f8fafc; border: 2px dashed #d4af37; border-radius: 10px; padding: 25px; margin-bottom: 30px; }
+        .coupon-code { font-family: monospace; font-size: 26px; font-weight: bold; color: #0a3c2c; background-color: #ffffff; padding: 8px 20px; border-radius: 6px; border: 1px solid #e2e8f0; display: inline-block; margin-top: 10px; letter-spacing: 2px; }
+        .cta-button { display: inline-block; background-color: #d4af37; color: #0a3c2c !important; font-size: 15px; font-weight: 800; text-decoration: none; padding: 14px 35px; border-radius: 30px; letter-spacing: 0.5px; border: 2px solid #d4af37; box-shadow: 0 4px 12px rgba(212,175,55,0.25); }
+        .footer { text-align: center; padding: 30px; background-color: #f8fafc; font-size: 13px; color: #94a3b8; border-top: 1px solid #e2e8f0; }
+      </style>
+    </head>
+    <body>
+      <div class="wrapper">
+        <div class="header">
+          <img class="logo-img" src="${frontendUrl}/favicon.png" alt="Logo Dynace">
+          <h2>DYNACE GLOBAL</h2>
+        </div>
+        <div class="content">
+          <div class="greeting">Bonjour ${user.first_name || 'Client VIP'},</div>
+          <div class="intro-text">
+            Pour vous remercier de votre fidélité et de votre confiance, nous avons le plaisir de vous offrir un code promotionnel exclusif de <strong>15% de réduction</strong> sur votre prochain achat de compléments alimentaires.
+          </div>
+          <div class="coupon-container">
+            <h4 style="margin: 0; color: #0a3c2c; font-size: 14px; text-transform: uppercase;">Votre Code Privilège :</h4>
+            <div class="coupon-code">${couponCode}</div>
+          </div>
+          <div>
+            <a href="${frontendUrl}" class="cta-button">
+              🎁 Utiliser mon offre →
+            </a>
+          </div>
+        </div>
+        <div class="footer">
+          <p>© ${new Date().getFullYear()} Dynace Global. Tous droits réservés.</p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  return sendEmail({
+    to: user.email,
+    subject: `Une surprise vous attend : 15% offerts sur votre prochain achat ! 🎁`,
     html,
     replyTo: adminEmail
   });

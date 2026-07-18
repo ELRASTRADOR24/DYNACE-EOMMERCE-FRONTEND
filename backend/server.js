@@ -14,7 +14,7 @@ import dotenv from 'dotenv';
 import crypto from 'crypto';
 import { v2 as cloudinary } from 'cloudinary';
 import { CloudinaryStorage } from 'multer-storage-cloudinary';
-import { sendContactEmail, sendOrderNotificationEmail, sendCustomerOrderConfirmationEmail, sendShippingConfirmationEmail, sendEmail } from './utils/email.js';
+import { sendContactEmail, sendOrderNotificationEmail, sendCustomerOrderConfirmationEmail, sendShippingConfirmationEmail, sendEmail, sendCustomerOrderStatusEmail, sendStockAlertEmail, sendAbandonedCartRecoveryEmail, sendReviewRequestEmail, sendLoyaltyPromoEmail } from './utils/email.js';
 import { sendAdminOrderSMS } from './utils/sms.js';
 
 // Charge les variables d'environnement depuis le fichier .env
@@ -835,6 +835,24 @@ app.get('/api/orders/track/:orderNumber', async (req, res) => {
   }
 });
 
+// GET order status history
+app.get('/api/orders/:orderNumber/history', async (req, res) => {
+  try {
+    const order = await Order.findOne({ order_number: req.params.orderNumber });
+    if (!order) {
+      return res.status(404).json({ error: 'Commande non trouvée.' });
+    }
+    // Return order history, initialized with creation if empty
+    const history = order.history && order.history.length > 0 
+      ? order.history 
+      : [{ status: order.status, label: 'Commande créée et validée', timestamp: order.created_at }];
+    res.json(history);
+  } catch (err) {
+    console.error('Erreur lecture historique commande :', err.message);
+    res.status(500).json({ error: 'Erreur lors de la récupération de l\'historique.' });
+  }
+});
+
 // Printable Packing Slip (Bordereau de livraison / Fiche d'expédition) HTML endpoint
 app.get('/api/orders/packing-slip/:orderNumber', async (req, res) => {
   try {
@@ -979,6 +997,159 @@ app.get('/api/orders/packing-slip/:orderNumber', async (req, res) => {
   } catch (err) {
     console.error('Erreur génération fiche expédition :', err.message);
     res.status(500).send('<h1>Erreur lors de la génération de la fiche d\'expédition</h1>');
+  }
+});
+
+// Printable Invoice (Facture client) HTML endpoint
+app.get('/api/orders/invoice/:orderNumber', async (req, res) => {
+  try {
+    const order = await Order.findOne({ order_number: req.params.orderNumber });
+    if (!order) {
+      return res.status(404).send('<h1>Facture non trouvée</h1>');
+    }
+
+    const itemsHtml = order.items.map(item => `
+      <tr>
+        <td style="padding: 12px 10px; border-bottom: 1px solid #e2e8f0; font-size: 14px;">${item.name}</td>
+        <td style="padding: 12px 10px; border-bottom: 1px solid #e2e8f0; text-align: center; font-size: 14px;">x${item.quantity}</td>
+        <td style="padding: 12px 10px; border-bottom: 1px solid #e2e8f0; text-align: right; font-size: 14px;">${item.price.toFixed(2)} €</td>
+        <td style="padding: 12px 10px; border-bottom: 1px solid #e2e8f0; text-align: right; font-size: 14px; font-weight: 600;">${(item.price * item.quantity).toFixed(2)} €</td>
+      </tr>
+    `).join('');
+
+    const discountHtml = order.discount_amount > 0 ? `
+      <tr>
+        <td colspan="3" style="text-align: right; padding: 8px 10px; font-size: 14px; color: #64748b;">Réduction (${order.coupon_code}) :</td>
+        <td style="text-align: right; padding: 8px 10px; font-size: 14px; color: #10b981; font-weight: 600;">-${order.discount_amount.toFixed(2)} €</td>
+      </tr>
+    ` : '';
+
+    const vatRate = 0.055;
+    const totalTtc = order.total;
+    const subtotalTtc = order.subtotal - order.discount_amount;
+    const shippingTtc = order.shipping;
+    const baseHt = (subtotalTtc + shippingTtc) / (1 + vatRate);
+    const vatAmount = (subtotalTtc + shippingTtc) - baseHt;
+
+    res.send(`
+      <!DOCTYPE html>
+      <html lang="fr">
+      <head>
+        <meta charset="UTF-8">
+        <title>Facture #${order.order_number}</title>
+        <style>
+          body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; color: #1e293b; margin: 0; padding: 20px; background-color: #f8fafc; }
+          .container { max-width: 800px; margin: 0 auto; border: 1px solid #e2e8f0; padding: 40px; border-radius: 12px; background-color: #fff; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+          .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #0a3c2c; padding-bottom: 20px; margin-bottom: 30px; }
+          .header h1 { color: #0a3c2c; margin: 0; font-size: 28px; font-weight: 800; text-transform: uppercase; }
+          .meta-info { font-size: 14px; color: #475569; text-align: right; }
+          .grid { display: flex; justify-content: space-between; margin-bottom: 30px; }
+          .col { width: 48%; }
+          .col-title { font-size: 12px; text-transform: uppercase; color: #94a3b8; font-weight: 700; margin-bottom: 8px; border-bottom: 2px solid #f1f5f9; padding-bottom: 6px; }
+          .col-content { font-size: 14px; line-height: 1.6; color: #334155; }
+          .order-table { width: 100%; border-collapse: collapse; margin: 25px 0; }
+          .order-table th { background-color: #f8fafc; border-bottom: 2px solid #e2e8f0; padding: 12px 10px; text-align: left; font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: 700; }
+          .order-table td { padding: 12px 10px; }
+          .totals-table { width: 40%; margin-left: 60%; border-collapse: collapse; margin-top: 20px; }
+          .totals-table td { padding: 6px 10px; font-size: 14px; }
+          .totals-table .grand-total { font-size: 18px; font-weight: 800; color: #0a3c2c; border-top: 2px solid #e2e8f0; padding-top: 10px; }
+          .footer { text-align: center; margin-top: 50px; padding-top: 20px; border-top: 1px solid #e2e8f0; font-size: 12px; color: #94a3b8; line-height: 1.6; }
+          .print-btn-container { text-align: center; margin-bottom: 25px; }
+          .btn-print { background-color: #d4af37; color: #0a3c2c; border: none; padding: 14px 28px; font-size: 15px; font-weight: 800; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+          @media print {
+            .print-btn-container { display: none; }
+            body { margin: 0; padding: 0; background-color: #fff; }
+            .container { border: none; box-shadow: none; padding: 0; max-width: 100%; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="print-btn-container">
+          <button onclick="window.print()" class="btn-print">🖨️ Imprimer la Facture / Enregistrer en PDF</button>
+        </div>
+        <div class="container">
+          <div class="header">
+            <div>
+              <h1>DYNACE GLOBAL</h1>
+              <p style="margin: 5px 0 0 0; color: #d4af37; font-weight: bold; font-size: 14px;">Boutique Agréée France & Europe</p>
+            </div>
+            <div class="meta-info">
+              <strong>FACTURE N° ${order.order_number}</strong><br>
+              Date : ${new Date(order.created_at).toLocaleDateString('fr-FR')}<br>
+              Moyen de paiement : ${order.payment_method || 'Carte bancaire (Stripe)'}
+            </div>
+          </div>
+          
+          <div class="grid">
+            <div class="col">
+              <div class="col-title">Émetteur</div>
+              <div class="col-content">
+                <strong>DYNACE GLOBAL FRANCE & EUROPE</strong><br>
+                E-mail : contact@dynaceglobalsanté-top.com<br>
+                Web : www.dynaceglobalsanté-top.com
+              </div>
+            </div>
+            <div class="col">
+              <div class="col-title">Facturé à (Destinataire)</div>
+              <div class="col-content">
+                <strong>${order.first_name} ${order.last_name}</strong><br>
+                ${order.address}<br>
+                ${order.postal_code} ${order.city}<br>
+                ${order.country || 'France'}<br>
+                E-mail : ${order.email}
+              </div>
+            </div>
+          </div>
+          
+          <table class="order-table">
+            <thead>
+              <tr>
+                <th>Produit Description</th>
+                <th style="text-align: center;">Qté</th>
+                <th style="text-align: right;">Prix Unitaire</th>
+                <th style="text-align: right;">Total TTC</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${itemsHtml}
+            </tbody>
+          </table>
+          
+          <table class="totals-table">
+            <tr>
+              <td style="color: #64748b;">Sous-total :</td>
+              <td style="text-align: right; font-weight: 500;">${order.subtotal.toFixed(2)} €</td>
+            </tr>
+            ${discountHtml}
+            <tr>
+              <td style="color: #64748b;">Livraison :</td>
+              <td style="text-align: right; font-weight: 500;">${order.shipping === 0 ? 'Offerte' : `${order.shipping.toFixed(2)} €`}</td>
+            </tr>
+            <tr>
+              <td style="color: #64748b;">TVA (5.5%) :</td>
+              <td style="text-align: right; font-weight: 500;">${vatAmount.toFixed(2)} €</td>
+            </tr>
+            <tr>
+              <td style="color: #64748b;">Total HT :</td>
+              <td style="text-align: right; font-weight: 500;">${baseHt.toFixed(2)} €</td>
+            </tr>
+            <tr>
+              <td class="grand-total">Total Payé (TTC) :</td>
+              <td class="grand-total" style="text-align: right;">${totalTtc.toFixed(2)} €</td>
+            </tr>
+          </table>
+          
+          <div class="footer">
+            <p>Merci pour votre commande ! En cas de question, contactez notre support client à contact@dynaceglobalsanté-top.com</p>
+            <p>DYNACE France • Compléments alimentaires cellulaires naturels</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `);
+  } catch (err) {
+    console.error('Erreur génération facture :', err.message);
+    res.status(500).send('<h1>Erreur lors de la génération de la facture</h1>');
   }
 });
 
@@ -1233,7 +1404,15 @@ app.post('/api/payment/create-test-order', authenticateToken, async (req, res) =
       discount_amount: discountAmount,
       coupon_code: couponCode ? couponCode.toUpperCase() : '',
       total: totalAmount,
-      status: 'Payé'
+      payment_method: 'Mode Test (Bypass Stripe)',
+      status: 'Payé',
+      history: [
+        {
+          status: 'Payé',
+          label: 'Commande créée (Mode Test)',
+          timestamp: new Date()
+        }
+      ]
     });
 
     await newOrder.save();
@@ -1313,7 +1492,15 @@ app.post('/api/payment/confirm-order', async (req, res) => {
       discount_amount: parseFloat(discountAmount || '0'),
       coupon_code: couponCode || '',
       total: parseFloat(total),
-      status: 'Payé'
+      payment_method: 'Carte bancaire (Stripe)',
+      status: 'Payé',
+      history: [
+        {
+          status: 'Payé',
+          label: 'Paiement Stripe confirmé & Commande validée',
+          timestamp: new Date()
+        }
+      ]
     });
 
     await newOrder.save();
@@ -1427,15 +1614,32 @@ app.put('/api/admin/orders/:id/status', authenticateToken, verifyAdmin, async (r
       updateData.tracking_number = trackingNumber;
     }
 
-    const order = await Order.findByIdAndUpdate(req.params.id, updateData, { returnDocument: 'after' });
+    const order = await Order.findById(req.params.id);
     if (!order) {
       return res.status(404).json({ error: 'Commande non trouvée.' });
     }
 
-    // Si le statut passe à "Expédié", envoyer l'e-mail d'expédition au client
-    if (status === 'Expédié') {
-      const trackingNo = trackingNumber || order.tracking_number || '';
-      await sendShippingConfirmationEmail(order, trackingNo);
+    order.status = status;
+    if (trackingNumber !== undefined) {
+      order.tracking_number = trackingNumber;
+    }
+
+    if (!order.history) {
+      order.history = [];
+    }
+    order.history.push({
+      status,
+      label: `Statut de la commande modifié en : ${status}`,
+      timestamp: new Date()
+    });
+
+    await order.save();
+
+    // Envoi automatique de l'e-mail de mise à jour au client
+    try {
+      await sendCustomerOrderStatusEmail(order, status, trackingNumber || order.tracking_number || '');
+    } catch (mailErr) {
+      console.error('Erreur lors de l\'envoi de l\'e-mail de statut :', mailErr.message);
     }
 
     res.json(order);
@@ -1556,7 +1760,7 @@ app.delete('/api/admin/reviews/:id/video', authenticateToken, verifyAdmin, async
 
 // Create product (Admin)
 app.post('/api/admin/products', authenticateToken, verifyAdmin, upload.single('imageFile'), async (req, res) => {
-  const { id, name, price, category, image, images, summary, description, benefits, usage, stock } = req.body;
+  const { id, name, price, category, image, images, summary, description, benefits, usage, stock, supplier_name, supplier_url, supplier_product_url, supplier_price, supplier_shipping_cost } = req.body;
 
   let parsedBenefits = benefits;
   let parsedImages = images;
@@ -1598,7 +1802,12 @@ app.post('/api/admin/products', authenticateToken, verifyAdmin, upload.single('i
       description,
       benefits: parsedBenefits || [],
       usage,
-      stock: stock !== undefined ? parseInt(stock) : 50
+      stock: stock !== undefined ? parseInt(stock) : 50,
+      supplier_name: supplier_name || 'Dynace Global',
+      supplier_url: supplier_url || 'https://member.dynaceglobal.com/',
+      supplier_product_url: supplier_product_url || '',
+      supplier_price: supplier_price !== undefined ? parseFloat(supplier_price) : 0,
+      supplier_shipping_cost: supplier_shipping_cost !== undefined ? parseFloat(supplier_shipping_cost) : 0
     });
 
     await newProduct.save();
@@ -1612,7 +1821,7 @@ app.post('/api/admin/products', authenticateToken, verifyAdmin, upload.single('i
 
 // Update product (Admin)
 app.put('/api/admin/products/:id', authenticateToken, verifyAdmin, upload.single('imageFile'), async (req, res) => {
-  const { name, price, category, image, images, summary, description, benefits, usage, stock } = req.body;
+  const { name, price, category, image, images, summary, description, benefits, usage, stock, supplier_name, supplier_url, supplier_product_url, supplier_price, supplier_shipping_cost } = req.body;
 
   try {
     let parsedBenefits = benefits;
@@ -1634,7 +1843,12 @@ app.put('/api/admin/products/:id', authenticateToken, verifyAdmin, upload.single
       description,
       benefits: parsedBenefits,
       usage,
-      stock: stock !== undefined ? parseInt(stock) : undefined
+      stock: stock !== undefined ? parseInt(stock) : undefined,
+      supplier_name: supplier_name !== undefined ? supplier_name : undefined,
+      supplier_url: supplier_url !== undefined ? supplier_url : undefined,
+      supplier_product_url: supplier_product_url !== undefined ? supplier_product_url : undefined,
+      supplier_price: supplier_price !== undefined ? parseFloat(supplier_price) : undefined,
+      supplier_shipping_cost: supplier_shipping_cost !== undefined ? parseFloat(supplier_shipping_cost) : undefined
     };
 
     if (finalImageUrl !== undefined && finalImageUrl !== '') {
@@ -1765,45 +1979,82 @@ app.delete('/api/admin/coupons/:id', authenticateToken, verifyAdmin, async (req,
 
 app.get('/api/admin/analytics', authenticateToken, verifyAdmin, async (req, res) => {
   try {
-    // Calculer les statistiques globales des commandes validées
-    const orders = await Order.find({ status: { $ne: 'Annulé' } });
+    const orders = await Order.find({});
+    const users = await User.find({});
+    const dbProducts = await Product.find({});
     
+    // Create a mapping for product costs (supplier_price + supplier_shipping_cost)
+    const productCostMap = {};
+    dbProducts.forEach(p => {
+      productCostMap[p._id] = (p.supplier_price || 0) + (p.supplier_shipping_cost || 0);
+    });
+
     let totalRevenue = 0;
-    let totalOrders = orders.length;
+    let totalProfit = 0;
     
-    // Dictionnaire pour cumuler les ventes par produit
+    // Status counts
+    let ordersTodayCount = 0;
+    let pendingCount = 0; 
+    let preparingCount = 0;
+    let shippedCount = 0;
+    let deliveredCount = 0;
+    let cancelledCount = 0;
+    let refundedCount = 0;
+    let returnCount = 0;
+
+    const todayStr = new Date().toISOString().split('T')[0];
     const salesByProduct = {};
     
     orders.forEach(order => {
-      totalRevenue += order.total || 0;
-      
-      if (order.items && Array.isArray(order.items)) {
-        order.items.forEach(item => {
-          const prodId = item.id;
-          const qty = item.quantity || 0;
-          const price = item.price || 0;
-          
-          if (!salesByProduct[prodId]) {
-            salesByProduct[prodId] = {
-              id: prodId,
-              name: item.name || prodId,
-              revenue: 0,
-              quantity: 0
-            };
-          }
-          
-          salesByProduct[prodId].revenue += price * qty;
-          salesByProduct[prodId].quantity += qty;
-        });
+      const orderDateStr = new Date(order.created_at).toISOString().split('T')[0];
+      if (orderDateStr === todayStr) {
+        ordersTodayCount++;
+      }
+
+      const status = order.status;
+      if (status === 'Payé') pendingCount++;
+      else if (status === 'En préparation') preparingCount++;
+      else if (status === 'Expédié') shippedCount++;
+      else if (status === 'Livré' || status === 'Colis livré') deliveredCount++;
+      else if (status === 'Annulé' || status === 'Annulation de commande') cancelledCount++;
+      else if (status === 'Remboursé' || status === 'Remboursement effectué') refundedCount++;
+      else if (status === 'Retour demandé' || status === 'Retour accepté') returnCount++;
+
+      // Only calculate financial metrics for non-cancelled/non-refunded orders
+      if (status !== 'Annulé' && status !== 'Annulation de commande' && status !== 'Remboursé' && status !== 'Remboursement effectué') {
+        totalRevenue += order.total || 0;
+        
+        let orderCost = 0;
+        if (order.items && Array.isArray(order.items)) {
+          order.items.forEach(item => {
+            const prodId = item.id;
+            const qty = item.quantity || 0;
+            const price = item.price || 0;
+            
+            const costPerUnit = productCostMap[prodId] !== undefined ? productCostMap[prodId] : (price * 0.5);
+            orderCost += costPerUnit * qty;
+
+            if (!salesByProduct[prodId]) {
+              salesByProduct[prodId] = {
+                id: prodId,
+                name: item.name || prodId,
+                revenue: 0,
+                quantity: 0
+              };
+            }
+            salesByProduct[prodId].revenue += price * qty;
+            salesByProduct[prodId].quantity += qty;
+          });
+        }
+        
+        totalProfit += (order.total || 0) - orderCost;
       }
     });
 
-    const avgOrderValue = totalOrders > 0 ? (totalRevenue / totalOrders) : 0;
-    
-    // Transformer l'objet ventes par produit en tableau trié par quantité vendue décroissante
+    const avgOrderValue = orders.length > 0 ? (totalRevenue / orders.length) : 0;
     const topProducts = Object.values(salesByProduct).sort((a, b) => b.quantity - a.quantity);
 
-    // Calculer le chiffre d'affaires journalier des 30 derniers jours
+    // Calculate daily metrics (revenue and profit) for the last 30 days
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 29);
     thirtyDaysAgo.setHours(0, 0, 0, 0);
@@ -1812,34 +2063,133 @@ app.get('/api/admin/analytics', authenticateToken, verifyAdmin, async (req, res)
     for (let i = 0; i < 30; i++) {
       const d = new Date(thirtyDaysAgo);
       d.setDate(d.getDate() + i);
-      const key = d.toISOString().split('T')[0]; // YYYY-MM-DD
-      dailyMap[key] = 0;
+      const key = d.toISOString().split('T')[0];
+      dailyMap[key] = { revenue: 0, profit: 0 };
     }
 
     orders.forEach(order => {
-      if (order.createdAt) {
-        const key = new Date(order.createdAt).toISOString().split('T')[0];
-        if (dailyMap[key] !== undefined) {
-          dailyMap[key] += order.total || 0;
+      const status = order.status;
+      if (status !== 'Annulé' && status !== 'Annulation de commande' && status !== 'Remboursé' && status !== 'Remboursement effectué') {
+        if (order.created_at) {
+          const key = new Date(order.created_at).toISOString().split('T')[0];
+          if (dailyMap[key] !== undefined) {
+            dailyMap[key].revenue += order.total || 0;
+            
+            let orderCost = 0;
+            if (order.items && Array.isArray(order.items)) {
+              order.items.forEach(item => {
+                const prodId = item.id;
+                const qty = item.quantity || 0;
+                const price = item.price || 0;
+                const costPerUnit = productCostMap[prodId] !== undefined ? productCostMap[prodId] : (price * 0.5);
+                orderCost += costPerUnit * qty;
+              });
+            }
+            dailyMap[key].profit += (order.total || 0) - orderCost;
+          }
         }
       }
     });
 
-    const dailyRevenue = Object.entries(dailyMap).map(([date, revenue]) => ({
+    const dailyRevenue = Object.entries(dailyMap).map(([date, data]) => ({
       date,
-      revenue: Math.round(revenue * 100) / 100
+      revenue: Math.round(data.revenue * 100) / 100,
+      profit: Math.round(data.profit * 100) / 100
     }));
+
+    // Calculate new users count registered in the last 30 days
+    const newCustomersCount = users.filter(u => {
+      const registrationDate = u._id ? u._id.getTimestamp() : new Date(u.created_at || Date.now());
+      return registrationDate >= thirtyDaysAgo;
+    }).length;
 
     res.json({
       totalRevenue: Math.round(totalRevenue * 100) / 100,
-      totalOrders,
+      totalProfit: Math.round(totalProfit * 100) / 100,
+      totalOrders: orders.length,
       avgOrderValue: Math.round(avgOrderValue * 100) / 100,
+      ordersTodayCount,
+      pendingCount,
+      preparingCount,
+      shippedCount,
+      deliveredCount,
+      cancelledCount,
+      refundedCount,
+      returnCount,
+      newCustomersCount,
       topProducts,
       dailyRevenue
     });
   } catch (err) {
     console.error('Erreur calcul statistiques :', err.message);
     res.status(500).json({ error: 'Erreur lors du calcul des statistiques de vente.' });
+  }
+});
+
+// --- MARKETING & AUTOMATIONS (Admin) ---
+
+// Send manual/auto abandoned cart recovery email
+app.post('/api/admin/marketing/abandoned-cart', authenticateToken, verifyAdmin, async (req, res) => {
+  const { email, items } = req.body;
+  if (!email || !items || !Array.isArray(items)) {
+    return res.status(400).json({ error: 'Adresse e-mail et liste d\'articles requis.' });
+  }
+  try {
+    const success = await sendAbandonedCartRecoveryEmail(email, items);
+    if (success) {
+      res.json({ success: true, message: 'E-mail de relance de panier abandonné envoyé.' });
+    } else {
+      res.status(500).json({ error: 'Échec de l\'envoi de l\'e-mail.' });
+    }
+  } catch (err) {
+    console.error('Erreur marketing relance panier :', err.message);
+    res.status(500).json({ error: 'Erreur interne.' });
+  }
+});
+
+// Send loyalty promo code email
+app.post('/api/admin/marketing/loyalty-promo', authenticateToken, verifyAdmin, async (req, res) => {
+  const { email, couponCode } = req.body;
+  if (!email || !couponCode) {
+    return res.status(400).json({ error: 'Adresse e-mail et code promo requis.' });
+  }
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ error: 'Utilisateur non trouvé.' });
+    }
+    const success = await sendLoyaltyPromoEmail(user, couponCode);
+    if (success) {
+      res.json({ success: true, message: 'E-mail de fidélité envoyé.' });
+    } else {
+      res.status(500).json({ error: 'Échec de l\'envoi de l\'e-mail.' });
+    }
+  } catch (err) {
+    console.error('Erreur marketing fidélité :', err.message);
+    res.status(500).json({ error: 'Erreur interne.' });
+  }
+});
+
+// Send review request email
+app.post('/api/admin/marketing/review-request', authenticateToken, verifyAdmin, async (req, res) => {
+  const { orderNumber } = req.body;
+  if (!orderNumber) {
+    return res.status(400).json({ error: 'Numéro de commande requis.' });
+  }
+  try {
+    const order = await Order.findOne({ order_number: orderNumber });
+    if (!order) {
+      return res.status(404).json({ error: 'Commande non trouvée.' });
+    }
+    const success = await sendReviewRequestEmail(order);
+    if (success) {
+      res.json({ success: true, message: 'Demande d\'avis envoyée.' });
+    } else {
+      res.status(500).json({ error: 'Échec de l\'envoi de l\'e-mail.' });
+    }
+  } catch (err) {
+    console.error('Erreur marketing demande avis :', err.message);
+    res.status(500).json({ error: 'Erreur interne.' });
   }
 });
 

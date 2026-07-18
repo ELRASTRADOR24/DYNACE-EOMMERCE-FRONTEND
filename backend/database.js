@@ -44,7 +44,12 @@ const productSchema = new mongoose.Schema({
   description: { type: String, required: true },
   benefits: [{ type: String }],
   usage: { type: String, required: true },
-  stock: { type: Number, default: 50 }
+  stock: { type: Number, default: 50 },
+  supplier_name: { type: String, default: 'Dynace Global' },
+  supplier_url: { type: String, default: 'https://member.dynaceglobal.com/' },
+  supplier_product_url: { type: String, default: '' },
+  supplier_price: { type: Number, default: 0 },
+  supplier_shipping_cost: { type: Number, default: 0 }
 });
 
 export const Product = mongoose.model('Product', productSchema);
@@ -65,11 +70,19 @@ const orderSchema = new mongoose.Schema({
   subtotal: { type: Number, required: true },
   shipping: { type: Number, required: true },
   total: { type: Number, required: true },
-  status: { type: String, default: 'Payé' }, // 'Payé', 'En préparation', 'Expédié', 'Livré'
+  status: { type: String, default: 'Payé' }, // 'Payé', 'En préparation', 'Expédié', 'Livré', etc.
   tracking_number: { type: String, default: '' },
   coupon_code: { type: String, default: '' },
   discount_amount: { type: Number, default: 0 },
   is_archived: { type: Boolean, default: false },
+  payment_method: { type: String, default: 'Carte bancaire (Stripe)' },
+  history: [
+    {
+      status: { type: String, required: true },
+      label: { type: String, required: true },
+      timestamp: { type: Date, default: Date.now }
+    }
+  ],
   created_at: { type: Date, default: Date.now }
 });
 

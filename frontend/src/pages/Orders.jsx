@@ -176,6 +176,46 @@ export default function Orders({ onBackToShopping }) {
                     <span className="total-amount-order">{(order.total || 0).toFixed(2)} €</span>
                   </div>
                 </div>
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1rem', borderTop: '1px solid var(--border-color)', paddingTop: '1rem', flexWrap: 'wrap', gap: '0.75rem' }}>
+                  <a
+                    href={`/api/orders/invoice/${order.orderNumber}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="invoice-download-btn-client"
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.35rem',
+                      color: 'var(--primary-gold)',
+                      fontWeight: 'bold',
+                      textDecoration: 'none',
+                      fontSize: '0.85rem',
+                      border: '1px solid var(--primary-gold)',
+                      padding: '0.4rem 1rem',
+                      borderRadius: '20px',
+                      backgroundColor: 'rgba(212, 175, 55, 0.05)',
+                      transition: 'all 0.2s'
+                    }}
+                  >
+                    📄 Télécharger la Facture (PDF / Impression)
+                  </a>
+                  
+                  <a
+                    href={`/suivre-commande?orderNumber=${order.orderNumber}&email=${order.email || ''}`}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.35rem',
+                      color: 'var(--primary-green)',
+                      fontWeight: 'bold',
+                      textDecoration: 'none',
+                      fontSize: '0.85rem'
+                    }}
+                  >
+                    Suivre la livraison <ChevronRight size={14} />
+                  </a>
+                </div>
               </div>
             </div>
           ))}
