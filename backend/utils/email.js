@@ -104,7 +104,7 @@ export const sendEmail = async ({ to, subject, html, replyTo }) => {
 };
 
 export const sendContactEmail = async ({ name, email, subject, message }) => {
-  const adminEmail = process.env.EMAIL_USER || 'dynaceglogal@gmail.com';
+  const adminEmail = process.env.ADMIN_RECEIVER_EMAIL || process.env.EMAIL_USER || 'dynaceglogal@gmail.com';
   const html = `
     <h2>Nouveau Message de Contact</h2>
     <p><strong>De :</strong> ${name} (${email})</p>
@@ -121,7 +121,7 @@ export const sendContactEmail = async ({ name, email, subject, message }) => {
 };
 
 export const sendOrderNotificationEmail = async ({ orderId, user, items, totalAmount, shippingAddress }) => {
-  const adminEmail = process.env.EMAIL_USER || 'dynaceglogal@gmail.com';
+  const adminEmail = process.env.ADMIN_RECEIVER_EMAIL || process.env.EMAIL_USER || 'dynaceglogal@gmail.com';
   const frontendUrl = process.env.FRONTEND_URL || 'https://www.xn--dynaceglobalsant-top-q2b.com';
 
   const itemsHtml = items.map(item => `
@@ -425,7 +425,7 @@ export const sendCustomerOrderConfirmationEmail = async (order) => {
     </html>
   `;
 
-  const adminEmail = process.env.EMAIL_USER || 'dynaceglogal@gmail.com';
+  const adminEmail = process.env.ADMIN_RECEIVER_EMAIL || process.env.EMAIL_USER || 'dynaceglogal@gmail.com';
 
   return sendEmail({
     to: order.email,
