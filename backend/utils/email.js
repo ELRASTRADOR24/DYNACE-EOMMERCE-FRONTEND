@@ -122,7 +122,7 @@ export const sendContactEmail = async ({ name, email, subject, message }) => {
 
 export const sendOrderNotificationEmail = async ({ orderId, user, items, totalAmount, shippingAddress }) => {
   const adminEmail = process.env.EMAIL_USER || 'dynaceglogal@gmail.com';
-  const frontendUrl = process.env.FRONTEND_URL || 'https://xn--dynaceglobalesant-top-r5b.com';
+  const frontendUrl = process.env.FRONTEND_URL || 'https://www.xn--dynaceglobalsant-top-q2b.com';
 
   const itemsHtml = items.map(item => `
     <tr>
@@ -316,7 +316,7 @@ export const sendOrderNotificationEmail = async ({ orderId, user, items, totalAm
 };
 
 export const sendCustomerOrderConfirmationEmail = async (order) => {
-  const frontendUrl = process.env.FRONTEND_URL || 'https://xn--dynaceglobalesant-top-r5b.com';
+  const frontendUrl = process.env.FRONTEND_URL || 'https://www.xn--dynaceglobalsant-top-q2b.com';
   const itemsHtml = order.items.map(item => `
     <tr>
       <td style="padding: 10px; border-bottom: 1px solid #eee;">${item.name}</td>
@@ -436,7 +436,7 @@ export const sendCustomerOrderConfirmationEmail = async (order) => {
 };
 
 export const sendShippingConfirmationEmail = async (order, trackingNumber) => {
-  const frontendUrl = process.env.FRONTEND_URL || 'https://xn--dynaceglobalesant-top-r5b.com';
+  const frontendUrl = process.env.FRONTEND_URL || 'https://www.xn--dynaceglobalsant-top-q2b.com';
   const trackingLink = `https://www.chronopost.fr/fr/chrono_suividecolis?listeNumeros=${trackingNumber}`;
 
   const html = `
