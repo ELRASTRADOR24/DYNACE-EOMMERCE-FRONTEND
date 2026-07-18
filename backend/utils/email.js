@@ -123,14 +123,34 @@ export const sendContactEmail = async ({ name, email, subject, message }) => {
 export const sendOrderNotificationEmail = async ({ orderId, user, items, totalAmount, shippingAddress }) => {
   const adminEmail = process.env.ADMIN_RECEIVER_EMAIL || process.env.EMAIL_USER || 'dynaceglogal@gmail.com';
   const frontendUrl = process.env.FRONTEND_URL || 'https://www.xn--dynaceglobalsant-top-q2b.com';
+  const backendUrl = process.env.BACKEND_URL || 'https://dynace-backend.onrender.com';
 
-  const itemsHtml = items.map(item => `
-    <tr>
-      <td style="padding: 12px 15px; border-bottom: 1px solid #e2e8f0; font-size: 14px; color: #334155; font-weight: 500;">${item.name}</td>
-      <td style="padding: 12px 15px; border-bottom: 1px solid #e2e8f0; font-size: 14px; color: #64748b; text-align: center;">x${item.quantity}</td>
-      <td style="padding: 12px 15px; border-bottom: 1px solid #e2e8f0; font-size: 14px; color: #334155; text-align: right; font-weight: 600;">${(item.price * item.quantity).toFixed(2)} €</td>
-    </tr>
-  `).join('');
+  const supplierProductUrls = {
+    rocenta: 'https://dynaceglobal.com/dynace-rocenta/',
+    dynafuel: 'https://dynaceglobal.com/dynace-dynafuel/',
+    tripleroot: 'https://dynaceglobal.com/dynace-triple-root/',
+    lyftmax: 'https://dynaceglobal.com/dynace-lyftmax/',
+    acebrew: 'https://dynaceglobal.com/dynace-ace-brew/',
+    aceguard: 'https://dynaceglobal.com/dynace-ace-guard/',
+    collagene: 'https://dynaceglobal.com/dynace-collagen/',
+    toothpaste: 'https://dynaceglobal.com/dynace-toothpaste/'
+  };
+
+  const itemsHtml = items.map(item => {
+    const cleanId = (item.id || '').toLowerCase();
+    const supUrl = supplierProductUrls[cleanId] || 'https://dynaceglobal.com/';
+    return `
+      <tr>
+        <td style="padding: 12px 15px; border-bottom: 1px solid #e2e8f0; font-size: 14px; color: #1e293b; font-weight: 600;">
+          ${item.name}
+          <br/>
+          <a href="${supUrl}" target="_blank" style="font-size: 0.75rem; color: #d4af37; text-decoration: none; font-weight: bold;">🛒 Page Fournisseur ↗</a>
+        </td>
+        <td style="padding: 12px 15px; border-bottom: 1px solid #e2e8f0; font-size: 14px; color: #64748b; text-align: center;">x${item.quantity}</td>
+        <td style="padding: 12px 15px; border-bottom: 1px solid #e2e8f0; font-size: 14px; color: #1e293b; text-align: right; font-weight: 700;">${(item.price * item.quantity).toFixed(2)} €</td>
+      </tr>
+    `;
+  }).join('');
 
   const html = `
     <!DOCTYPE html>
@@ -139,81 +159,69 @@ export const sendOrderNotificationEmail = async ({ orderId, user, items, totalAm
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <style>
-        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f0f4f8; margin: 0; padding: 0; -webkit-font-smoothing: antialiased; }
-        .email-wrapper { max-width: 650px; margin: 30px auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
-        .header { background: linear-gradient(135deg, #153A89 0%, #0f2b66 100%); padding: 35px 30px; }
-        .header h1 { color: #ffffff; font-size: 22px; font-weight: 800; margin: 0; letter-spacing: 1.5px; text-transform: uppercase; }
-        .header p { color: #94b8ff; font-size: 14px; margin: 5px 0 0 0; }
-        .alert-bar { background-color: #10b981; color: #ffffff; text-align: center; padding: 14px 20px; font-size: 15px; font-weight: 700; letter-spacing: 0.5px; }
+        body { font-family: 'Inter', Helvetica, Arial, sans-serif; background-color: #f4f6f8; margin: 0; padding: 0; }
+        .wrapper { max-width: 650px; margin: 40px auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
+        .header { background: linear-gradient(135deg, #0a3c2c 0%, #052219 100%); padding: 35px 30px; text-align: center; border-bottom: 4px solid #d4af37; }
+        .logo-img { width: 70px; height: 70px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+        .header h1 { color: #ffffff; font-size: 20px; font-weight: 800; margin: 0; letter-spacing: 2px; text-transform: uppercase; }
+        .badge { background-color: #d4af37; color: #0a3c2c; display: inline-block; padding: 6px 16px; border-radius: 30px; font-size: 13px; font-weight: 800; text-transform: uppercase; margin-top: 10px; }
         .content { padding: 35px 30px; }
-        .section-title { font-size: 13px; text-transform: uppercase; color: #94a3b8; font-weight: 700; letter-spacing: 1px; margin-bottom: 12px; border-bottom: 2px solid #f1f5f9; padding-bottom: 8px; }
-        .info-grid { display: table; width: 100%; margin-bottom: 25px; }
-        .info-col { display: table-cell; vertical-align: top; width: 50%; padding-right: 15px; }
-        .info-col:last-child { padding-right: 0; padding-left: 15px; }
-        .info-label { font-size: 12px; text-transform: uppercase; color: #94a3b8; font-weight: 600; letter-spacing: 0.5px; margin-bottom: 4px; }
-        .info-value { font-size: 15px; color: #1e293b; font-weight: 500; line-height: 1.5; margin-bottom: 12px; }
-        .order-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-        .order-table th { font-size: 11px; text-transform: uppercase; color: #94a3b8; font-weight: 700; text-align: left; padding: 10px 15px; background-color: #f8fafc; border-bottom: 2px solid #e2e8f0; }
-        .total-row { text-align: right; padding: 8px 15px; font-size: 14px; color: #64748b; }
-        .grand-total { font-size: 20px; font-weight: 800; color: #153A89; padding-top: 12px; border-top: 2px solid #e2e8f0; }
-        .shipping-label { border: 3px dashed #153A89; border-radius: 12px; padding: 25px; margin: 30px 0; background-color: #fafbff; }
-        .shipping-label-header { text-align: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #153A89; }
-        .shipping-label-header h3 { font-size: 18px; color: #153A89; margin: 0; text-transform: uppercase; font-weight: 800; }
-        .shipping-label-header p { font-size: 12px; color: #64748b; margin: 5px 0 0 0; }
-        .label-grid { display: table; width: 100%; }
-        .label-from, .label-to { display: table-cell; vertical-align: top; width: 50%; }
-        .label-from { padding-right: 15px; }
-        .label-to { padding-left: 15px; border-left: 2px solid #e2e8f0; }
-        .label-section-title { font-size: 11px; text-transform: uppercase; color: #94a3b8; font-weight: 700; margin-bottom: 8px; }
-        .label-name { font-size: 16px; font-weight: 700; color: #1e293b; margin-bottom: 4px; }
-        .label-address { font-size: 14px; color: #475569; line-height: 1.6; }
-        .label-ref { text-align: center; margin-top: 18px; padding-top: 15px; border-top: 2px solid #e2e8f0; }
-        .label-ref span { font-family: 'Courier New', monospace; font-size: 16px; font-weight: 700; color: #153A89; background-color: #eef2ff; padding: 6px 16px; border-radius: 6px; }
-        .footer { text-align: center; padding: 25px 30px; background-color: #f1f5f9; font-size: 12px; color: #94a3b8; }
+        .section-title { font-size: 13px; text-transform: uppercase; color: #0a3c2c; font-weight: 800; letter-spacing: 1.5px; margin: 25px 0 15px 0; border-bottom: 2px solid #f1f5f9; padding-bottom: 8px; }
+        .grid { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        .grid td { vertical-align: top; width: 50%; padding-right: 15px; }
+        .label { font-size: 11px; text-transform: uppercase; color: #94a3b8; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 3px; }
+        .val { font-size: 14px; color: #1e293b; font-weight: 600; line-height: 1.5; margin-bottom: 12px; }
+        .table-items { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        .table-items th { font-size: 11px; text-transform: uppercase; color: #94a3b8; font-weight: 700; text-align: left; padding: 10px 15px; background-color: #f8fafc; border-bottom: 2px solid #e2e8f0; }
+        .action-box { background-color: #fafbfc; border: 2px dashed #d4af37; border-radius: 12px; padding: 25px; margin-top: 30px; }
+        .action-box h3 { margin: 0 0 18px 0; font-size: 16px; color: #0a3c2c; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; text-align: center; }
+        .action-btn { display: block; background-color: #0a3c2c; color: #ffffff !important; text-align: center; padding: 12px 20px; border-radius: 8px; font-weight: 700; text-decoration: none; font-size: 14px; margin-bottom: 10px; border: 1px solid #0a3c2c; box-shadow: 0 4px 10px rgba(10,60,44,0.15); transition: background-color 0.2s; }
+        .action-btn:hover { background-color: #052219; }
+        .action-btn-gold { background-color: #d4af37; color: #0a3c2c !important; border: 1px solid #d4af37; box-shadow: 0 4px 10px rgba(212,175,55,0.2); }
+        .action-btn-gold:hover { background-color: #bfa030; }
+        .footer { background-color: #f8fafc; padding: 25px; text-align: center; font-size: 12px; color: #94a3b8; border-top: 1px solid #e2e8f0; }
       </style>
     </head>
     <body>
-      <div class="email-wrapper">
+      <div class="wrapper">
         <div class="header">
-          <h1>DYNACE GLOBAL</h1>
-          <p>Tableau de bord • Notification de commande</p>
-        </div>
-        <div class="alert-bar">
-          ✅ NOUVELLE COMMANDE REÇUE — ACTION REQUISE
+          <img class="logo-img" src="${frontendUrl}/favicon.png" alt="Logo Dynace">
+          <h1>Nouvelle Commande Reçue</h1>
+          <span class="badge">A Traiter 📦</span>
         </div>
         <div class="content">
-          <div class="section-title">Résumé de la commande</div>
-          <div class="info-grid">
-            <div class="info-col">
-              <div class="info-label">N° Commande</div>
-              <div class="info-value" style="font-family: 'Courier New', monospace; font-size: 17px; color: #153A89; font-weight: 700;">${orderId}</div>
-              <div class="info-label">Date</div>
-              <div class="info-value">${new Date().toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</div>
-              <div class="info-label">Montant total payé</div>
-              <div class="info-value" style="font-size: 22px; font-weight: 800; color: #10b981;">${totalAmount.toFixed(2)} €</div>
-            </div>
-            <div class="info-col">
-              <div class="info-label">Client</div>
-              <div class="info-value" style="font-weight: 700;">${user.firstName} ${user.lastName}</div>
-              <div class="info-label">Email</div>
-              <div class="info-value"><a href="mailto:${user.email}" style="color: #153A89; text-decoration: none;">${user.email}</a></div>
-              <div class="info-label">Téléphone</div>
-              <div class="info-value">${shippingAddress.phone || 'Non renseigné'}</div>
-            </div>
+          <div class="section-title">Résumé de la Commande</div>
+          <table class="grid">
+            <tr>
+              <td>
+                <div class="label">N° de Commande</div>
+                <div class="val" style="font-family: monospace; font-size: 16px; color: #0a3c2c; font-weight: bold;">${orderId}</div>
+                <div class="label">Date de Commande</div>
+                <div class="val">${new Date().toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</div>
+                <div class="label">Total Payé par le Client</div>
+                <div class="val" style="font-size: 18px; color: #10b981; font-weight: 800;">${totalAmount.toFixed(2)} €</div>
+              </td>
+              <td>
+                <div class="label">Client</div>
+                <div class="val" style="font-weight: 700;">${user.firstName} ${user.lastName}</div>
+                <div class="label">Adresse E-mail</div>
+                <div class="val"><a href="mailto:${user.email}" style="color: #0a3c2c; text-decoration: none;">${user.email}</a></div>
+                <div class="label">Téléphone</div>
+                <div class="val">${shippingAddress.phone || 'Non renseigné'}</div>
+              </td>
+            </tr>
+          </table>
+
+          <div class="section-title">Adresse d'Expédition</div>
+          <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; font-size: 14px; line-height: 1.6; color: #334155;">
+            <strong>${shippingAddress.fullName}</strong><br/>
+            ${shippingAddress.address}<br/>
+            ${shippingAddress.postalCode} ${shippingAddress.city}<br/>
+            ${shippingAddress.country || 'France'}
           </div>
-          
-          <div class="section-title">Adresse de livraison</div>
-          <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 18px; margin-bottom: 25px;">
-            <div style="font-size: 16px; font-weight: 700; color: #1e293b; margin-bottom: 5px;">${shippingAddress.fullName}</div>
-            <div style="font-size: 14px; color: #475569; line-height: 1.6;">
-              ${shippingAddress.address}<br>
-              ${shippingAddress.postalCode} ${shippingAddress.city}<br>
-              ${shippingAddress.country || 'France'}
-            </div>
-          </div>
-          
-          <div class="section-title">Produits à expédier</div>
-          <table class="order-table">
+
+          <div class="section-title">Détails des Produits</div>
+          <table class="table-items">
             <thead>
               <tr>
                 <th>Produit</th>
@@ -225,83 +233,34 @@ export const sendOrderNotificationEmail = async ({ orderId, user, items, totalAm
               ${itemsHtml}
             </tbody>
           </table>
-          <div class="total-row" style="text-align: right; padding: 12px 15px;">Total : ${totalAmount.toFixed(2)} €</div>
-          
-          <div class="shipping-label">
-            <div class="shipping-label-header">
-              <h3>📦 Fiche d'Expédition</h3>
-              <p>Imprimez cette fiche et collez-la sur le colis, ou recopiez les informations sur Chronopost en ligne</p>
-            </div>
-            <div class="label-grid">
-              <div class="label-from">
-                <div class="label-section-title">Expéditeur</div>
-                <div class="label-name">DYNACE GLOBAL</div>
-                <div class="label-address">
-                  78300 Poissy<br>
-                  France
-                </div>
-              </div>
-              <div class="label-to">
-                <div class="label-section-title">Destinataire</div>
-                <div class="label-name">${shippingAddress.fullName}</div>
-                <div class="label-address">
-                  ${shippingAddress.address}<br>
-                  ${shippingAddress.postalCode} ${shippingAddress.city}<br>
-                  ${shippingAddress.country || 'France'}<br>
-                  ${shippingAddress.phone ? 'Tél: ' + shippingAddress.phone : ''}
-                </div>
-              </div>
-            </div>
-            <div class="label-ref">
-              <span>REF: ${orderId}</span>
-            </div>
-          </div>
-          
-          <div style="margin-top: 25px; text-align: center; margin-bottom: 12px;">
-            <a href="${process.env.BACKEND_URL || 'https://dynace-backend.onrender.com'}/api/orders/packing-slip/${orderId}" target="_blank" style="display: inline-block; background-color: #10b981; color: #ffffff !important; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-size: 15px; font-weight: 800; letter-spacing: 0.5px; box-shadow: 0 4px 12px rgba(16,185,129,0.2); border: 2px solid #10b981; width: 85%; max-width: 420px; text-align: center;">
-              🖨️ Imprimer la Fiche d'Expédition / Coller sur le carton →
+
+          <div class="action-box">
+            <h3>⚡ Actions Rapides Administrateur</h3>
+            
+            <a href="https://member.dynaceglobal.com/" target="_blank" class="action-btn action-btn-gold">
+              🛒 1. Acheter le stock chez le fournisseur (Backoffice Dynace) ↗
             </a>
-          </div>
-          <div style="text-align: center; margin-bottom: 25px;">
-            <a href="${frontendUrl}/?tab=admin&order=${orderId}" target="_blank" style="display: inline-block; background-color: #153A89; color: #ffffff !important; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-size: 15px; font-weight: 800; letter-spacing: 0.5px; box-shadow: 0 4px 12px rgba(21,58,137,0.2); border: 2px solid #153A89; width: 85%; max-width: 420px; text-align: center;">
-              👁️ Voir la commande dans l'Administration →
+            
+            <a href="https://www.chronopost.fr/fr/particulier/envoyer-un-colis" target="_blank" class="action-btn">
+              🏷️ 2. Générer l'étiquette d'expédition (Chronopost) ↗
             </a>
-          </div>
-          
-          <div style="margin-top: 30px; background: linear-gradient(135deg, #fafbff 0%, #f0f4ff 100%); border: 2px solid #153A89; border-radius: 14px; padding: 25px; ">
-            <h3 style="font-size: 17px; color: #153A89; margin: 0 0 18px 0; text-transform: uppercase; font-weight: 800; letter-spacing: 1px; text-align: center;">🚚 Envoyer le colis en 3 étapes</h3>
-            
-            <div style="margin-bottom: 20px;">
-              <div style="display: flex; align-items: center; margin-bottom: 10px;">
-                <span style="background-color: #153A89; color: #fff; font-size: 14px; font-weight: 800; width: 28px; height: 28px; border-radius: 50%; display: inline-block; text-align: center; line-height: 28px; margin-right: 10px;">1</span>
-                <strong style="font-size: 15px; color: #1e293b;">Cliquez sur le lien ci-dessous pour aller sur Chronopost</strong>
-              </div>
-              <div style="text-align: center; margin: 10px 0;">
-                <a href="https://www.chronopost.fr/fr/particulier/envoyer-un-colis" target="_blank" style="display: inline-block; background: linear-gradient(135deg, #00468b 0%, #153A89 100%); color: #ffffff; padding: 14px 30px; border-radius: 10px; text-decoration: none; font-size: 15px; font-weight: 700; letter-spacing: 0.5px; box-shadow: 0 4px 12px rgba(0,70,139,0.3);">
-                  📦 Ouvrir Chronopost en ligne →
-                </a>
-              </div>
-            </div>
-            
-            <div style="margin-bottom: 20px;">
-              <div style="display: flex; align-items: center; margin-bottom: 10px;">
-                <span style="background-color: #153A89; color: #fff; font-size: 14px; font-weight: 800; width: 28px; height: 28px; border-radius: 50%; display: inline-block; text-align: center; line-height: 28px; margin-right: 10px;">2</span>
-                <strong style="font-size: 15px; color: #1e293b;">Achetez l'étiquette d'envoi en recopiant les informations</strong>
-              </div>
-              <p style="font-size: 14px; color: #475569; margin: 0 0 0 38px; line-height: 1.5;">Utilisez l'adresse et le téléphone du destinataire ci-dessus. Une fois payée, imprimez votre fiche Chronopost et collez-la sur votre paquet.</p>
-            </div>
-            
-            <div>
-              <div style="display: flex; align-items: center; margin-bottom: 10px;">
-                <span style="background-color: #153A89; color: #fff; font-size: 14px; font-weight: 800; width: 28px; height: 28px; border-radius: 50%; display: inline-block; text-align: center; line-height: 28px; margin-right: 10px;">3</span>
-                <strong style="font-size: 15px; color: #1e293b;">Renseignez le numéro de suivi dans l'administration</strong>
-              </div>
-              <p style="font-size: 14px; color: #475569; margin: 0 0 0 38px; line-height: 1.5;">Allez sur votre tableau de bord admin, passez la commande en statut "Expédié" et saisissez le numéro de suivi Chronopost obtenu. Le client sera alors notifié automatiquement par e-mail avec son lien de suivi.</p>
-            </div>
+
+            <a href="${backendUrl}/api/orders/packing-slip/${orderId}" target="_blank" class="action-btn">
+              🖨️ 3. Imprimer le bon de livraison ↗
+            </a>
+
+            <a href="${frontendUrl}/?tab=admin&order=${orderId}" target="_blank" class="action-btn">
+              💻 4. Voir / Traiter la commande dans l'Administration ↗
+            </a>
+
+            <a href="${frontendUrl}/?tab=admin&subtab=users&search=${user.email}" target="_blank" class="action-btn">
+              👤 5. Consulter la fiche client complète ↗
+            </a>
           </div>
         </div>
         <div class="footer">
-          <p>Dynace Global Administration System • Automated Notification</p>
+          <p>Système de Notification Automatique Dynace Global France & Europe</p>
+          <p>© ${new Date().getFullYear()} Dynace Global. Tous droits réservés.</p>
         </div>
       </div>
     </body>
@@ -317,11 +276,13 @@ export const sendOrderNotificationEmail = async ({ orderId, user, items, totalAm
 
 export const sendCustomerOrderConfirmationEmail = async (order) => {
   const frontendUrl = process.env.FRONTEND_URL || 'https://www.xn--dynaceglobalsant-top-q2b.com';
+  const adminEmail = process.env.ADMIN_RECEIVER_EMAIL || process.env.EMAIL_USER || 'dynaceglogal@gmail.com';
+
   const itemsHtml = order.items.map(item => `
     <tr>
-      <td style="padding: 10px; border-bottom: 1px solid #eee;">${item.name}</td>
-      <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: center;">x${item.quantity}</td>
-      <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">${item.price.toFixed(2)} €</td>
+      <td style="padding: 12px 10px; border-bottom: 1px solid #f1f5f9; font-size: 15px; color: #334155; font-weight: 500;">${item.name}</td>
+      <td style="padding: 12px 10px; border-bottom: 1px solid #f1f5f9; font-size: 15px; color: #64748b; text-align: center;">x${item.quantity}</td>
+      <td style="padding: 12px 10px; border-bottom: 1px solid #f1f5f9; font-size: 15px; color: #1e293b; text-align: right; font-weight: 700;">${(item.price * item.quantity).toFixed(2)} €</td>
     </tr>
   `).join('');
 
@@ -330,102 +291,127 @@ export const sendCustomerOrderConfirmationEmail = async (order) => {
     <html lang="fr">
     <head>
       <meta charset="UTF-8">
-      <meta name="color-scheme" content="light dark">
-      <meta name="supported-color-schemes" content="light dark">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <style>
-        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f4f7f6; margin: 0; padding: 0; -webkit-font-smoothing: antialiased; }
-        .email-wrapper { max-width: 600px; margin: 40px auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        .header { background-color: #153A89; padding: 40px 20px; text-align: center; }
-        .header h2 { color: #ffffff; font-size: 28px; font-weight: 800; margin: 0; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 10px; }
-        .header h1 { color: #e2e8f0; font-size: 18px; font-weight: 400; margin: 0; }
+        body { font-family: 'Inter', Helvetica, Arial, sans-serif; background-color: #f8fafc; margin: 0; padding: 0; }
+        .wrapper { max-width: 600px; margin: 40px auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.04); border: 1px solid #e2e8f0; }
+        .header { background: linear-gradient(135deg, #0a3c2c 0%, #052219 100%); padding: 40px 20px; text-align: center; border-bottom: 4px solid #d4af37; }
+        .logo-img { width: 70px; height: 70px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+        .header h2 { color: #ffffff; font-size: 22px; font-weight: 800; margin: 0; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 5px; }
+        .header h1 { color: #d4af37; font-size: 15px; font-weight: 600; margin: 0; letter-spacing: 0.5px; }
         .content { padding: 40px 30px; color: #334155; }
-        .greeting { font-size: 18px; font-weight: 600; margin-bottom: 10px; color: #1e293b; }
+        .greeting { font-size: 18px; font-weight: 700; margin-bottom: 12px; color: #0a3c2c; }
         .intro-text { font-size: 15px; line-height: 1.6; color: #475569; margin-bottom: 30px; }
-        .order-card { background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 25px; margin-bottom: 30px; }
-        .order-card-header { display: flex; justify-content: space-between; border-bottom: 2px solid #e2e8f0; padding-bottom: 15px; margin-bottom: 15px; }
-        .order-number { font-size: 16px; font-weight: 700; color: #153A89; }
+        .order-card { background-color: #fafcfb; border: 1px solid #e2e8f0; border-radius: 10px; padding: 25px; margin-bottom: 30px; }
+        .order-number { font-size: 15px; font-weight: 800; color: #0a3c2c; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 15px; display: block; }
         .order-items { width: 100%; border-collapse: collapse; }
-        .order-items th { font-size: 12px; text-transform: uppercase; color: #94a3b8; text-align: left; padding-bottom: 10px; }
-        .order-items td { padding: 12px 0; border-bottom: 1px solid #f1f5f9; font-size: 15px; }
-        .item-name { font-weight: 600; color: #334155; }
-        .item-qty { color: #64748b; font-size: 14px; text-align: center; }
-        .item-price { text-align: right; font-weight: 500; }
-        .totals { margin-top: 20px; width: 100%; text-align: right; }
-        .totals-row { padding: 5px 0; font-size: 14px; color: #64748b; }
-        .grand-total { font-size: 18px; font-weight: 700; color: #153A89; padding-top: 10px; margin-top: 10px; border-top: 2px solid #e2e8f0; }
-        .shipping-box { background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin-top: 20px; }
-        .shipping-title { font-size: 13px; text-transform: uppercase; color: #94a3b8; font-weight: 700; margin-bottom: 10px; letter-spacing: 0.5px; }
-        .shipping-address { font-size: 15px; line-height: 1.5; color: #475569; }
+        .order-items th { font-size: 11px; text-transform: uppercase; color: #94a3b8; text-align: left; padding-bottom: 10px; }
+        .totals { margin-top: 20px; width: 100%; border-collapse: collapse; text-align: right; }
+        .totals-row { font-size: 14px; color: #64748b; padding: 6px 0; }
+        .grand-total { font-size: 19px; font-weight: 800; color: #0a3c2c; padding-top: 12px; margin-top: 10px; border-top: 2px solid #e2e8f0; }
+        .details-grid { display: table; width: 100%; margin-top: 25px; border-top: 1px solid #f1f5f9; padding-top: 20px; }
+        .details-col { display: table-cell; width: 50%; vertical-align: top; }
+        .details-title { font-size: 11px; text-transform: uppercase; color: #94a3b8; font-weight: 700; margin-bottom: 8px; letter-spacing: 0.5px; }
+        .details-val { font-size: 14px; color: #475569; line-height: 1.6; }
         .cta-container { text-align: center; margin: 40px 0 20px; }
-        .cta-button { display: inline-block; background-color: #00ACD8; color: #ffffff !important; font-size: 16px; font-weight: 700; text-decoration: none; padding: 15px 35px; border-radius: 30px; letter-spacing: 0.5px; border: 2px solid #00ACD8; }
-        .footer { text-align: center; padding: 30px; background-color: #f1f5f9; font-size: 13px; color: #94a3b8; line-height: 1.5; }
-        .footer a { color: #153A89; text-decoration: none; }
+        .cta-button { display: inline-block; background-color: #d4af37; color: #0a3c2c !important; font-size: 15px; font-weight: 800; text-decoration: none; padding: 14px 35px; border-radius: 30px; letter-spacing: 0.5px; border: 2px solid #d4af37; box-shadow: 0 4px 12px rgba(212,175,55,0.25); }
+        .cta-button-secondary { display: inline-block; background-color: transparent; color: #0a3c2c !important; font-size: 14px; font-weight: 700; text-decoration: none; padding: 10px 25px; border-radius: 30px; border: 2px solid #0a3c2c; margin-top: 15px; }
+        .footer { text-align: center; padding: 30px; background-color: #f8fafc; font-size: 13px; color: #94a3b8; line-height: 1.6; border-top: 1px solid #e2e8f0; }
+        .footer a { color: #0a3c2c; text-decoration: none; font-weight: 700; }
       </style>
     </head>
     <body>
-      <div class="email-wrapper">
+      <div class="wrapper">
         <div class="header">
+          <img class="logo-img" src="${frontendUrl}/favicon.png" alt="Logo Dynace">
           <h2>DYNACE GLOBAL</h2>
-          <h1>Merci d'avoir acheté chez nous</h1>
+          <h1>Confirmation de Commande</h1>
         </div>
         <div class="content">
           <div class="greeting">Bonjour ${order.first_name},</div>
           <div class="intro-text">
-            Nous sommes ravis de vous confirmer que votre paiement a bien été reçu.<br/>
-            <strong>Votre colis sera préparé et expédié sous peu.</strong> Nos équipes y accordent le plus grand soin.
+            Nous vous remercions pour votre achat ! Votre paiement a été validé avec succès. <br/>
+            Notre équipe prépare actuellement vos produits avec le plus grand soin.
           </div>
           
           <div class="order-card">
-            <div class="order-card-header">
-              <span class="order-number">Commande n° ${order.order_number}</span>
-            </div>
+            <span class="order-number">Commande n° ${order.order_number}</span>
             <table class="order-items">
               <thead>
                 <tr>
-                  <th>Produit</th>
-                  <th style="text-align: center;">Qté</th>
-                  <th style="text-align: right;">Prix</th>
+                  <th style="font-size: 11px; text-transform: uppercase; color: #94a3b8; text-align: left; padding-bottom: 10px;">Produit</th>
+                  <th style="font-size: 11px; text-transform: uppercase; color: #94a3b8; text-align: center; padding-bottom: 10px;">Qté</th>
+                  <th style="font-size: 11px; text-transform: uppercase; color: #94a3b8; text-align: right; padding-bottom: 10px;">Prix</th>
                 </tr>
               </thead>
               <tbody>
                 ${itemsHtml}
               </tbody>
             </table>
-            <div class="totals">
-              <div class="totals-row">Sous-total : ${order.subtotal.toFixed(2)} €</div>
-              <div class="totals-row">Frais de livraison : ${order.shipping === 0 ? 'Offerts' : `${order.shipping.toFixed(2)} €`}</div>
-              <div class="grand-total">Total payé : ${order.total.toFixed(2)} €</div>
-            </div>
-          </div>
-          
-          <div class="shipping-box">
-            <div class="shipping-title">Adresse de Livraison</div>
-            <div class="shipping-address">
-              <strong>${order.first_name} ${order.last_name}</strong><br/>
-              ${order.address}<br/>
-              ${order.postal_code} ${order.city}
+            
+            <table class="totals">
+              <tr>
+                <td class="totals-row">Sous-total :</td>
+                <td class="totals-row" style="font-weight: 600; color: #334155;">${order.subtotal.toFixed(2)} €</td>
+              </tr>
+              ${order.discount_amount > 0 ? `
+              <tr>
+                <td class="totals-row" style="color: #10b981;">Réduction (${order.coupon_code}) :</td>
+                <td class="totals-row" style="font-weight: 600; color: #10b981;">-${order.discount_amount.toFixed(2)} €</td>
+              </tr>
+              ` : ''}
+              <tr>
+                <td class="totals-row">Frais de livraison :</td>
+                <td class="totals-row" style="font-weight: 600; color: #334155;">${order.shipping === 0 ? 'Offerts' : `${order.shipping.toFixed(2)} €`}</td>
+              </tr>
+              <tr>
+                <td class="totals-row grand-total">Total payé :</td>
+                <td class="totals-row grand-total">${order.total.toFixed(2)} €</td>
+              </tr>
+            </table>
+
+            <div class="details-grid">
+              <div class="details-col">
+                <div class="details-title">Adresse de Livraison</div>
+                <div class="details-val">
+                  <strong>${order.first_name} ${order.last_name}</strong><br/>
+                  ${order.address}<br/>
+                  ${order.postal_code} ${order.city}<br/>
+                  ${order.country || 'France'}
+                </div>
+              </div>
+              <div class="details-col">
+                <div class="details-title">Informations de livraison</div>
+                <div class="details-val">
+                  <strong>Mode de paiement :</strong> Carte bancaire (Stripe Sécurisé)<br/>
+                  <strong>Date estimée :</strong> sous 3 à 5 jours ouvrés<br/>
+                  <strong>Mode d'envoi :</strong> Livraison à domicile
+                </div>
+              </div>
             </div>
           </div>
           
           <div class="cta-container">
             <a href="${frontendUrl}/track?order=${order.order_number}" class="cta-button">
-              Suivre ma commande en temps réel
+              🚚 Suivre ma commande en temps réel
+            </a>
+            <br/>
+            <a href="${frontendUrl}" class="cta-button-secondary">
+              👤 Accéder à mon compte
             </a>
           </div>
         </div>
         <div class="footer">
           <p>
-            Ceci est un e-mail automatique, merci de ne pas y répondre directement.<br/>
-            Pour toute question, contactez notre support client via la page <a href="${frontendUrl}/contact">Contact</a> de notre site.
+            Une question ? Notre support client est à votre disposition par e-mail à <a href="mailto:${adminEmail}">${adminEmail}</a> ou directement via notre formulaire de contact.<br/>
+            Pour votre sécurité, nous ne vous demanderons jamais vos coordonnées bancaires par e-mail.
           </p>
-          <p>&copy; ${new Date().getFullYear()} Dynace Global. Tous droits réservés.</p>
+          <p>© ${new Date().getFullYear()} Dynace Global. Tous droits réservés.</p>
         </div>
       </div>
     </body>
     </html>
   `;
-
-  const adminEmail = process.env.ADMIN_RECEIVER_EMAIL || process.env.EMAIL_USER || 'dynaceglogal@gmail.com';
 
   return sendEmail({
     to: order.email,

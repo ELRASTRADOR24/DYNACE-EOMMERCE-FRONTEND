@@ -4,16 +4,21 @@ import { Plus, Edit2, Trash2, Package, ShoppingCart, RefreshCw, Save, X, Check, 
 export default function AdminDashboard({ onRefreshProducts }) {
   const [activeSubTab, setActiveSubTab] = useState('analytics'); // 'analytics', 'products', 'orders', etc.
   const [highlightedOrderNumber, setHighlightedOrderNumber] = useState('');
+  const [userSearchQuery, setUserSearchQuery] = useState('');
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const tabParam = params.get('tab');
     const orderParam = params.get('order');
+    const searchParam = params.get('search');
     if (tabParam) {
       setActiveSubTab(tabParam);
     }
     if (orderParam) {
       setHighlightedOrderNumber(orderParam);
+    }
+    if (searchParam) {
+      setUserSearchQuery(searchParam);
     }
   }, []);
   
@@ -1840,6 +1845,18 @@ export default function AdminDashboard({ onRefreshProducts }) {
             Gestion des Utilisateurs ({users.length})
           </h3>
           
+          {/* User Search Bar */}
+          <div style={{ marginBottom: '1.5rem', maxWidth: '400px' }}>
+            <input
+              type="text"
+              placeholder="🔍 Rechercher un utilisateur par nom ou e-mail..."
+              value={userSearchQuery}
+              onChange={e => setUserSearchQuery(e.target.value)}
+              className="form-input"
+              style={{ width: '100%', padding: '0.7rem 1rem', borderRadius: '10px', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-secondary)', color: 'var(--text-primary)', fontSize: '0.9rem' }}
+            />
+          </div>
+          
           {usersLoading && users.length === 0 ? (
             <div style={{ display: 'flex', justifyContent: 'center', padding: '3rem' }}>
               <RefreshCw size={36} className="spin" style={{ color: 'var(--primary-green)' }} />
@@ -1859,7 +1876,12 @@ export default function AdminDashboard({ onRefreshProducts }) {
                   </tr>
                 </thead>
                 <tbody>
-                  {users.map((u) => {
+                  {users.filter(u => {
+                    const q = userSearchQuery.toLowerCase();
+                    return !q || 
+                      (u.first_name + ' ' + u.last_name).toLowerCase().includes(q) ||
+                      (u.email || '').toLowerCase().includes(q);
+                  }).map((u) => {
                     const userOrders = orders.filter(o => (o.email || '').toLowerCase() === (u.email || '').toLowerCase());
                     const userTotal = userOrders.reduce((sum, o) => sum + (o.total || 0), 0);
                     return (
