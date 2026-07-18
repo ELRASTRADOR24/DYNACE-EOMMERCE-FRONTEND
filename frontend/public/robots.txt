@@ -3,4 +3,4 @@ Allow: /
 Disallow: /admin
 Disallow: /checkout
 
-Sitemap: https://xn--dynaceglobalesant-top-r5b.com/sitemap.xml
+Sitemap: https://www.xn--dynaceglobalsant-top-q2b.com/sitemap.xml
