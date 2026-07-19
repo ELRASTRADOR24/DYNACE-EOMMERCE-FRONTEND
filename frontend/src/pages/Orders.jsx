@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Package, Calendar, Clock, MapPin, ChevronRight, AlertCircle, ShoppingBag } from 'lucide-react';
+import OptimizedImage from '../components/OptimizedImage';
 
 export default function Orders({ onBackToShopping }) {
   const [orders, setOrders] = useState([]);
@@ -129,9 +130,10 @@ export default function Orders({ onBackToShopping }) {
                 {(order.items || []).map((item, idx) => (
                   <div className="order-item-row" key={idx}>
                     <div className="order-item-img-wrapper">
-                      <img 
+                      <OptimizedImage 
                         src={item.image || "/images/logo.svg"} 
                         alt={item.name || 'Produit'} 
+                        size="thumb"
                         className="order-item-img" 
                       />
                     </div>

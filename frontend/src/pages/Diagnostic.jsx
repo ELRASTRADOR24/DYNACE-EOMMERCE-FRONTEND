@@ -13,6 +13,7 @@ import {
   Sun,
   Activity
 } from 'lucide-react';
+import OptimizedImage from '../components/OptimizedImage';
 
 const QUESTIONS = [
   {
@@ -274,11 +275,13 @@ export default function Diagnostic({ onAddToCart, onNavigate }) {
 
             {/* Product card recommendation */}
             <div className="diagnostic-result-box">
-              <img 
-                src={recommendedProduct.image} 
-                alt={recommendedProduct.name} 
-                style={{ width: '120px', height: '120px', objectFit: 'contain' }} 
-              />
+              <div style={{ width: '120px', height: '120px', overflow: 'hidden' }}>
+                <OptimizedImage 
+                  src={recommendedProduct.image} 
+                  alt={recommendedProduct.name} 
+                  size="thumb"
+                />
+              </div>
               
               <div style={{ textAlign: 'center' }}>
                 <h3 style={{ fontSize: '1.4rem', fontWeight: '800', marginBottom: '0.25rem' }}>

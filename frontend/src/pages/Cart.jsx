@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { ShoppingCart, Trash2, Plus, Minus, ArrowLeft, ShieldCheck, Truck } from 'lucide-react';
+import OptimizedImage from '../components/OptimizedImage';
 
 export default function Cart({ cartItems, onUpdateQty, onRemoveItem, onNavigate }) {
   const [shippingCost, setShippingCost] = useState(10.50);
@@ -168,11 +169,9 @@ export default function Cart({ cartItems, onUpdateQty, onRemoveItem, onNavigate 
                 }}
               >
                 {/* Product Image */}
-                <img 
-                  src={item.image} 
-                  alt={item.name} 
-                  style={{ width: '80px', height: '80px', objectFit: 'contain', backgroundColor: 'var(--bg-secondary)', borderRadius: '10px', padding: '0.5rem' }} 
-                />
+                <div style={{ width: '80px', height: '80px', backgroundColor: 'var(--bg-secondary)', borderRadius: '10px', padding: '0.5rem', overflow: 'hidden' }}>
+                  <OptimizedImage src={item.image} alt={item.name} size="thumb" />
+                </div>
 
                 {/* Details */}
                 <div style={{ flex: '1 1 200px' }}>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, CheckCircle, FlameKindling, ShoppingBag, CreditCard, Minus, Plus, ImageOff, Star } from 'lucide-react';
+import OptimizedImage from '../components/OptimizedImage';
 
 export default function ProductDetail({ product, onBack, onAddToCart, onBuyNow, currentUser, onOpenAuth }) {
   const [activeImage, setActiveImage] = useState(product?.image || "");
@@ -138,7 +139,7 @@ export default function ProductDetail({ product, onBack, onAddToCart, onBuyNow, 
           ) : (
             <>
               <div className="detail-img-card">
-                <img src={activeImage} alt={product.name} className="detail-img" />
+                <OptimizedImage src={activeImage} alt={product.name} size="medium" className="detail-img" eager />
               </div>
               {hasImages && (
                 <div className="detail-thumbnails">
@@ -148,7 +149,7 @@ export default function ProductDetail({ product, onBack, onAddToCart, onBuyNow, 
                       className={`thumbnail-btn ${activeImage === img ? 'active' : ''}`}
                       onClick={() => setActiveImage(img)}
                     >
-                      <img src={img} alt={`${product.name} view ${index + 1}`} className="thumbnail-img" />
+                      <OptimizedImage src={img} alt={`${product.name} view ${index + 1}`} size="thumb" className="thumbnail-img" />
                     </button>
                   ))}
                 </div>

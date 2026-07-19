@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ShoppingBag, X, Minus, Plus, Trash2, ArrowRight } from 'lucide-react';
+import OptimizedImage from './OptimizedImage';
 
 export default function CartDrawer({ 
   isOpen, 
@@ -54,7 +55,7 @@ export default function CartDrawer({
             cartItems.map((item) => (
               <div className="cart-item" key={item.id}>
                 <div className="cart-item-img-wrapper">
-                  <img src={item.image} alt={item.name} className="cart-item-img" />
+                  <OptimizedImage src={item.image} alt={item.name} size="thumb" className="cart-item-img" />
                 </div>
                 <div className="cart-item-details">
                   <h4 className="cart-item-title">{item.name}</h4>

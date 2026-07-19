@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Star, Play, Pause, AlertCircle, MessageSquare, CheckCircle } from 'lucide-react';
+import OptimizedImage from '../components/OptimizedImage';
 
 const getProductName = (id) => {
   const mapping = {
@@ -281,7 +282,7 @@ export default function Reviews({ products = [], onSelectProduct }) {
             <div className="selector-products-list">
               {products.map(product => (
                 <div key={product.id} className="selector-product-item">
-                  <img src={product.image} alt={product.name} className="selector-product-img" />
+                  <OptimizedImage src={product.image} alt={product.name} size="thumb" className="selector-product-img" />
                   <div className="selector-product-info">
                     <h4>{product.name}</h4>
                     <p>{product.summary}</p>

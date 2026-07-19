@@ -1,16 +1,16 @@
 import React from 'react';
 import { ShoppingCart, Star } from 'lucide-react';
+import OptimizedImage from './OptimizedImage';
 
 export default function ProductCard({ product, onSelect, onAddToCart }) {
   return (
     <article className="product-card" onClick={() => onSelect(product.id)}>
       <div className="product-img-wrapper">
         {product.image ? (
-          <img 
+          <OptimizedImage 
             src={product.image} 
             alt={`${product.name} - Dynace Global`} 
-            className="product-img" 
-            loading="lazy"
+            size="thumb"
           />
         ) : (
           <div className="product-img-placeholder">

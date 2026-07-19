@@ -509,8 +509,55 @@ body {
   transition: transform 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
 
-.product-card:hover .product-img {
+.product-card:hover .product-img,
+.product-card:hover .optimized-img-real {
   transform: scale(1.05); /* Zoom très léger et délicat */
+}
+
+/* ========================================
+   OptimizedImage – Blur-up Loading Effect
+   ======================================== */
+.optimized-img-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.optimized-img-placeholder {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: blur(20px);
+  transform: scale(1.1);
+  transition: opacity 0.4s ease;
+  opacity: 1;
+  z-index: 1;
+}
+
+.optimized-img-real {
+  max-width: 90%;
+  max-height: 90%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  opacity: 0;
+  transition: opacity 0.4s ease, transform 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
+  z-index: 2;
+}
+
+/* When image is loaded, reveal it and hide the placeholder */
+.optimized-img-container.loaded .optimized-img-real {
+  opacity: 1;
+}
+
+.optimized-img-container.loaded .optimized-img-placeholder {
+  opacity: 0;
 }
 
 .product-tag {

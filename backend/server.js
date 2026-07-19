@@ -72,8 +72,13 @@ const upload = multer({
   limits: { fileSize: 50 * 1024 * 1024 } // 50MB limit
 });
 
-// Servir les fichiers uploadés
-app.use('/uploads', express.static(path.join(process.cwd(), 'public', 'uploads')));
+// Servir les fichiers uploadés avec cache longue durée
+app.use('/uploads', express.static(path.join(process.cwd(), 'public', 'uploads'), {
+  maxAge: '365d',
+  immutable: true,
+  etag: true,
+  lastModified: true,
+}));
 
 // Token Verification Middleware
 const authenticateToken = (req, res, next) => {
