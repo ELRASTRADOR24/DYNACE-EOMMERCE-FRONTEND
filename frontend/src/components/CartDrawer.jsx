@@ -16,6 +16,7 @@ export default function CartDrawer({
 
   useEffect(() => {
     if (isOpen) {
+      document.body.style.overflow = 'hidden';
       fetch('/api/settings/shipping')
         .then(res => res.json())
         .then(data => {
@@ -23,8 +24,22 @@ export default function CartDrawer({
           if (data.cost !== undefined) setShippingCostBase(data.cost);
         })
         .catch(err => console.error(err));
+    } else {
+      document.body.style.overflow = '';
     }
-  }, [isOpen]);
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && isOpen) {
+        onClose();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.body.style.overflow = '';
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, onClose]);
 
   const subtotal = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
   const shippingCost = subtotal === 0 ? 0 : shippingCostBase;

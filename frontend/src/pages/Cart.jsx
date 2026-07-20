@@ -177,7 +177,7 @@ export default function Cart({ cartItems, onUpdateQty, onRemoveItem, onNavigate 
                 <div style={{ flex: '1 1 200px' }}>
                   <h3 style={{ fontSize: '1.1rem', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '0.25rem' }}>{item.name}</h3>
                   <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                    Prix unitaire : {item.price}.00 €
+                    Prix unitaire : {Number(item.price).toFixed(2)} €
                   </span>
                 </div>
 
@@ -201,7 +201,7 @@ export default function Cart({ cartItems, onUpdateQty, onRemoveItem, onNavigate 
                 {/* Price Total & Delete */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', marginLeft: 'auto' }}>
                   <span style={{ fontSize: '1.15rem', fontWeight: '800', color: 'var(--primary-gold)' }}>
-                    {item.price * item.quantity}.00 €
+                    {(item.price * item.quantity).toFixed(2)} €
                   </span>
                   <button 
                     onClick={() => onRemoveItem(item.id)}
@@ -237,7 +237,7 @@ export default function Cart({ cartItems, onUpdateQty, onRemoveItem, onNavigate 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.5rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.95rem' }}>
                 <span style={{ color: 'var(--text-secondary)' }}>Sous-total</span>
-                <span style={{ fontWeight: '600' }}>{subtotal}.00 €</span>
+                <span style={{ fontWeight: '600' }}>{subtotal.toFixed(2)} €</span>
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.95rem' }}>

@@ -18,6 +18,7 @@ import Contact from './pages/Contact';
 import OrderTracking from './pages/OrderTracking';
 import Cart from './pages/Cart';
 import Footer from './components/Footer';
+import Toast from './components/Toast';
 
 function App() {
   const [currentTab, setCurrentTab] = useState(() => {
@@ -30,6 +31,11 @@ function App() {
   const [selectedProductId, setSelectedProductId] = useState(null);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
+  const [toast, setToast] = useState(null);
+
+  const showToast = (message, type = 'success') => {
+    setToast({ message, type });
+  };
 
   // Scroll to top when changing tabs
   useEffect(() => {
@@ -279,6 +285,7 @@ function App() {
       }
       return [...prevItems, { ...product, quantity: qty }];
     });
+    showToast(`${product.name} ajouté au panier !`);
     setIsCartOpen(true);
   };
 
@@ -463,7 +470,10 @@ function App() {
         )}
 
         {currentTab === 'orders' && currentUser && (
-          <Orders onBackToShopping={() => setCurrentTab('home')} />
+          <Orders 
+            onBackToShopping={() => setCurrentTab('home')} 
+            onTrackOrder={() => setCurrentTab('track')}
+          />
         )}
 
         {currentTab === 'profile' && currentUser && (
@@ -517,6 +527,7 @@ function App() {
 
       <Footer setCurrentTab={setCurrentTab} />
       <CookieBanner />
+      <Toast toast={toast} onClose={() => setToast(null)} />
     </div>
   );
 }

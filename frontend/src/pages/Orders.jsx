@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Package, Calendar, Clock, MapPin, ChevronRight, AlertCircle, ShoppingBag } from 'lucide-react';
 import OptimizedImage from '../components/OptimizedImage';
 
-export default function Orders({ onBackToShopping }) {
+export default function Orders({ onBackToShopping, onTrackOrder }) {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -203,20 +203,31 @@ export default function Orders({ onBackToShopping }) {
                     📄 Télécharger la Facture (PDF / Impression)
                   </a>
                   
-                  <a
-                    href={`/suivre-commande?orderNumber=${order.orderNumber}&email=${order.email || ''}`}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (onTrackOrder) {
+                        onTrackOrder(order.orderNumber, order.email);
+                      } else {
+                        window.history.pushState({}, '', `?tab=track&orderNumber=${order.orderNumber}`);
+                        window.dispatchEvent(new Event('popstate'));
+                      }
+                    }}
                     style={{
                       display: 'inline-flex',
                       alignItems: 'center',
                       gap: '0.35rem',
                       color: 'var(--primary-green)',
                       fontWeight: 'bold',
-                      textDecoration: 'none',
-                      fontSize: '0.85rem'
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                      fontSize: '0.85rem',
+                      padding: 0
                     }}
                   >
                     Suivre la livraison <ChevronRight size={14} />
-                  </a>
+                  </button>
                 </div>
               </div>
             </div>

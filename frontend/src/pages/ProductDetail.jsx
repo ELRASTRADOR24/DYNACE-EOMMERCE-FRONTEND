@@ -50,6 +50,11 @@ export default function ProductDetail({ product, onBack, onAddToCart, onBuyNow, 
     e.preventDefault();
     if (!newComment.trim()) return;
 
+    if (newVideo && newVideo.size > 50 * 1024 * 1024) {
+      setSubmitError("La vidéo ne doit pas dépasser 50 Mo.");
+      return;
+    }
+
     setSubmitLoading(true);
     setSubmitError(null);
 
@@ -186,7 +191,7 @@ export default function ProductDetail({ product, onBack, onAddToCart, onBuyNow, 
                 fontWeight: '600',
                 border: '1px solid var(--success)'
               }}>
-                En stock ({product.stock !== undefined ? product.stock : 50} disponibles)
+                En stock {product.stock !== undefined ? `(${product.stock} disponibles)` : ''}
               </span>
             )}
           </div>
