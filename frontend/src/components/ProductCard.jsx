@@ -2,7 +2,7 @@ import React from 'react';
 import { ShoppingCart, Star } from 'lucide-react';
 import OptimizedImage from './OptimizedImage';
 
-export default function ProductCard({ product, onSelect, onAddToCart }) {
+const ProductCard = React.memo(function ProductCard({ product, onSelect, onAddToCart, eager = false }) {
   return (
     <article className="product-card" onClick={() => onSelect(product.id)}>
       <div className="product-img-wrapper">
@@ -11,6 +11,7 @@ export default function ProductCard({ product, onSelect, onAddToCart }) {
             src={product.image} 
             alt={`${product.name} - Dynace Global`} 
             size="thumb"
+            eager={eager}
           />
         ) : (
           <div className="product-img-placeholder">
@@ -42,7 +43,7 @@ export default function ProductCard({ product, onSelect, onAddToCart }) {
         <div className="product-footer">
           <div className="product-price-container">
             <span className="product-price-label">Prix</span>
-            <span className="product-price">{product.price.toFixed(2)} €</span>
+            <span className="product-price">{(Number(product.price) || 0).toFixed(2)} €</span>
           </div>
           <button 
             className="product-action-btn"
@@ -70,4 +71,6 @@ export default function ProductCard({ product, onSelect, onAddToCart }) {
       </div>
     </article>
   );
-}
+});
+
+export default ProductCard;

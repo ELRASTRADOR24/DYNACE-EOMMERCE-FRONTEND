@@ -14,6 +14,7 @@ import dotenv from 'dotenv';
 import crypto from 'crypto';
 import { v2 as cloudinary } from 'cloudinary';
 import { CloudinaryStorage } from 'multer-storage-cloudinary';
+import compression from 'compression';
 import { sendContactEmail, sendOrderNotificationEmail, sendCustomerOrderConfirmationEmail, sendShippingConfirmationEmail, sendEmail, sendCustomerOrderStatusEmail, sendStockAlertEmail, sendAbandonedCartRecoveryEmail, sendReviewRequestEmail, sendLoyaltyPromoEmail } from './utils/email.js';
 import { sendAdminOrderSMS } from './utils/sms.js';
 
@@ -47,6 +48,7 @@ const app = express();
 const PORT = process.env.PORT || 5001;
 const JWT_SECRET = process.env.JWT_SECRET || 'dynace_dev_jwt_secret_fallback';
 
+app.use(compression());
 app.use(cors());
 app.use(express.json());
 
@@ -505,7 +507,7 @@ const clearProductsCache = () => {
 
 // Get all products
 app.get('/api/products', async (req, res) => {
-  res.setHeader('Cache-Control', 'no-store, max-age=0');
+  res.setHeader('Cache-Control', 'public, max-age=60, stale-while-revalidate=600');
   
   const now = Date.now();
   if (productsCache && (now - productsCacheTime < CACHE_DURATION)) {

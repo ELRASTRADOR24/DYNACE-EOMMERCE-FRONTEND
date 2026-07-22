@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import ProductCard from '../components/ProductCard';
 import { Search, Plus, ArrowRight, ShieldCheck, Activity, Sparkles } from 'lucide-react';
 
-export default function Home({ products, loadingProducts, onSelectProduct, onAddToCart, onNavigate, searchQuery = '', setSearchQuery }) {
+const Home = React.memo(function Home({ products, loadingProducts, onSelectProduct, onAddToCart, onNavigate, searchQuery = '', setSearchQuery }) {
   const [selectedCategory, setSelectedCategory] = useState('all');
 
   const categories = [
@@ -13,12 +13,15 @@ export default function Home({ products, loadingProducts, onSelectProduct, onAdd
     { id: 'beaute', label: 'Beauté & Soins' }
   ];
 
-  const filteredProducts = products.filter(product => {
-    const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory;
-    const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          product.summary.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
-  });
+  const filteredProducts = useMemo(() => {
+    return products.filter(product => {
+      const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory;
+      const matchesSearch = !searchQuery || 
+                            product.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                            (product.summary && product.summary.toLowerCase().includes(searchQuery.toLowerCase()));
+      return matchesCategory && matchesSearch;
+    });
+  }, [products, selectedCategory, searchQuery]);
 
   const handleExploreClick = () => {
     const filterBar = document.querySelector('.filter-bar');
@@ -108,7 +111,7 @@ export default function Home({ products, loadingProducts, onSelectProduct, onAdd
         </div>
       </div>
 
-      {loadingProducts ? (
+      {loadingProducts && products.length === 0 ? (
         <div className="product-grid">
           {[1, 2, 3, 4].map(n => (
             <div key={n} className="product-card skeleton-card" style={{ cursor: 'default' }}>
@@ -131,12 +134,13 @@ export default function Home({ products, loadingProducts, onSelectProduct, onAdd
         </div>
       ) : (
         <div className="product-grid">
-          {filteredProducts.map(product => (
+          {filteredProducts.map((product, index) => (
             <ProductCard
               key={product.id}
               product={product}
               onSelect={onSelectProduct}
               onAddToCart={onAddToCart}
+              eager={index < 4}
             />
           ))}
 
@@ -170,4 +174,6 @@ export default function Home({ products, loadingProducts, onSelectProduct, onAdd
       )}
     </div>
   );
-}
+});
+
+export default Home;

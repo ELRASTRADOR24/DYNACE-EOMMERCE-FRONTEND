@@ -20,6 +20,57 @@ import Cart from './pages/Cart';
 import Footer from './components/Footer';
 import Toast from './components/Toast';
 
+const DEFAULT_PRODUCTS = [
+  {
+    id: "rocenta",
+    name: "Dynace Rocenta",
+    price: 60.00,
+    category: "vitalite",
+    image: "/images/rocenta.png",
+    images: ["/images/rocenta.png", "/images/rocenta_2.png", "/images/rocenta_3.png"],
+    summary: "Soutien à la vitalité cellulaire — régénération, hydratation et éclat de l'intérieur.",
+    avgRating: 4.9,
+    reviewCount: 28,
+    stock: 50
+  },
+  {
+    id: "dynafuel",
+    name: "Dynace Dynafuel",
+    price: 60.00,
+    category: "energie",
+    image: "/images/dynafuel.png",
+    images: ["/images/dynafuel.png", "/images/dynafuel_2.png", "/images/dynafuel_3.png"],
+    summary: "Supplément d'énergie cellulaire et de vitalité masculine pour hommes actifs.",
+    avgRating: 4.8,
+    reviewCount: 19,
+    stock: 0
+  },
+  {
+    id: "urbanism",
+    name: "Dynace Urbanism",
+    price: 60.00,
+    category: "minceur",
+    image: "/images/urbanism.png",
+    images: ["/images/urbanism.png", "/images/urbanism_2.png", "/images/urbanism_3.png"],
+    summary: "Soutien à la gestion du poids Jour & Nuit — brûlez le jour, détoxifiez la nuit.",
+    avgRating: 4.7,
+    reviewCount: 15,
+    stock: 50
+  },
+  {
+    id: "acebrew",
+    name: "Dynace Ace Brew",
+    price: 32.00,
+    category: "vitalite",
+    image: "/images/acebrew.png",
+    images: ["/images/acebrew.png", "/images/acebrew_2.png"],
+    summary: "Café d'exception enrichi au Ganoderma pour une énergie saine et un éveil intellectuel.",
+    avgRating: 4.9,
+    reviewCount: 22,
+    stock: 50
+  }
+];
+
 function App() {
   const [currentTab, setCurrentTab] = useState(() => {
     const params = new URLSearchParams(window.location.search);
@@ -46,12 +97,12 @@ function App() {
   const [productsList, setProductsList] = useState(() => {
     try {
       const cached = localStorage.getItem('dynace_products_cache');
-      return cached ? JSON.parse(cached) : [];
+      return cached ? JSON.parse(cached) : DEFAULT_PRODUCTS;
     } catch (e) {
-      return [];
+      return DEFAULT_PRODUCTS;
     }
   });
-  const [loadingProducts, setLoadingProducts] = useState(productsList.length === 0);
+  const [loadingProducts, setLoadingProducts] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const [loadingSession, setLoadingSession] = useState(true);
   const [resetToken, setResetToken] = useState('');
