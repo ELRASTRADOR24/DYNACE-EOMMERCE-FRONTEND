@@ -132,17 +132,8 @@ function App() {
   });
 
   // Theme state with localStorage persistence
-  const [themeMode, setThemeMode] = useState(() => {
-    return localStorage.getItem('dynace_theme_mode') || 'system';
-  });
-
   const [theme, setTheme] = useState(() => {
-    const localTheme = localStorage.getItem('dynace_theme');
-    const localMode = localStorage.getItem('dynace_theme_mode') || 'system';
-    if (localMode === 'manual' && localTheme) {
-      return localTheme;
-    }
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    return localStorage.getItem('dynace_theme') || 'light';
   });
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -218,41 +209,11 @@ function App() {
     localStorage.setItem('dynace_cart', JSON.stringify(cartItems));
   }, [cartItems]);
 
-  // Listen to system theme changes dynamically
-  useEffect(() => {
-    if (themeMode !== 'system') return;
-
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    const handleChange = (e) => {
-      setTheme(e.matches ? 'dark' : 'light');
-    };
-
-    if (mediaQuery.addEventListener) {
-      mediaQuery.addEventListener('change', handleChange);
-    } else {
-      mediaQuery.addListener(handleChange);
-    }
-
-    return () => {
-      if (mediaQuery.removeEventListener) {
-        mediaQuery.removeEventListener('change', handleChange);
-      } else {
-        mediaQuery.removeListener(handleChange);
-      }
-    };
-  }, [themeMode]);
-
   // Sync theme to document element
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
-    if (themeMode === 'manual') {
-      localStorage.setItem('dynace_theme', theme);
-      localStorage.setItem('dynace_theme_mode', 'manual');
-    } else {
-      localStorage.removeItem('dynace_theme');
-      localStorage.setItem('dynace_theme_mode', 'system');
-    }
-  }, [theme, themeMode]);
+    localStorage.setItem('dynace_theme', theme);
+  }, [theme]);
 
   // Auto-scroll to top when active tab changes
   useEffect(() => {
@@ -322,7 +283,6 @@ function App() {
   }, [currentTab, selectedProductId, productsList]);
 
   const toggleTheme = () => {
-    setThemeMode('manual');
     setTheme(prev => prev === 'light' ? 'dark' : 'light');
   };
 
