@@ -47,25 +47,25 @@ export default function SecretLove({ onBack }) {
 
   // Typewriter effect for letter lines
   const loveLines = [
-    "Pour Pharelle Annastasy Nerolel.",
+    "Pour Pharelle, ma femme.",
     "",
-    "Je sais que tu n'aimes pas les grands discours trop niais ou trop larmoyants.",
-    "Ce n'est pas ton genre, et c'est justement pour ça que j'aime ton caractère et ta façon d'être.",
+    "Tu sais déjà que je ne suis pas là pour te sortir un discours rempli de phrases toutes faites. Déjà parce que ce n'est pas mon style, mais surtout parce que je sais que ce n'est pas le tien.",
     "",
-    "Tu as ce tempérament fort, cette prestance et ce style qui te rendent unique.",
-    "Avec toi, pas besoin de jouer un rôle ou d'en faire trop.",
+    "Ce que j'aime chez toi, ce n'est pas seulement ce que tout le monde peut voir. C'est ton caractère. Tu ne te laisses pas marcher dessus, tu as du répondant, tu assumes qui tu es et tu n'as pas besoin de jouer un rôle pour exister. C'est ça qui me plaît.",
     "",
-    "Sache que pour moi, tu n'es pas juste ma copine.",
-    "Tu es ma femme. Ma moitié.",
+    "Je sais aussi que tu ne montres pas facilement ce que tu ressens. Tu as grandi en apprenant à encaisser, à avancer, à ne pas toujours laisser les autres entrer dans ton monde. Et tu sais quoi ? Je ne cherche pas à changer ça. J'apprends simplement à te connaître, avec tes qualités, ton sale caractère parfois... et c'est justement ce qui fait ton charme.",
     "",
-    "Et même quand tu me taquines ou que tu me mentionnes cette fille dont le prénom commence par 'S'...",
-    "Je m'en fous complètement.",
-    "Dans ma tête et dans ma vie, il n'y a que toi.",
+    "Tu me cherches, tu me taquines, tu m'insultes même de temps en temps... mais ça me fait plus rire qu'autre chose. C'est toi. Et je préfère mille fois une fille vraie qu'une personne qui fait semblant d'être parfaite.",
     "",
-    "Mon respect, ma loyauté et mon soutien envers toi sont absolus.",
-    "On avance ensemble, à notre façon.",
+    "Je ne vais pas te faire des promesses dans le vide. Je préfère te montrer, avec le temps, que je suis quelqu'un sur qui tu peux compter.",
     "",
-    "Pharelle. Ma femme. ♾️"
+    "Et puis... même quand tu me parles de cette fameuse fille dont le prénom commence par un « S », ça me fait sourire. Tu peux continuer à me taquiner si ça t'amuse, ça ne changera rien. Dans ma tête, il y a déjà assez de place pour une seule personne.",
+    "",
+    "Je ne sais pas de quoi demain sera fait. Personne ne le sait. Mais je sais une chose : j'aime ce qu'on construit. J'aime la personne que tu es. Et si un jour je t'appelle « ma femme », ce n'est pas pour faire joli. C'est parce que, dans ma tête, c'est comme ça que je te vois.",
+    "",
+    "Prends ça comme tu veux, coco... ou plutôt, ma bipolaire préférée.",
+    "",
+    "— Johanson"
   ];
 
   useEffect(() => {
@@ -74,7 +74,7 @@ export default function SecretLove({ onBack }) {
 
     const timer = setTimeout(() => {
       setTypedLines(prev => prev + 1);
-    }, loveLines[typedLines] === '' ? 300 : 120);
+    }, loveLines[typedLines] === '' ? 350 : 300);
 
     return () => clearTimeout(timer);
   }, [showContent, typedLines]);
