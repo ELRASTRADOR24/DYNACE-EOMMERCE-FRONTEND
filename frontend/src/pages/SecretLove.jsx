@@ -31,7 +31,7 @@ export default function SecretLove({ onBack }) {
   const [shake, setShake] = useState(false);
   const containerRef = useRef(null);
 
-  const SECRET_CODE = '152002';
+  const SECRET_CODE = '262002';
 
   const handleCodeSubmit = (e) => {
     e.preventDefault();
