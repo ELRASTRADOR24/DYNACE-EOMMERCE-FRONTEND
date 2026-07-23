@@ -48,25 +48,24 @@ export default function Legal({ onOpenSecret }) {
         </p>
       </section>
 
-      {/* Tiny decorative separator — actually the secret trigger */}
-      <div style={{ textAlign: 'center', padding: '1rem 0 2rem' }}>
+      {/* Standard-looking legal footer — the ♥ is the secret trigger */}
+      <p style={{
+        textAlign: 'center',
+        fontSize: '0.75rem',
+        color: 'var(--text-secondary)',
+        opacity: 0.45,
+        padding: '2rem 0 1rem',
+        borderTop: '1px solid var(--border-color)',
+        marginTop: '1rem',
+      }}>
+        © 2026 Dynace Global Santé Top · Tous droits réservés · Conçu avec{' '}
         <span
           onClick={onOpenSecret}
-          style={{
-            display: 'inline-block',
-            width: '6px',
-            height: '6px',
-            borderRadius: '50%',
-            backgroundColor: 'var(--border-color)',
-            cursor: 'default',
-            opacity: 0.4,
-            transition: 'opacity 0.3s',
-          }}
-          onMouseEnter={(e) => { e.target.style.opacity = '0.7'; }}
-          onMouseLeave={(e) => { e.target.style.opacity = '0.4'; }}
+          style={{ cursor: 'default', userSelect: 'none' }}
           aria-hidden="true"
-        />
-      </div>
+        >♥</span>
+        {' '}en France
+      </p>
     </div>
   );
 }
