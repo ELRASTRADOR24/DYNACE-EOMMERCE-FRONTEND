@@ -3,20 +3,11 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 /**
  * SecretLove — Hidden Easter Egg Page
  * 
- * A secret love letter page dedicated to Pharelle Annastasy Nerolel.
+ * A secret dedicated page for Pharelle Annastasy Nerolel.
  * Accessible only by entering a secret code.
  */
 
-// Floating heart particle component
-function Heart({ style }) {
-  return (
-    <div className="floating-heart" style={style}>
-      ♥
-    </div>
-  );
-}
-
-// Sparkle particle
+// Star particle component
 function Sparkle({ style }) {
   return <div className="sparkle-particle" style={style} />;
 }
@@ -25,7 +16,6 @@ export default function SecretLove({ onBack }) {
   const [codeInput, setCodeInput] = useState('');
   const [unlocked, setUnlocked] = useState(false);
   const [showContent, setShowContent] = useState(false);
-  const [hearts, setHearts] = useState([]);
   const [sparkles, setSparkles] = useState([]);
   const [typedLines, setTypedLines] = useState(0);
   const [shake, setShake] = useState(false);
@@ -79,20 +69,6 @@ export default function SecretLove({ onBack }) {
     return () => clearTimeout(timer);
   }, [showContent, typedLines]);
 
-  // Floating hearts animation
-  const spawnHeart = useCallback(() => {
-    const id = Date.now() + Math.random();
-    const heart = {
-      id,
-      left: Math.random() * 100,
-      size: 12 + Math.random() * 24,
-      duration: 4 + Math.random() * 6,
-      delay: Math.random() * 2,
-      opacity: 0.3 + Math.random() * 0.5,
-    };
-    setHearts(prev => [...prev.slice(-25), heart]);
-  }, []);
-
   // Sparkle particles
   const spawnSparkle = useCallback(() => {
     const id = Date.now() + Math.random();
@@ -101,38 +77,22 @@ export default function SecretLove({ onBack }) {
       left: Math.random() * 100,
       top: Math.random() * 100,
       size: 2 + Math.random() * 4,
-      duration: 1.5 + Math.random() * 2,
+      duration: 2 + Math.random() * 3,
     };
     setSparkles(prev => [...prev.slice(-30), sparkle]);
   }, []);
 
   useEffect(() => {
     if (!unlocked) return;
-    const heartInterval = setInterval(spawnHeart, 400);
-    const sparkleInterval = setInterval(spawnSparkle, 200);
+    const sparkleInterval = setInterval(spawnSparkle, 250);
     return () => {
-      clearInterval(heartInterval);
       clearInterval(sparkleInterval);
     };
-  }, [unlocked, spawnHeart, spawnSparkle]);
+  }, [unlocked, spawnSparkle]);
 
   return (
     <div className="secret-love-page" ref={containerRef}>
-      {/* Floating hearts layer */}
-      {unlocked && hearts.map(h => (
-        <Heart
-          key={h.id}
-          style={{
-            left: `${h.left}%`,
-            fontSize: `${h.size}px`,
-            animationDuration: `${h.duration}s`,
-            animationDelay: `${h.delay}s`,
-            opacity: h.opacity,
-          }}
-        />
-      ))}
-
-      {/* Sparkles layer */}
+      {/* Sparkles / Stars layer */}
       {unlocked && sparkles.map(s => (
         <Sparkle
           key={s.id}
@@ -152,14 +112,14 @@ export default function SecretLove({ onBack }) {
           <div className="secret-code-glow" />
           
           <div className="secret-code-icon">
-            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
               <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
               <path d="M7 11V7a5 5 0 0 1 10 0v4" />
               <circle cx="12" cy="16" r="1" />
             </svg>
           </div>
 
-          <h2 className="secret-code-title">Zone Secrète</h2>
+          <h2 className="secret-code-title">Espace Privé</h2>
           <p className="secret-code-subtitle">
             Cet espace est protégé. Entrez le code secret pour continuer.
           </p>
@@ -169,13 +129,13 @@ export default function SecretLove({ onBack }) {
               type="password"
               value={codeInput}
               onChange={(e) => setCodeInput(e.target.value)}
-              placeholder="Entrez le code secret..."
+              placeholder="Code secret..."
               className="secret-code-input"
               autoFocus
               autoComplete="off"
             />
             <button type="submit" className="secret-code-btn">
-              <span>Déverrouiller</span>
+              <span>Accéder</span>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M5 12h14M12 5l7 7-7 7" />
               </svg>
@@ -189,8 +149,8 @@ export default function SecretLove({ onBack }) {
       ) : (
         /* LOVE LETTER SCREEN */
         <div className={`secret-love-content ${showContent ? 'visible' : ''}`}>
-          {/* Infinity symbol header */}
-          <div className="love-infinity-symbol">∞</div>
+          {/* Constellation star emblem header */}
+          <div className="love-infinity-symbol">✦</div>
           
           <div className="love-envelope">
             <div className="love-letter-card">
@@ -219,7 +179,7 @@ export default function SecretLove({ onBack }) {
 
             {typedLines >= loveLines.length && (
               <div className="love-footer-reveal">
-                <div className="love-heart-big">♥</div>
+                <div className="love-star-symbol">✦</div>
                 <p className="love-footer-text">
                   Un espace secret, fait sur mesure pour toi, Pharelle.
                 </p>
