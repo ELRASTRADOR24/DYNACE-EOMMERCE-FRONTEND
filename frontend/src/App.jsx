@@ -19,6 +19,7 @@ import OrderTracking from './pages/OrderTracking';
 import Cart from './pages/Cart';
 import Footer from './components/Footer';
 import Toast from './components/Toast';
+import SecretLove from './pages/SecretLove';
 
 const DEFAULT_PRODUCTS = [
   {
@@ -82,6 +83,7 @@ function App() {
   const [selectedProductId, setSelectedProductId] = useState(null);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
+  const [showSecret, setShowSecret] = useState(false);
   const [toast, setToast] = useState(null);
 
   const showToast = (message, type = 'success') => {
@@ -118,6 +120,31 @@ function App() {
       setResetToken(tokenParam);
       window.history.replaceState({}, document.title, window.location.pathname);
     }
+
+    // Secret page trigger via URL ?secret
+    if (params.has('secret')) {
+      setShowSecret(true);
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, []);
+
+  // Secret keyboard trigger — type "love" anywhere on the site
+  useEffect(() => {
+    let buffer = '';
+    let timer = null;
+    const handleKeydown = (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      buffer += e.key.toLowerCase();
+      if (buffer.length > 10) buffer = buffer.slice(-10);
+      if (buffer.includes('love')) {
+        setShowSecret(true);
+        buffer = '';
+      }
+      clearTimeout(timer);
+      timer = setTimeout(() => { buffer = ''; }, 3000);
+    };
+    window.addEventListener('keydown', handleKeydown);
+    return () => window.removeEventListener('keydown', handleKeydown);
   }, []);
 
   // Cart state with localStorage persistence
@@ -370,6 +397,10 @@ function App() {
 
   return (
     <div className="app-container">
+      {/* Hidden Easter Egg — Secret Love Page */}
+      {showSecret && (
+        <SecretLove onBack={() => setShowSecret(false)} />
+      )}
       <Navbar
         currentTab={currentTab}
         setCurrentTab={setCurrentTab}

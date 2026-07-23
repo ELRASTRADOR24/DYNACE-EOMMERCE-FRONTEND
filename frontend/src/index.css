@@ -3955,3 +3955,373 @@ body {
   }
 }
 
+/* =============================================
+   SECRET LOVE — Easter Egg Hidden Page
+   ============================================= */
+
+.secret-love-page {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  overflow: hidden;
+  overflow-y: auto;
+  background: linear-gradient(135deg, #0a0015 0%, #1a0028 30%, #0d001a 60%, #100020 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  font-family: var(--sans);
+}
+
+/* === CODE ENTRY SCREEN === */
+
+.secret-code-screen {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 3rem 2rem;
+  max-width: 420px;
+  width: 100%;
+  z-index: 2;
+}
+
+.secret-code-glow {
+  position: absolute;
+  top: -100px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(168, 85, 247, 0.15) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.secret-code-icon {
+  color: rgba(168, 85, 247, 0.7);
+  margin-bottom: 1.5rem;
+  animation: secretPulse 3s ease-in-out infinite;
+}
+
+@keyframes secretPulse {
+  0%, 100% { opacity: 0.7; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.05); }
+}
+
+.secret-code-title {
+  font-family: var(--serif);
+  font-size: 2rem;
+  font-weight: 600;
+  color: #e2d0f8;
+  margin-bottom: 0.75rem;
+  letter-spacing: 0.04em;
+}
+
+.secret-code-subtitle {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.45);
+  line-height: 1.6;
+  margin-bottom: 2rem;
+  max-width: 320px;
+}
+
+.secret-code-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+}
+
+.secret-code-input {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1.5px solid rgba(168, 85, 247, 0.25);
+  border-radius: 12px;
+  padding: 0.9rem 1.2rem;
+  font-size: 1rem;
+  color: #e2d0f8;
+  text-align: center;
+  letter-spacing: 0.3em;
+  font-family: var(--sans);
+  outline: none;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.secret-code-input:focus {
+  border-color: rgba(168, 85, 247, 0.6);
+  box-shadow: 0 0 20px rgba(168, 85, 247, 0.15);
+}
+
+.secret-code-input::placeholder {
+  color: rgba(255, 255, 255, 0.2);
+  letter-spacing: 0.05em;
+}
+
+.secret-code-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, #7c3aed, #a855f7);
+  border: none;
+  border-radius: 12px;
+  padding: 0.85rem 1.5rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.3s;
+  font-family: var(--sans);
+}
+
+.secret-code-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(168, 85, 247, 0.35);
+}
+
+.secret-back-link {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 0.8rem;
+  cursor: pointer;
+  margin-top: 2rem;
+  font-family: var(--sans);
+  transition: color 0.3s;
+}
+
+.secret-back-link:hover {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* Shake animation for wrong code */
+.shake {
+  animation: shakeAnim 0.5s ease-in-out;
+}
+
+@keyframes shakeAnim {
+  0%, 100% { transform: translateX(0); }
+  10%, 50%, 90% { transform: translateX(-8px); }
+  30%, 70% { transform: translateX(8px); }
+}
+
+/* === LOVE LETTER CONTENT === */
+
+.secret-love-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem 1.5rem 4rem;
+  width: 100%;
+  max-width: 600px;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 1s ease, transform 1s ease;
+}
+
+.secret-love-content.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.love-infinity-symbol {
+  font-size: 4rem;
+  background: linear-gradient(135deg, #f472b6, #c084fc, #818cf8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: infinityGlow 4s ease-in-out infinite alternate;
+  margin-bottom: 1.5rem;
+  font-weight: 300;
+}
+
+@keyframes infinityGlow {
+  0% { filter: brightness(0.8); transform: scale(1); }
+  50% { filter: brightness(1.3); transform: scale(1.08); }
+  100% { filter: brightness(1); transform: scale(1.03); }
+}
+
+.love-envelope {
+  width: 100%;
+}
+
+.love-letter-card {
+  position: relative;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(244, 114, 182, 0.15);
+  border-radius: 16px;
+  padding: 2.5rem 2rem;
+  backdrop-filter: blur(10px);
+}
+
+/* Decorative corners */
+.love-corner {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-color: rgba(244, 114, 182, 0.3);
+  border-style: solid;
+}
+
+.love-corner-tl { top: -1px; left: -1px; border-width: 2px 0 0 2px; border-radius: 16px 0 0 0; }
+.love-corner-tr { top: -1px; right: -1px; border-width: 2px 2px 0 0; border-radius: 0 16px 0 0; }
+.love-corner-bl { bottom: -1px; left: -1px; border-width: 0 0 2px 2px; border-radius: 0 0 0 16px; }
+.love-corner-br { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; border-radius: 0 0 16px 0; }
+
+.love-letter-body {
+  min-height: 200px;
+}
+
+.love-line {
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.95rem;
+  line-height: 1.9;
+  margin: 0;
+  opacity: 0;
+  animation: loveLineAppear 0.6s ease forwards;
+}
+
+.love-line-title {
+  font-family: var(--serif);
+  font-size: 1.15rem;
+  color: #f9a8d4;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.love-line-break {
+  height: 0.8rem;
+}
+
+.love-line-highlight {
+  color: #f472b6 !important;
+  font-weight: 600;
+  font-size: 1.05rem;
+  text-shadow: 0 0 20px rgba(244, 114, 182, 0.4);
+}
+
+.love-line-newest {
+  animation: loveLineAppear 0.6s ease forwards, loveGlow 0.6s ease;
+}
+
+@keyframes loveLineAppear {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes loveGlow {
+  0% { text-shadow: 0 0 15px rgba(244, 114, 182, 0.5); }
+  100% { text-shadow: none; }
+}
+
+.love-cursor {
+  display: inline-block;
+  color: #f472b6;
+  font-weight: 300;
+  animation: loveBlink 0.7s step-end infinite;
+}
+
+@keyframes loveBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* Footer reveal */
+.love-footer-reveal {
+  text-align: center;
+  margin-top: 2.5rem;
+  animation: loveLineAppear 1.2s ease forwards;
+}
+
+.love-heart-big {
+  font-size: 3rem;
+  color: #f472b6;
+  animation: heartBeat 1.2s ease-in-out infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes heartBeat {
+  0%, 100% { transform: scale(1); }
+  15% { transform: scale(1.15); }
+  30% { transform: scale(1); }
+  45% { transform: scale(1.1); }
+  60% { transform: scale(1); }
+}
+
+.love-footer-text {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.4);
+  line-height: 1.7;
+  font-style: italic;
+}
+
+.love-back {
+  margin-top: 3rem;
+}
+
+/* === FLOATING HEARTS === */
+
+.floating-heart {
+  position: fixed;
+  bottom: -30px;
+  color: #f472b6;
+  pointer-events: none;
+  z-index: 1;
+  animation: floatUp linear forwards;
+  will-change: transform;
+}
+
+@keyframes floatUp {
+  0% {
+    transform: translateY(0) rotate(0deg) scale(1);
+    opacity: var(--start-opacity, 0.5);
+  }
+  50% {
+    transform: translateY(-50vh) rotate(20deg) scale(1.1);
+  }
+  100% {
+    transform: translateY(-110vh) rotate(-15deg) scale(0.7);
+    opacity: 0;
+  }
+}
+
+/* === SPARKLE PARTICLES === */
+
+.sparkle-particle {
+  position: fixed;
+  background: white;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 1;
+  animation: sparkleFade ease-in-out forwards;
+  will-change: opacity, transform;
+}
+
+@keyframes sparkleFade {
+  0% { opacity: 0; transform: scale(0); }
+  30% { opacity: 0.8; transform: scale(1.2); }
+  100% { opacity: 0; transform: scale(0); }
+}
+
+/* === RESPONSIVE === */
+
+@media (max-width: 640px) {
+  .secret-code-title {
+    font-size: 1.6rem;
+  }
+
+  .love-letter-card {
+    padding: 1.8rem 1.4rem;
+  }
+
+  .love-line {
+    font-size: 0.88rem;
+  }
+
+  .love-infinity-symbol {
+    font-size: 3rem;
+  }
+}
+
+
