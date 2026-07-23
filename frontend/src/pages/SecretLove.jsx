@@ -31,11 +31,11 @@ export default function SecretLove({ onBack }) {
   const [shake, setShake] = useState(false);
   const containerRef = useRef(null);
 
-  const SECRET_CODE = 'pharelle';
+  const SECRET_CODE = '152002';
 
   const handleCodeSubmit = (e) => {
     e.preventDefault();
-    if (codeInput.toLowerCase().trim() === SECRET_CODE) {
+    if (codeInput.trim() === SECRET_CODE) {
       setUnlocked(true);
       setTimeout(() => setShowContent(true), 800);
     } else {

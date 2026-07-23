@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function Legal() {
+export default function Legal({ onOpenSecret }) {
   return (
     <div className="legal-page" style={{ padding: '3rem 1rem', maxWidth: '800px', margin: '0 auto' }}>
       <h1 style={{ fontSize: '2rem', marginBottom: '2rem', color: 'var(--text-primary)', borderBottom: '2px solid var(--primary-green)', paddingBottom: '0.5rem' }}>Mentions Légales & Confidentialité</h1>
@@ -47,6 +47,26 @@ export default function Legal() {
           Ce site utilise des cookies strictement nécessaires à son fonctionnement (gestion du panier, session de connexion) et potentiellement des cookies de mesure d'audience anonyme. En naviguant sur ce site, vous acceptez l'utilisation de ces cookies fonctionnels.
         </p>
       </section>
+
+      {/* Tiny decorative separator — actually the secret trigger */}
+      <div style={{ textAlign: 'center', padding: '1rem 0 2rem' }}>
+        <span
+          onClick={onOpenSecret}
+          style={{
+            display: 'inline-block',
+            width: '6px',
+            height: '6px',
+            borderRadius: '50%',
+            backgroundColor: 'var(--border-color)',
+            cursor: 'default',
+            opacity: 0.4,
+            transition: 'opacity 0.3s',
+          }}
+          onMouseEnter={(e) => { e.target.style.opacity = '0.7'; }}
+          onMouseLeave={(e) => { e.target.style.opacity = '0.4'; }}
+          aria-hidden="true"
+        />
+      </div>
     </div>
   );
 }
