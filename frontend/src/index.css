@@ -3963,14 +3963,17 @@ body {
   position: fixed;
   inset: 0;
   z-index: 9999;
-  overflow: hidden;
+  overflow-x: hidden;
   overflow-y: auto;
   background: linear-gradient(135deg, #0a0015 0%, #1a0028 30%, #0d001a 60%, #100020 100%);
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   min-height: 100vh;
+  padding: 3.5rem 1rem 4rem;
   font-family: var(--sans);
+  box-sizing: border-box;
 }
 
 /* === CODE ENTRY SCREEN === */
@@ -3981,9 +3984,10 @@ body {
   flex-direction: column;
   align-items: center;
   text-align: center;
-  padding: 3rem 2rem;
+  padding: 2.5rem 1.5rem;
   max-width: 420px;
   width: 100%;
+  margin: auto 0;
   z-index: 2;
 }
 
@@ -4112,9 +4116,10 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 2rem 1.5rem 4rem;
+  padding: 1rem 1rem 4rem;
   width: 100%;
   max-width: 600px;
+  margin: 0 auto;
   opacity: 0;
   transform: translateY(30px);
   transition: opacity 1s ease, transform 1s ease;

@@ -45,32 +45,27 @@ export default function SecretLove({ onBack }) {
     }
   };
 
-  // Typewriter effect for love letter lines
+  // Typewriter effect for letter lines
   const loveLines = [
-    "À ma reine, Pharelle Annastasy Nerolel,",
+    "Pour Pharelle Annastasy Nerolel.",
     "",
-    "Chaque ligne de code que j'écris,",
-    "chaque projet que je construis,",
-    "chaque nuit blanche que je passe...",
-    "tout ça, c'est pour nous.",
+    "Je sais que tu n'aimes pas les grands discours trop niais ou trop larmoyants.",
+    "Ce n'est pas ton genre, et c'est justement pour ça que j'aime ton caractère et ta façon d'être.",
     "",
-    "Tu es ma source d'inspiration,",
-    "mon énergie quand tout semble impossible,",
-    "ma lumière dans les moments sombres.",
+    "Tu as ce tempérament fort, cette prestance et ce style qui te rendent unique.",
+    "Avec toi, pas besoin de jouer un rôle ou d'en faire trop.",
     "",
-    "Tu n'es pas ma copine.",
-    "Tu es ma femme. Ma moitié. Mon tout.",
+    "Sache que pour moi, tu n'es pas juste ma copine.",
+    "Tu es ma femme. Ma moitié.",
     "",
-    "Ce site, cette ambition, ce futur —",
-    "tout porte ton empreinte invisible.",
-    "Parce que sans toi, rien de tout ça n'existerait.",
+    "Et même quand tu me taquines ou que tu me mentionnes cette fille dont le prénom commence par 'S'...",
+    "Je m'en fous complètement.",
+    "Dans ma tête et dans ma vie, il n'y a que toi.",
     "",
-    "Je t'aime au-delà des mots,",
-    "au-delà du code,",
-    "au-delà de tout.",
+    "Mon respect, ma loyauté et mon soutien envers toi sont absolus.",
+    "On avance ensemble, à notre façon.",
     "",
-    "Pour toujours et à jamais,",
-    "Ton homme. ♾️"
+    "Pharelle. Ma femme. ♾️"
   ];
 
   useEffect(() => {
@@ -226,8 +221,7 @@ export default function SecretLove({ onBack }) {
               <div className="love-footer-reveal">
                 <div className="love-heart-big">♥</div>
                 <p className="love-footer-text">
-                  Cette page n'existe que pour toi, Pharelle.<br/>
-                  Elle est cachée du monde entier — comme notre amour est unique.
+                  Un espace secret, fait sur mesure pour toi, Pharelle.
                 </p>
               </div>
             )}
