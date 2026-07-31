@@ -24,16 +24,32 @@ export default function Legal({ onOpenSecret }) {
       </section>
 
       <section style={{ marginBottom: '3rem' }}>
-        <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: 'var(--text-primary)' }}>3. Propriété Intellectuelle</h2>
+        <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: 'var(--text-primary)' }}>3. Conception &amp; Développement Web</h2>
+        <p style={{ color: 'var(--text-secondary)', lineHeight: '1.6' }}>
+          Ce site e-commerce a été entièrement conçu et développé par <strong>Johanson Nzoda</strong>.<br />
+          Portfolio &amp; Contact Développeur :{' '}
+          <a
+            href="https://johansonweb.vercel.app/"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: 'var(--primary-green)', fontWeight: '600', textDecoration: 'underline' }}
+          >
+            johansonweb.vercel.app
+          </a>
+        </p>
+      </section>
+
+      <section style={{ marginBottom: '3rem' }}>
+        <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: 'var(--text-primary)' }}>4. Propriété Intellectuelle</h2>
         <p style={{ color: 'var(--text-secondary)', lineHeight: '1.6' }}>
           Les marques, logos, images et descriptions des produits <strong>Dynace Global</strong> (Rocenta, DynaFuel, etc.) appartiennent à <em>Dynamic Ace Global Sdn. Bhd</em>. Les autres contenus textuels et visuels de ce site sont la propriété exclusive de l'éditeur du site ou utilisés avec autorisation.
         </p>
       </section>
 
       <section style={{ marginBottom: '3rem' }}>
-        <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: 'var(--text-primary)' }}>4. Politique de Confidentialité (RGPD)</h2>
+        <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: 'var(--text-primary)' }}>5. Politique de Confidentialité (RGPD)</h2>
         <p style={{ color: 'var(--text-secondary)', lineHeight: '1.6', marginBottom: '1rem' }}>
-          Nous nous engageons à protéger vos données personnelles. Les informations recueillies lors de la création d'un compte ou d'une commande (nom, adresse, email) sont strictement utilisées pour le traitement et le suivi de vos achats.
+          Nous nous engageons à protéger vos données personnelles. Les informations recueillies lors de la création d'un compte ou d'une commande (nom, adresse, email) sont strictly utilisées pour le traitement et le suivi de vos achats.
         </p>
         <h3 style={{ fontSize: '1.1rem', marginBottom: '0.5rem', color: 'var(--text-primary)' }}>Vos droits :</h3>
         <p style={{ color: 'var(--text-secondary)', lineHeight: '1.6' }}>
@@ -42,7 +58,7 @@ export default function Legal({ onOpenSecret }) {
       </section>
 
       <section style={{ marginBottom: '3rem' }}>
-        <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: 'var(--text-primary)' }}>5. Cookies</h2>
+        <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: 'var(--text-primary)' }}>6. Cookies</h2>
         <p style={{ color: 'var(--text-secondary)', lineHeight: '1.6' }}>
           Ce site utilise des cookies strictement nécessaires à son fonctionnement (gestion du panier, session de connexion) et potentiellement des cookies de mesure d'audience anonyme. En naviguant sur ce site, vous acceptez l'utilisation de ces cookies fonctionnels.
         </p>
