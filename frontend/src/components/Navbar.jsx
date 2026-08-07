@@ -225,6 +225,14 @@ export default function Navbar({
           </li>
           <li>
             <a
+              className={currentTab === 'faq-health' ? 'active' : ''}
+              onClick={() => handleTabClick('faq-health')}
+            >
+              FAQ &amp; Posologie Dr. RAJ
+            </a>
+          </li>
+          <li>
+            <a
               className={currentTab === 'about' ? 'active' : ''}
               onClick={() => handleTabClick('about')}
             >
@@ -397,6 +405,14 @@ export default function Navbar({
                 onClick={() => handleTabClick('reviews')}
               >
                 Avis Clients
+              </button>
+            </li>
+            <li>
+              <button 
+                className={`drawer-link-btn ${currentTab === 'faq-health' ? 'active' : ''}`}
+                onClick={() => handleTabClick('faq-health')}
+              >
+                FAQ &amp; Posologie Dr. RAJ
               </button>
             </li>
             <li>

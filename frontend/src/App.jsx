@@ -20,6 +20,7 @@ import Cart from './pages/Cart';
 import Footer from './components/Footer';
 import Toast from './components/Toast';
 import SecretLove from './pages/SecretLove';
+import FaqHealth from './pages/FaqHealth';
 
 const DEFAULT_PRODUCTS = [
   {
@@ -518,6 +519,7 @@ function App() {
         {currentTab === 'terms' && <Terms />}
         {currentTab === 'contact' && <Contact />}
         {currentTab === 'track' && <OrderTracking />}
+        {currentTab === 'faq-health' && <FaqHealth onNavigate={setCurrentTab} />}
         {currentTab === 'diagnostic' && <Diagnostic onAddToCart={handleAddToCart} onNavigate={setCurrentTab} />}
         {currentTab === 'cart' && (
           <Cart
