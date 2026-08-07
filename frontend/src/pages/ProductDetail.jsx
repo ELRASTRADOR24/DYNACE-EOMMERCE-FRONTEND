@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, CheckCircle, FlameKindling, ShoppingBag, CreditCard, Minus, Plus, ImageOff, Star } from 'lucide-react';
+import { ArrowLeft, CheckCircle, FlameKindling, ShoppingBag, CreditCard, Minus, Plus, ImageOff, Star, Sparkles, ShieldCheck, AlertCircle, Leaf } from 'lucide-react';
 import OptimizedImage from '../components/OptimizedImage';
 
 export default function ProductDetail({ product, onBack, onAddToCart, onBuyNow, currentUser, onOpenAuth }) {
@@ -203,8 +203,31 @@ export default function ProductDetail({ product, onBack, onAddToCart, onBuyNow, 
             <p className="detail-description">{product.description}</p>
           </div>
 
-          <div>
-            <h3 className="detail-section-title">Propriétés & Bienfaits</h3>
+          {product.ingredients && product.ingredients.length > 0 && (
+            <div style={{ marginTop: '1.25rem' }}>
+              <h3 className="detail-section-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Leaf size={18} style={{ color: 'var(--primary-green)' }} /> Ingrédients Clés &amp; Cellules Souches
+              </h3>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '0.75rem' }}>
+                {product.ingredients.map((ing, idx) => (
+                  <span key={idx} style={{
+                    backgroundColor: 'var(--bg-secondary)',
+                    color: 'var(--text-primary)',
+                    border: '1px solid var(--border-color)',
+                    padding: '0.35rem 0.75rem',
+                    borderRadius: '20px',
+                    fontSize: '0.82rem',
+                    fontWeight: '500'
+                  }}>
+                    ✨ {ing}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div style={{ marginTop: '1.25rem' }}>
+            <h3 className="detail-section-title">Propriétés &amp; Bienfaits</h3>
             <div className="benefits-list">
               {product.benefits.map((benefit, i) => (
                 <div className="benefit-item" key={i}>
@@ -215,12 +238,32 @@ export default function ProductDetail({ product, onBack, onAddToCart, onBuyNow, 
             </div>
           </div>
 
-          <div className="detail-usage-box">
+          <div className="detail-usage-box" style={{ marginTop: '1.25rem' }}>
             <FlameKindling style={{ color: 'var(--accent-gold)', flexShrink: 0, marginTop: '0.1rem' }} size={20} />
             <div className="detail-usage-text">
-              <strong>Conseil d'utilisation :</strong> {product.usage}
+              <strong>Posologie &amp; Conseil du Dr. RAJ :</strong> {product.usage}
             </div>
           </div>
+
+          {product.doctorNotes && (
+            <div style={{
+              backgroundColor: 'rgba(245, 158, 11, 0.08)',
+              borderLeft: '4px solid var(--accent-gold)',
+              padding: '0.85rem 1rem',
+              borderRadius: '6px',
+              marginTop: '0.75rem',
+              display: 'flex',
+              alignItems: 'flex-start',
+              gap: '0.6rem',
+              fontSize: '0.85rem',
+              color: 'var(--text-primary)'
+            }}>
+              <AlertCircle size={18} style={{ color: 'var(--accent-gold)', flexShrink: 0, marginTop: '0.1rem' }} />
+              <div>
+                <strong>Recommandation Médicale :</strong> {product.doctorNotes}
+              </div>
+            </div>
+          )}
 
           <div className="detail-divider" />
 

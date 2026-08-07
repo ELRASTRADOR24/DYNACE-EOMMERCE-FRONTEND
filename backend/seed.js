@@ -9,67 +9,103 @@ const initialProducts = [
     category: "vitalite",
     image: "/images/rocenta.png",
     images: ["/images/rocenta.png", "/images/rocenta_2.png", "/images/rocenta_3.png"],
-    summary: "Soutien à la vitalité cellulaire — régénération, hydratation et éclat de l'intérieur.",
-    description: "Rocenta est l'élixir ultime de vitalité cellulaire. Cette formule d'exception régénère votre organisme en profondeur, redonne éclat et jeunesse à votre peau, et renforce vos articulations, vos ongles et vos cheveux. Profitez d'une sensation de bien-être absolu et d'une énergie débordante chaque jour.",
-    benefits: [
-      "Active la régénération cellulaire et la jeunesse de la peau",
-      "Renforce et assouplit les articulations et les os",
-      "Améliore considérablement la qualité du repos et de la relaxation",
-      "Sublime l'éclat des cheveux et la force des ongles"
+    summary: "Thérapie cellulaire globale — Régénération, immunité & réparation ADN (Formule originale du Dr. Raj).",
+    description: "Rocenta est le produit phare de Dynace Global. Formulé à 100% à base de plantes et de cellules souches végétales sans aucun effet secondaire, il stimule la régénération cellulaire profonde, répare l'ADN, purifie l'organisme et inverse le processus de vieillissement.",
+    ingredients: [
+      "Placenta de Rose Bulgare (Cellules Souches Végétales)",
+      "NMN (Nicotinamide Mononucléotide — Recherche Harvard)",
+      "Extrait d'Algue Brune (Élimination des métaux lourds)",
+      "Extrait de Germe de Lotus (Éclat & jeunesse de la peau)",
+      "Melon Amer (Glycémie & régulation du cholestérol)",
+      "Ashwagandha (Sommeil profond & fertilité)",
+      "Coenzyme Q10 (Santé cardiaque & énergie)",
+      "Clou de Girofle (Puissant antioxydant)",
+      "Luzerne / Alfalfa (Richesse en minéraux & vitalité)"
     ],
-    usage: "Prendre un sachet par jour de préférence le matin avant le petit-déjeuner."
+    benefits: [
+      "Stimule la régénération naturelle des cellules souches dans le corps",
+      "Inverse le vieillissement cellulaire et aide à réparer l'ADN",
+      "Améliore la circulation sanguine vers tous les organes vitaux",
+      "Favorise un sommeil profond, réparateur et régénérant",
+      "Purifie l'organisme et réduit les gonflements et douleurs"
+    ],
+    usage: "Le matin à jeun. Découper le sachet avec des ciseaux. Verser la poudre SOUS la langue. Laisser dissoudre 30 secondes à 1 minute. Attendre AU MOINS 20 minutes avant de boire de l'eau ou de manger. Boire 2 à 3 litres d'eau dans les 24h.",
+    doctorNotes: "Conseil Dr. Raj : Les 7 à 10 premiers jours, consommer 1 jour sur 2 (lundi oui, mardi non...) pour habituer l'organisme. Maximum 2 sachets/jour."
   },
   {
-    id: "dynafuel",
-    name: "Dynace Dynafuel",
-    price: 60.00,
-    stock: 0,
-    category: "energie",
-    image: "/images/dynafuel.png",
-    images: ["/images/dynafuel.png", "/images/dynafuel_2.png", "/images/dynafuel_3.png"],
-    summary: "Supplément d'énergie cellulaire et de vitalité masculine pour hommes actifs.",
-    description: "Dynafuel est un puissant booster de performance et de vitalité masculine. Spécialement formulé pour libérer une énergie cellulaire maximale, il déploie une endurance physique et mentale hors du commun au quotidien, renforce les défenses naturelles et favorise une concentration laser pour relever tous vos défis.",
-    benefits: [
-      "Booste instantanément l'énergie cellulaire et l'endurance",
-      "Maximise les performances physiques et la force musculaire",
-      "Renforce intensément le système immunitaire",
-      "Optimise la clarté mentale et la concentration laser"
+    id: "aceguard",
+    name: "Dynace Ace Guard",
+    price: 32.00,
+    category: "vitalite",
+    image: "/images/aceguard.png",
+    images: ["/images/aceguard.png", "/images/aceguard_2.png", "/images/aceguard_3.png"],
+    summary: "Bouclier immunitaire & protection cellulaire (Triple formulation de cellules souches).",
+    description: "Aceguard est l'armure antioxydante de référence développée par Dynace Global. Enrichi d'une triple formulation de cellules souches et d'ingrédients botaniques exclusifs, il protège le cœur, le foie, régule la glycémie et renforce massivement le système immunitaire.",
+    ingredients: [
+      "Triple formulation de Cellules Souches végétales",
+      "Bêta-Glucane d'Algues (Immunité & régulation glycémie)",
+      "Gymnema Sylvestre (Contrôle du taux de sucre sanguin)",
+      "Champignon Lait de Tigre (Santé cardiovasculaire & pulmonaire)",
+      "Extrait de Graine Noire / Nigelle (Immunité & cœur)",
+      "Feuille de Mûrier Blanc (Santé du foie & détoxification)"
     ],
-    usage: "Diluer un sachet dans 100ml d'eau tiède. À consommer en milieu de journée."
+    benefits: [
+      "Renforcement puissant et durable du système immunitaire",
+      "Soutien respiratoire (asthme, pneumonie, sinusite)",
+      "Soulagement des douleurs articulaires et de l'arthrite",
+      "Protection de la muqueuse gastrique et prévention des ulcères",
+      "Action synergique renforcée lorsqu'il est combiné avec Rocenta"
+    ],
+    usage: "Le matin à jeun. Diluer 1 sachet dans exactement 100 ml d'eau plate (température ambiante). JAMAIS d'eau chaude ! Attendre 15 à 20 minutes avant de manger ou boire.",
+    doctorNotes: "Ne jamais diluer dans de l'eau chaude. En cure combinée avec Rocenta, attendre 15-20 minutes entre les deux."
   },
   {
     id: "urbanism",
-    name: "Dynace Urbanism",
+    name: "Dynace Urbanism (Sunz + Moonz)",
     price: 60.00,
     category: "minceur",
     image: "/images/urbanism.png",
     images: ["/images/urbanism.png", "/images/urbanism_2.png", "/images/urbanism_3.png"],
-    summary: "Soutien à la gestion du poids Jour & Nuit — brûlez le jour, détoxifiez la nuit.",
-    description: "Urbanism réinvente la minceur avec sa double formule révolutionnaire Jour & Nuit. Brûlez activement les graisses et accélérez votre métabolisme pendant la journée, puis laissez l'organisme éliminer les toxines et affiner votre silhouette pendant votre sommeil. L'allié parfait pour sculpter votre corps sans frustration.",
-    benefits: [
-      "Accélère la combustion des graisses et le métabolisme (jour)",
-      "Régule naturellement l'appétit et élimine les fringales",
-      "Détoxifie l'organisme en profondeur pendant la nuit",
-      "Aplatit le ventre et facilite une digestion légère"
+    summary: "Gestion du poids ciblée Jour & Nuit — Brûlez le jour (SUNZ), purifiez la nuit (MOONZ).",
+    description: "Urbanism est le programme minceur révolutionnaire du Dr. Raj. Contrairement aux régimes restrictifs, Urbanism vous permet de conserver vos 3 repas quotidiens normaux. SUNZ (Morosil® Orange Sicilienne) brûle la graisse viscérale le jour, tandis que MOONZ (Sinetrol® France) purifie et évacue les toxines pendant la nuit.",
+    ingredients: [
+      "Morosil® (Extrait d'Orange Sicilienne breveté - Brûleur diurne)",
+      "Sinetrol® (Actif breveté origine France - Purificateur nocturne)",
+      "Complexe d'extraits botaniques coupe-faim naturels",
+      "Agents remodelants de la silhouette et du métabolisme"
     ],
-    usage: "Un sachet Jour dilué dans 150ml d'eau le matin. Un sachet Nuit le soir au coucher."
+    benefits: [
+      "Cible en priorité la graisse viscérale (interne) profonde",
+      "SUNZ le matin : active la combustion des graisses et régule l'appétit",
+      "MOONZ le soir (1-2h avant le coucher) : élimine les toxines pendant la nuit",
+      "Permet de perdre du poids tout en gardant 3 repas normaux par jour",
+      "Formule de cure Dr. Raj : Nombre de boîtes = (Kilos à perdre ÷ 2) + 1"
+    ],
+    usage: "SUNZ le matin avec le petit-déjeuner. MOONZ 1h à 2h avant le coucher. Consommer quotidiennement avec constance.",
+    doctorNotes: "Calculateur officiel : Pour 10 kg à perdre, commander (10 ÷ 2) + 1 = 6 boîtes de cure."
   },
   {
     id: "acebrew",
-    name: "Dynace Ace Brew",
+    name: "Dynace Ace Brew Coffee",
     price: 32.00,
     category: "energie",
     image: "/images/acebrew.png",
     images: ["/images/acebrew.png", "/images/acebrew_2.png", "/images/acebrew_3.png"],
-    summary: "Café au NMN sans sucre ajouté — savourez votre café, libérez votre vitalité cellulaire.",
-    description: "Découvrez Ace Brew, le café premium enrichi en NMN pour allier plaisir gourmand et longévité cellulaire. Sans aucun sucre ajouté, cette boisson d'exception libère une énergie constante, favorise la jeunesse cellulaire de votre organisme, et apporte une clarté d'esprit remarquable dès la première tasse.",
-    benefits: [
-      "Enrichi en NMN pour stimuler la jeunesse et la longévité cellulaire",
-      "Zéro sucre ajouté — goût de café riche et authentique",
-      "Procure une énergie propre et durable sans excitation",
-      "Favorise la concentration et la mémoire au quotidien"
+    summary: "Le café santé & longévité au NMN — Contrôle la glycémie et régénère les cellules.",
+    description: "Acebrew est l'un des cafés les plus sains au monde. Combinant du NMN (Nicotinamide Mononucléotide) et du Gymnema Sylvestre, il remplace le café sucré nocif par une boisson d'exception qui normalise le taux de sucre, booste l'énergie et prévient le vieillissement.",
+    ingredients: [
+      "NMN (Nicotinamide Mononucléotide — Longévité cellulaire)",
+      "Gymnema Sylvestre (Normalise la glycémie et le sucre)",
+      "Café Arabica Premium sélectionné (Zéro sucre artificiel ajouté)"
     ],
-    usage: "Dissoudre un sachet dans une tasse d'eau chaude (150ml). À déguster le matin."
+    benefits: [
+      "Normalise le taux de sucre dans le sang (idéal pour diabétiques)",
+      "Procure une énergie propre, constante et sans énervement",
+      "Stimule la jeunesse cellulaire et protège contre le vieillissement",
+      "Favorise la concentration et la mémoire dès la première tasse"
+    ],
+    usage: "Dissoudre un sachet dans 150ml d'eau chaude. À savourer le matin au petit-déjeuner.",
+    doctorNotes: "Point fort Dr. Raj : Contrôle la glycémie chez les diabétiques, contrairement aux cafés sucrés industriels."
   },
   {
     id: "fitmax",
@@ -79,32 +115,21 @@ const initialProducts = [
     category: "minceur",
     image: "/images/fitmax.png",
     images: ["/images/fitmax.png"],
-    summary: "Formule thermogénique avancée pour optimiser le contrôle du poids.",
-    description: "FitMax est le brûleur de graisse thermogénique le plus puissant de sa génération. Formulé pour activer instantanément la perte de poids, il cible les graisses stockées, réduit l'absorption des sucres et transforme vos calories en énergie pure pour sculpter rapidement et sans fatigue la silhouette de vos rêves.",
-    benefits: [
-      "Cible et élimine rapidement les graisses stockées",
-      "Bloque efficacement l'assimilation des glucides",
-      "Fournit une énergie physique débordante et constante",
-      "Aide à réguler le taux de sucre pour éviter le stockage"
+    summary: "Formule thermogénique avancée pour la combustion des graisses tenaces.",
+    description: "FitMax est le complément thermogénique développé pour stimuler le métabolisme et accélérer la perte de masse grasse lors d'un programme d'affinement ou d'activité physique régulière.",
+    ingredients: [
+      "Extraits Thermogéniques botaniques",
+      "Brûleurs de lipides concentrés",
+      "Complexes énergisants anti-fatigue"
     ],
-    usage: "Prendre un sachet dilué dans un verre d'eau 30 minutes avant le repas principal."
-  },
-  {
-    id: "aceguard",
-    name: "Dynace Ace Guard",
-    price: 32.00,
-    category: "vitalite",
-    image: "/images/aceguard.png",
-    images: ["/images/aceguard.png", "/images/aceguard_2.png", "/images/aceguard_3.png"],
-    summary: "Votre bouclier immunitaire quotidien — protection antioxydante et soutien à la longévité.",
-    description: "Ace Guard est le bouclier antioxydant ultime de votre organisme. Grâce à sa synergie de super-nutriments, il renforce puissamment vos défenses naturelles, prévient les signes du vieillissement et maintient une vitalité et une respiration optimales tout au long de l'année.",
     benefits: [
-      "Renforce et consolide le système immunitaire",
-      "Puissant effet antioxydant contre le vieillissement cellulaire",
-      "Soutient la respiration et la vitalité globale",
-      "Maintient un métabolisme sain et équilibré au quotidien"
+      "Active la thermogenèse et la combustion des graisses",
+      "Transforme les réserves lipidiques en énergie physique",
+      "Aide à affiner la silhouette et redessiner la masse musculaire",
+      "Prévient les baisses de forme durant l'affinement"
     ],
-    usage: "Un sachet par jour dilué dans un verre d'eau tempérée le matin à jeun."
+    usage: "Prendre un sachet dilué dans un verre d'eau 30 minutes avant le repas principal.",
+    doctorNotes: "Peut être combiné avec Urbanism pour des résultats accélérés."
   },
   {
     id: "tripleroot",
@@ -113,15 +138,21 @@ const initialProducts = [
     category: "energie",
     image: "/images/tripleroot.png",
     images: ["/images/tripleroot.png", "/images/tripleroot_2.png", "/images/tripleroot_3.png"],
-    summary: "Café vitalité pour hommes — endurance, résilience et clarté d'esprit au quotidien.",
-    description: "Triple Root Coffee est la boisson de force par excellence. Ce café d'exception, formulé à base de racines de plantes puissantes, décuple instantanément l'endurance masculine, booste les performances physiques, active une concentration absolue et combat efficacement la fatigue physique et nerveuse.",
-    benefits: [
-      "Décuple l'endurance et les performances physiques masculines",
-      "Procure un surcroît d'énergie et de vitalité immédiat",
-      "Favorise une excellente circulation sanguine",
-      "Renforce la résistance au stress et à la fatigue quotidienne"
+    summary: "Café vitalité & santé sexuelle masculine — Testostérone, endurance & performance.",
+    description: "Triple Root Coffee est réservé aux hommes adultes. Après 40 ans, la baisse de testostérone diminue l'énergie et la puissance sexuelle. Formulé à partir de racines puissantes, il augmente naturellement le taux de testostérone, prolonge l'érection et améliore la qualité spermatique.",
+    ingredients: [
+      "Extrait de Triple Racines Végétales Ancestrales",
+      "Actifs tonifiants masculins concentrés",
+      "Café de spécialité riche en antioxydants"
     ],
-    usage: "Dissoudre un sachet dans 150ml d'eau chaude. Une tasse le matin pour démarrer avec vigueur."
+    benefits: [
+      "Augmente naturellement le taux de testostérone masculine",
+      "Prolonge la durée de l'érection et la vigueur",
+      "Améliore le nombre et la qualité des spermatozoïdes (oligospermie)",
+      "Stimule la libido et combat la fatigue nerveuse et physique"
+    ],
+    usage: "RÉSERVÉ AUX HOMMES ADULTES. Mélanger 1/2 sachet dans 80ml d'eau chaude 1h à 2h avant le moment intime.",
+    doctorNotes: "AVERTISSEMENT DR. RAJ : Réservé aux hommes adultes UNIQUEMENT. Ne JAMAIS donner aux enfants ou adolescents."
   },
   {
     id: "lyftmax",
@@ -130,15 +161,21 @@ const initialProducts = [
     category: "vitalite",
     image: "/images/lyftmax.png",
     images: ["/images/lyftmax.png", "/images/lyftmax_2.png", "/images/lyftmax_3.png"],
-    summary: "Le bien-être au féminin, chaque jour — équilibre hormonal, éclat et vitalité.",
-    description: "LyftMax est l'élixir d'équilibre et de beauté spécialement conçu pour les femmes. Cette formule précieuse harmonise naturellement le corps féminin, booste l'énergie quotidienne, favorise la santé des os et révèle un teint éclatant de jeunesse et de fermeté.",
-    benefits: [
-      "Harmonise et régule naturellement l'équilibre féminin",
-      "Redonne éclat, fermeté et jeunesse à la peau",
-      "Fortifie la structure osseuse et le confort articulaire",
-      "Procure bien-être physique et sérénité mentale au quotidien"
+    summary: "Santé hormonale & beauté féminine — Estro-G 100®, fermeté poitrine & ménopause.",
+    description: "Lyftmax est le soin d'exception dédié à l'équilibre féminin. Grâce à son actif breveté Estro-G 100®, il harmonise les hormones (œstrogène et progestérone), raffermit la poitrine et la silhouette dès 35 ans, régule les cycles et soulage les désagréments de la ménopause.",
+    ingredients: [
+      "Estro-G 100® (Actif breveté équilibreur hormonal puissant 100% naturel)",
+      "Complexes vasculaires pour la circulation gynécologique",
+      "Actifs tonifiants musculaires & cutanés"
     ],
-    usage: "Un sachet dilué dans 200ml d'eau fraîche par jour, de préférence le matin."
+    benefits: [
+      "Soin Poitrine & Silhouette (35 ans+) : Raffermit et redessine naturellement les seins",
+      "Femmes Actives : Régule les cycles menstruels et soutient la fertilité",
+      "Ménopause (50 ans+) : Atténue sécheresse vaginale, insomnies & sautes d'humeur",
+      "Apporte éclat, fermeté et jeunesse globale au corps féminin"
+    ],
+    usage: "Le matin (après le repas en cas de sensibilité gastrique). Verser sous la langue et laisser dissoudre. Cure conseillée : 5 à 6 mois pour la poitrine.",
+    doctorNotes: "Combinaison beauté féminine idéale : Rocenta + Lyftmax + Collagène."
   },
   {
     id: "collagene",
@@ -147,15 +184,23 @@ const initialProducts = [
     category: "beaute",
     image: "/images/collagene.png",
     images: ["/images/collagene.png", "/images/collagene_2.png", "/images/collagene_3.png"],
-    summary: "Élixir de beauté cellulaire — peau repulpée, cheveux renforcés, ongles solides.",
-    description: "Le Collagène Beauté Dynace est un véritable élixir de jeunesse. Associant collagène marin ultra-biodisponible, acide hyaluronique et Coenzyme Q10, cette formule haut de gamme repulpe la peau, estompe visiblement les rides, fortifie intensément les cheveux et les ongles, et redonne confort à vos articulations.",
-    benefits: [
-      "Repulpe visiblement la peau et lisse les rides et ridules",
-      "Hydrate la peau en profondeur pour un effet rebondi immédiat",
-      "Régénère et fortifie la fibre capillaire et les ongles",
-      "Préserve la jeunesse et la souplesse des articulations"
+    summary: "Élixir nocturne de jeunesse — Peau repulpée, cheveux forts, ongles solides & GABA.",
+    description: "Le Collagène Beauté Dynace associe Collagène Marin haut de gamme, NMN, Nid d'Oiseau, Élastine et GABA. Pris lors du rituel du soir, il agit pendant le sommeil pour lisser les rides, fortifier cheveux et ongles, et assouplir les articulations.",
+    ingredients: [
+      "Collagène Marin hautement biodisponible (Poisson)",
+      "NMN (Nicotinamide Mononucléotide - Longévité cellulaire)",
+      "Nid d'Oiseau (Nutrition intensive de l'émail cutané)",
+      "Élastine (Éclat, souplesse & rebond de la peau)",
+      "GABA (Détente mentale & sommeil réparateur)"
     ],
-    usage: "Mélanger un sachet dans un verre d'eau fraîche le soir au coucher."
+    benefits: [
+      "Repulpe la peau et permet de paraître jusqu'à 5 ans plus jeune",
+      "Régénère la fibre capillaire et fortifie la solidité des ongles",
+      "Assouplit les articulations et améliore la mobilité à la marche",
+      "Le GABA garantit un sommeil réparateur essentiel au renouvellement"
+    ],
+    usage: "Rituel nocturne 1h à 2h avant le coucher. Verser sous la langue, laisser dissoudre 1 min. Mâcher les 10% restants. Cure de 4 à 5 mois.",
+    doctorNotes: "Le collagène travaille pendant la nuit grâce au GABA. Consommer avant de dormir."
   },
   {
     id: "toothpaste",
@@ -164,15 +209,19 @@ const initialProducts = [
     category: "beaute",
     image: "/images/toothpaste.png",
     images: ["/images/toothpaste.png", "/images/toothpaste_2.png", "/images/toothpaste_3.png"],
-    summary: "Soin bucco-dentaire Jour & Nuit — MorningShield au Thé Blanc & NightRestore aux Herbes.",
-    description: "Le Dynace Duo Toothpaste réinvente votre sourire avec son protocole Jour & Nuit unique. MorningShield (Thé Blanc) blanchit l'émail et garantit une haleine fraîche toute la journée. NightRestore (Plantes apaisantes) répare les gencives et assainit la bouche durant votre sommeil pour une protection totale 24h/24.",
-    benefits: [
-      "Blanchit l'émail et protège contre les taches au quotidien",
-      "Assure une haleine ultra-fraîche du matin au soir",
-      "Apaise et renforce activement les gencives sensibles",
-      "Soin complet 24h/24 pour un sourire éclatant de santé"
+    summary: "Soin bucco-dentaire Jour & Nuit — MorningShield (Thé Blanc) & NightRestore (Plantes).",
+    description: "Le Dynace Duo Toothpaste réinvente l'hygiène bucco-dentaire avec son protocole 24h/24. MorningShield (Thé Blanc) blanchit l'émail et assure une haleine fraîche le jour. NightRestore (Herbes apaisantes) répare les gencives et assainit la bouche durant la nuit.",
+    ingredients: [
+      "MorningShield : Extrait de Thé Blanc & Agents Blanchissants doux",
+      "NightRestore : Complexes de Plantes Apaisantes & Réparatrices des gencives"
     ],
-    usage: "Utiliser MorningShield (tube Thé Blanc) le matin et NightRestore (tube Menthe) le soir."
+    benefits: [
+      "Blanchit l'émail et protège efficacement contre les taches",
+      "Garantit une haleine ultra-fraîche du matin au soir",
+      "Apaise et renforce activement les gencives sensibles",
+      "Protocole complet 24h/24 pour un sourire éclatant de santé"
+    ],
+    usage: "MorningShield (tube Thé Blanc) le matin après le petit-déjeuner. NightRestore (tube Herbes) le soir au coucher."
   }
 ];
 
