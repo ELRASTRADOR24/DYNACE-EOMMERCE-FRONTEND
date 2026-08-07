@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, CheckCircle, FlameKindling, ShoppingBag, CreditCard, Minus, Plus, ImageOff, Star, Sparkles, ShieldCheck, AlertCircle, Leaf } from 'lucide-react';
+import { ArrowLeft, CheckCircle, FlameKindling, ShoppingBag, CreditCard, Minus, Plus, ImageOff, Star, Sparkles, ShieldCheck, AlertCircle, Leaf, Calculator, Scale, Target } from 'lucide-react';
 import OptimizedImage from '../components/OptimizedImage';
 
 export default function ProductDetail({ product, onBack, onAddToCart, onBuyNow, currentUser, onOpenAuth }) {
   const [activeImage, setActiveImage] = useState(product?.image || "");
   const [quantity, setQuantity] = useState(1);
+  const [targetKilos, setTargetKilos] = useState(6);
 
   // États pour la gestion des avis
   const [reviews, setReviews] = useState([]);
@@ -261,6 +262,122 @@ export default function ProductDetail({ product, onBack, onAddToCart, onBuyNow, 
               <AlertCircle size={18} style={{ color: 'var(--accent-gold)', flexShrink: 0, marginTop: '0.1rem' }} />
               <div>
                 <strong>Recommandation Médicale :</strong> {product.doctorNotes}
+              </div>
+            </div>
+          )}
+
+          {/* CALCULATEUR DE CURE MINCEUR OFFICIEL (DR. RAJ) - URBANISM */}
+          {product.id === 'urbanism' && (
+            <div style={{
+              backgroundColor: 'var(--bg-secondary)',
+              border: '1.5px solid var(--primary-green)',
+              borderRadius: '12px',
+              padding: '1.25rem',
+              marginTop: '1.25rem',
+              boxShadow: '0 4px 15px rgba(0,0,0,0.04)'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.75rem' }}>
+                <Calculator size={22} style={{ color: 'var(--primary-green)' }} />
+                <h3 style={{ fontSize: '1.05rem', fontWeight: '700', color: 'var(--text-primary)', margin: 0 }}>
+                  Calculateur de Cure Minceur (Dr. RAJ)
+                </h3>
+              </div>
+              <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '1rem', lineHeight: '1.5' }}>
+                Sélectionnez votre objectif de perte de poids pour calculer le nombre de boîtes recommandé par le Dr. Raj (formule : <code>kilos ÷ 2 + 1</code>).
+              </p>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <label style={{ fontSize: '0.9rem', fontWeight: '600', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                    <Target size={16} style={{ color: 'var(--accent-gold)' }} /> Objectif de perte de poids :
+                  </label>
+                  <span style={{ fontSize: '1.1rem', fontWeight: '700', color: 'var(--primary-green)' }}>
+                    {targetKilos} kg
+                  </span>
+                </div>
+
+                <input
+                  type="range"
+                  min="2"
+                  max="30"
+                  step="2"
+                  value={targetKilos}
+                  onChange={(e) => {
+                    const val = parseInt(e.target.value);
+                    setTargetKilos(val);
+                    setQuantity(Math.floor(val / 2) + 1);
+                  }}
+                  style={{ width: '100%', accentColor: 'var(--primary-green)', cursor: 'pointer' }}
+                />
+
+                <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginTop: '0.25rem' }}>
+                  {[4, 6, 8, 10, 14, 20].map(kg => (
+                    <button
+                      key={kg}
+                      type="button"
+                      onClick={() => {
+                        setTargetKilos(kg);
+                        setQuantity(Math.floor(kg / 2) + 1);
+                      }}
+                      style={{
+                        padding: '0.25rem 0.6rem',
+                        fontSize: '0.78rem',
+                        fontWeight: '600',
+                        borderRadius: '15px',
+                        border: targetKilos === kg ? '1.5px solid var(--primary-green)' : '1px solid var(--border-color)',
+                        backgroundColor: targetKilos === kg ? 'var(--primary-green)' : 'var(--bg-primary)',
+                        color: targetKilos === kg ? '#fff' : 'var(--text-primary)',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      {kg} kg
+                    </button>
+                  ))}
+                </div>
+
+                <div style={{
+                  backgroundColor: 'var(--bg-primary)',
+                  border: '1px dashed var(--primary-green)',
+                  borderRadius: '8px',
+                  padding: '0.85rem 1rem',
+                  marginTop: '0.5rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  flexWrap: 'wrap',
+                  gap: '0.5rem'
+                }}>
+                  <div>
+                    <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'block' }}>Cure complète recommandée :</span>
+                    <strong style={{ fontSize: '1rem', color: 'var(--primary-green)' }}>
+                      {Math.floor(targetKilos / 2) + 1} boîtes d'Urbanism
+                    </strong>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const boxes = Math.floor(targetKilos / 2) + 1;
+                      setQuantity(boxes);
+                      onAddToCart(product, boxes);
+                    }}
+                    style={{
+                      backgroundColor: 'var(--primary-green)',
+                      color: '#fff',
+                      border: 'none',
+                      padding: '0.55rem 0.95rem',
+                      borderRadius: '6px',
+                      fontSize: '0.82rem',
+                      fontWeight: '600',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.35rem',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                    }}
+                  >
+                    <ShoppingBag size={15} /> Ajouter la cure ({Math.floor(targetKilos / 2) + 1} boîtes)
+                  </button>
+                </div>
               </div>
             </div>
           )}
