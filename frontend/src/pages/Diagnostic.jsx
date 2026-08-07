@@ -18,47 +18,49 @@ import OptimizedImage from '../components/OptimizedImage';
 const QUESTIONS = [
   {
     id: 1,
-    question: "Quel est votre objectif principal ?",
+    question: "Quel est votre objectif de santé principal ?",
     options: [
-      { text: "Améliorer l'aspect de ma peau et ralentir les signes de l'âge", points: { rocenta: 3, collagene: 2 }, icon: Sparkles },
-      { text: "Retrouver de l'énergie physique, de la force et du tonus", points: { tripleroot: 3, dynafuel: 2 }, icon: Zap },
-      { text: "Perdre du poids et affiner ma silhouette", points: { fitmax: 3, urbanism: 2 }, icon: Flame },
-      { text: "Renforcer ma santé globale et mes défenses naturelles", points: { aceguard: 3, acebrew: 1 }, icon: Shield }
+      { text: "Régénérer mes cellules, réparer mon organisme et retrouver une santé globale", points: { rocenta: 4, aceguard: 2 }, icon: Sparkles },
+      { text: "Équilibre féminin : fermeté silhouette/poitrine, cycles ou ménopause", points: { lyftmax: 4, collagene: 2 }, icon: HeartPulse },
+      { text: "Perdre du poids et brûler les graisses (Jour & Nuit)", points: { urbanism: 4, fitmax: 2 }, icon: Flame },
+      { text: "Vitalité masculine, endurance, force & santé sexuelle (Hommes)", points: { tripleroot: 4, dynafuel: 2 }, icon: Zap },
+      { text: "Renforcer mon système immunitaire, mes poumons & mon foie", points: { aceguard: 4, rocenta: 2 }, icon: Shield }
     ]
   },
   {
     id: 2,
     question: "Comment évaluez-vous votre niveau de fatigue au quotidien ?",
     options: [
-      { text: "Je me sens constamment fatigué(e) ou épuisé(e)", points: { rocenta: 2, tripleroot: 2 }, icon: Battery },
-      { text: "J'ai des baisses d'énergie régulières, notamment après les repas", points: { fitmax: 1, acebrew: 2 }, icon: Activity },
-      { text: "Je me sens généralement en forme, mais je souhaite optimiser mes capacités", points: { tripleroot: 3, dynafuel: 2 }, icon: Zap }
+      { text: "Je me sens constamment fatigué(e), épuisé(e) au réveil", points: { rocenta: 3, tripleroot: 2 }, icon: Battery },
+      { text: "J'ai des coup de barre et une mauvaise régulation du sucre / glycémie", points: { acebrew: 3, aceguard: 2 }, icon: Activity },
+      { text: "Je suis actif/active et je souhaite optimiser ma longévité et mon immunité", points: { rocenta: 2, aceguard: 3 }, icon: Zap }
     ]
   },
   {
     id: 3,
-    question: "Ressentez-vous régulièrement des douleurs physiques (muscles ou articulations) ?",
+    question: "Avez-vous des inconforts physiques ou articulaires réguliers ?",
     options: [
-      { text: "Oui, j'ai souvent des douleurs ou des raideurs physiques", points: { rocenta: 3, collagene: 2 }, icon: Activity },
-      { text: "Non, je n'ai pas de douleurs particulières", points: {}, icon: Check }
+      { text: "Oui, douleurs articulaires, raideurs ou manque de mobilité", points: { rocenta: 3, collagene: 3, aceguard: 2 }, icon: Activity },
+      { text: "Oui, insomnies, sautes d'humeur ou bouffées de chaleur (femmes)", points: { lyftmax: 4, collagene: 2 }, icon: Moon },
+      { text: "Non, pas de douleurs particulières", points: {}, icon: Check }
     ]
   },
   {
     id: 4,
-    question: "Qu'aimeriez-vous améliorer en priorité ?",
+    question: "Qu'aimeriez-vous sublimer en priorité ?",
     options: [
-      { text: "L'éclat et la fermeté de ma peau, ou la force de mes cheveux", points: { rocenta: 2, collagene: 3 }, icon: Sparkles },
-      { text: "Mon poids, ma digestion et l'élimination des toxines", points: { fitmax: 3, urbanism: 2 }, icon: Flame },
-      { text: "Mon endurance et mes performances lors d'efforts physiques", points: { tripleroot: 2, dynafuel: 3 }, icon: Zap }
+      { text: "L'éclat et la fermeté de ma peau, le volume des cheveux et ongles", points: { collagene: 4, rocenta: 2 }, icon: Sparkles },
+      { text: "Ma silhouette, mon ventre et l'élimination des toxines", points: { urbanism: 4, fitmax: 2 }, icon: Flame },
+      { text: "Mon endurance, ma libido et ma vigueur (Hommes)", points: { tripleroot: 4, dynafuel: 2 }, icon: Zap }
     ]
   },
   {
     id: 5,
-    question: "Comment décririez-vous la qualité de votre sommeil ?",
+    question: "Comment qualifiez-vous votre sommeil et votre récupération ?",
     options: [
-      { text: "Difficile : je dors mal ou je me réveille souvent la nuit", points: { rocenta: 3, aceguard: 1 }, icon: Moon },
-      { text: "Moyenne : je dors mais je me réveille fatigué(e) le matin", points: { tripleroot: 2, acebrew: 1 }, icon: Sun },
-      { text: "Bonne : je dors bien et je me sens reposé(e)", points: {}, icon: Check }
+      { text: "Sommeil agité ou réveils nocturnes fréquents", points: { collagene: 3, rocenta: 3 }, icon: Moon },
+      { text: "Sommeil court avec baisse d'énergie dans la journée", points: { acebrew: 2, tripleroot: 2 }, icon: Sun },
+      { text: "Bon sommeil mais besoin de détoxification et de vitalité", points: { aceguard: 2, rocenta: 2 }, icon: Check }
     ]
   }
 ];
@@ -98,7 +100,8 @@ export default function Diagnostic({ onAddToCart, onNavigate }) {
       collagene: 0,
       dynafuel: 0,
       urbanism: 0,
-      acebrew: 0
+      acebrew: 0,
+      lyftmax: 0
     });
     setSelectedAnswers([]);
     setRecommendedProduct(null);
