@@ -11,7 +11,8 @@ import {
   Check, 
   Moon, 
   Sun,
-  Activity
+  Activity,
+  HeartPulse
 } from 'lucide-react';
 import OptimizedImage from '../components/OptimizedImage';
 
