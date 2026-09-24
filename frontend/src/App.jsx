@@ -26,7 +26,7 @@ const DEFAULT_PRODUCTS = [
   {
     id: "rocenta",
     name: "Dynace Rocenta",
-    price: 60.00,
+    price: 59.99,
     category: "vitalite",
     image: "/images/rocenta.png",
     images: ["/images/rocenta.png", "/images/rocenta_2.png", "/images/rocenta_3.png"],
@@ -38,7 +38,7 @@ const DEFAULT_PRODUCTS = [
   {
     id: "dynafuel",
     name: "Dynace Dynafuel",
-    price: 60.00,
+    price: 59.99,
     category: "energie",
     image: "/images/dynafuel.png",
     images: ["/images/dynafuel.png", "/images/dynafuel_2.png", "/images/dynafuel_3.png"],
@@ -50,7 +50,7 @@ const DEFAULT_PRODUCTS = [
   {
     id: "urbanism",
     name: "Dynace Urbanism",
-    price: 60.00,
+    price: 59.99,
     category: "minceur",
     image: "/images/urbanism.png",
     images: ["/images/urbanism.png", "/images/urbanism_2.png", "/images/urbanism_3.png"],
@@ -62,7 +62,7 @@ const DEFAULT_PRODUCTS = [
   {
     id: "acebrew",
     name: "Dynace Ace Brew",
-    price: 32.00,
+    price: 31.99,
     category: "vitalite",
     image: "/images/acebrew.png",
     images: ["/images/acebrew.png", "/images/acebrew_2.png"],
