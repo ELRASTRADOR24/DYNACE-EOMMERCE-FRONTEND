@@ -806,6 +806,14 @@ app.get('/api/orders/user', authenticateToken, async (req, res) => {
         };
       }));
 
+      const subtotalVal = Number(row.subtotal || 0);
+      const totalVal = Number(row.total || 0);
+      const discountVal = Number(row.discount_amount || 0);
+      let shippingVal = Number(row.shipping || 0);
+      if (shippingVal === 0 && totalVal > (subtotalVal - discountVal)) {
+        shippingVal = totalVal - (subtotalVal - discountVal);
+      }
+
       return {
         id: row._id,
         orderNumber: row.order_number,
@@ -816,9 +824,9 @@ app.get('/api/orders/user', authenticateToken, async (req, res) => {
         postalCode: row.postal_code,
         city: row.city,
         items: enrichedItems,
-        subtotal: Number(row.subtotal || 0),
-        shipping: Number(row.shipping || 0),
-        total: Number(row.total || 0),
+        subtotal: subtotalVal,
+        shipping: shippingVal,
+        total: totalVal,
         status: row.status,
         trackingNumber: row.tracking_number || '',
         createdAt: row.created_at
@@ -922,8 +930,11 @@ app.get('/api/orders/packing-slip/:orderNumber', async (req, res) => {
     `).join('');
 
     const subtotal = Number(order.subtotal || 0);
-    const shipping = Number(order.shipping || 0);
-    const total = Number(order.total || (subtotal + shipping));
+    const total = Number(order.total || 0);
+    let shipping = Number(order.shipping || 0);
+    if (shipping === 0 && total > subtotal) {
+      shipping = total - subtotal;
+    }
 
     res.send(`
       <!DOCTYPE html>
@@ -1038,7 +1049,7 @@ app.get('/api/orders/packing-slip/:orderNumber', async (req, res) => {
               </tr>
               <tr>
                 <td colspan="2" style="text-align: right; color: #64748b; padding: 5px 10px;">Frais de livraison :</td>
-                <td style="text-align: right; color: #64748b; padding: 5px 10px;">${shipping === 0 ? 'Gratuit' : `${shipping.toFixed(2)} €`}</td>
+                <td style="text-align: right; color: #64748b; padding: 5px 10px;">${shipping.toFixed(2)} €</td>
               </tr>
               <tr>
                 <td colspan="2" style="text-align: right; font-size: 18px; font-weight: 800; color: #153A89; padding: 12px 10px 0 10px;">Montant total :</td>
@@ -1096,8 +1107,14 @@ app.get('/api/orders/invoice/:orderNumber', async (req, res) => {
 
     const discountAmount = Number(order.discount_amount || 0);
     const subtotal = Number(order.subtotal || 0);
-    const shipping = Number(order.shipping || 0);
-    const totalTtc = Number(order.total || (subtotal - discountAmount + shipping));
+    const totalTtc = Number(order.total || 0);
+    const subtotalTtc = Math.max(0, subtotal - discountAmount);
+
+    // Récupérer les frais de livraison réels si non renseignés
+    let shipping = Number(order.shipping || 0);
+    if (shipping === 0 && totalTtc > subtotalTtc) {
+      shipping = totalTtc - subtotalTtc;
+    }
 
     const discountHtml = discountAmount > 0 ? `
       <tr>
@@ -1107,7 +1124,6 @@ app.get('/api/orders/invoice/:orderNumber', async (req, res) => {
     ` : '';
 
     const vatRate = 0.055;
-    const subtotalTtc = Math.max(0, subtotal - discountAmount);
     const baseHt = (subtotalTtc + shipping) / (1 + vatRate);
     const vatAmount = (subtotalTtc + shipping) - baseHt;
 
@@ -1203,7 +1219,7 @@ app.get('/api/orders/invoice/:orderNumber', async (req, res) => {
             ${discountHtml}
             <tr>
               <td style="color: #64748b;">Livraison :</td>
-              <td style="text-align: right; font-weight: 500;">${shipping === 0 ? 'Offerte' : `${shipping.toFixed(2)} €`}</td>
+              <td style="text-align: right; font-weight: 500;">${shipping.toFixed(2)} €</td>
             </tr>
             <tr>
               <td style="color: #64748b;">TVA (5.5%) :</td>

@@ -278,6 +278,10 @@ export const sendCustomerOrderConfirmationEmail = async (order) => {
   const frontendUrl = process.env.FRONTEND_URL || 'https://www.xn--dynaceglobalsant-top-q2b.com';
   const adminEmail = process.env.ADMIN_RECEIVER_EMAIL || process.env.EMAIL_USER || 'dynaceglogal@gmail.com';
 
+  const shippingAmount = (order.shipping && order.shipping > 0)
+    ? order.shipping
+    : Math.max(0, (order.total || 0) - ((order.subtotal || 0) - (order.discount_amount || 0)));
+
   const itemsHtml = order.items.map(item => `
     <tr>
       <td style="padding: 12px 10px; border-bottom: 1px solid #f1f5f9; font-size: 15px; color: #334155; font-weight: 500;">${item.name}</td>
@@ -362,7 +366,7 @@ export const sendCustomerOrderConfirmationEmail = async (order) => {
               ` : ''}
               <tr>
                 <td class="totals-row">Frais de livraison :</td>
-                <td class="totals-row" style="font-weight: 600; color: #334155;">${order.shipping === 0 ? 'Offerts' : `${order.shipping.toFixed(2)} €`}</td>
+                <td class="totals-row" style="font-weight: 600; color: #334155;">${shippingAmount.toFixed(2)} €</td>
               </tr>
               <tr>
                 <td class="totals-row grand-total">Total payé :</td>
@@ -505,6 +509,10 @@ export const sendCustomerOrderStatusEmail = async (order, status, trackingNumber
     subject: `Mise à jour de commande : ${status}`
   };
 
+  const shippingAmount = (order.shipping && order.shipping > 0)
+    ? order.shipping
+    : Math.max(0, (order.total || 0) - ((order.subtotal || 0) - (order.discount_amount || 0)));
+
   const itemsHtml = (order.items || []).map(item => `
     <tr>
       <td style="padding: 12px 10px; border-bottom: 1px solid #f1f5f9; font-size: 15px; color: #334155; font-weight: 500;">${item.name}</td>
@@ -586,7 +594,7 @@ export const sendCustomerOrderStatusEmail = async (order, status, trackingNumber
             <table class="totals">
               <tr>
                 <td class="totals-row">Frais de livraison :</td>
-                <td class="totals-row" style="font-weight: 600; color: #334155;">${order.shipping === 0 ? 'Offerts' : `${order.shipping.toFixed(2)} €`}</td>
+                <td class="totals-row" style="font-weight: 600; color: #334155;">${shippingAmount.toFixed(2)} €</td>
               </tr>
               <tr>
                 <td class="totals-row grand-total">Total :</td>

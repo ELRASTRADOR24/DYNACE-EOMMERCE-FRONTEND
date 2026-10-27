@@ -171,7 +171,7 @@ export default function Orders({ onBackToShopping, onTrackOrder }) {
                   </div>
                   <div className="financials-row-order">
                     <span>Livraison :</span>
-                    <span>{(order.shipping || 0) === 0 ? 'Gratuite' : `${(order.shipping || 0).toFixed(2)} €`}</span>
+                    <span>{Number(order.shipping || 0).toFixed(2)} €</span>
                   </div>
                   <div className="financials-row-order grand-total-order">
                     <span>Total :</span>
