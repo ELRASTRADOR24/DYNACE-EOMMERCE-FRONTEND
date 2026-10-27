@@ -132,7 +132,7 @@ export default function OrderTracking() {
 
       {trackingData && (
         <div style={{ backgroundColor: 'var(--bg-primary)', padding: '2rem', borderRadius: '12px', border: '1px solid var(--border-color)', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', paddingBottom: '1.5rem', marginBottom: '2rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', paddingBottom: '1.5rem', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
             <div>
               <h2 style={{ fontSize: '1.25rem', margin: '0 0 0.5rem 0', color: 'var(--text-primary)' }}>Commande {trackingData.order_number}</h2>
               <p style={{ margin: 0, color: 'var(--text-secondary)' }}>Passée le {new Date(trackingData.createdAt).toLocaleDateString('fr-FR')}</p>
@@ -203,6 +203,30 @@ export default function OrderTracking() {
               {trackingData.address}<br />
               {trackingData.postal_code} {trackingData.city}
             </p>
+          </div>
+
+          <div style={{ marginTop: '1.5rem', textAlign: 'center' }}>
+            <a
+              href={`/api/orders/invoice/${trackingData.order_number}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.4rem',
+                color: 'var(--primary-gold)',
+                fontWeight: 'bold',
+                textDecoration: 'none',
+                fontSize: '0.9rem',
+                border: '1px solid var(--primary-gold)',
+                padding: '0.65rem 1.5rem',
+                borderRadius: '25px',
+                backgroundColor: 'rgba(212, 175, 55, 0.05)',
+                transition: 'all 0.2s'
+              }}
+            >
+              📄 Télécharger la Facture (PDF / Impression)
+            </a>
           </div>
         </div>
       )}

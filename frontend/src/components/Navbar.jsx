@@ -358,11 +358,8 @@ export default function Navbar({
             </li>
             <li>
               <button 
-                className="drawer-link-btn"
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  setIsCartOpen(true);
-                }}
+                className={`drawer-link-btn ${currentTab === 'cart' ? 'active' : ''}`}
+                onClick={() => handleTabClick('cart')}
                 style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}
               >
                 <span>Mon Panier</span>

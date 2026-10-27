@@ -782,22 +782,47 @@ app.get('/api/orders/user', authenticateToken, async (req, res) => {
         { email: user.email }
       ]
     }).sort({ created_at: -1 });
-    const ordersList = rows.map(row => ({
-      id: row._id,
-      orderNumber: row.order_number,
-      firstName: row.first_name,
-      lastName: row.last_name,
-      email: row.email,
-      address: row.address,
-      postalCode: row.postal_code,
-      city: row.city,
-      items: row.items || [],
-      subtotal: row.subtotal,
-      shipping: row.shipping,
-      total: row.total,
-      status: row.status,
-      trackingNumber: row.tracking_number || '',
-      createdAt: row.created_at
+    const ordersList = await Promise.all(rows.map(async row => {
+      const enrichedItems = await Promise.all((row.items || []).map(async (item) => {
+        let name = item.name;
+        let price = typeof item.price === 'number' ? item.price : parseFloat(item.price);
+        let image = item.image;
+        if (!name || isNaN(price)) {
+          try {
+            const dbProd = (await Product.findById(item.id)) || (await Product.findOne({ id: item.id }));
+            if (dbProd) {
+              name = name || dbProd.name;
+              if (isNaN(price)) price = dbProd.price;
+              image = image || dbProd.image;
+            }
+          } catch (e) {}
+        }
+        return {
+          id: item.id,
+          name: name || 'Produit Dynace',
+          price: !isNaN(price) ? price : 0,
+          image: image || '/images/logo.svg',
+          quantity: item.quantity || 1
+        };
+      }));
+
+      return {
+        id: row._id,
+        orderNumber: row.order_number,
+        firstName: row.first_name,
+        lastName: row.last_name,
+        email: row.email,
+        address: row.address,
+        postalCode: row.postal_code,
+        city: row.city,
+        items: enrichedItems,
+        subtotal: Number(row.subtotal || 0),
+        shipping: Number(row.shipping || 0),
+        total: Number(row.total || 0),
+        status: row.status,
+        trackingNumber: row.tracking_number || '',
+        createdAt: row.created_at
+      };
     }));
     res.json(ordersList);
   } catch (err) {
@@ -868,13 +893,37 @@ app.get('/api/orders/packing-slip/:orderNumber', async (req, res) => {
       return res.status(404).send('<h1>Commande non trouvée</h1>');
     }
 
-    const itemsHtml = order.items.map(item => `
+    const enrichedItems = await Promise.all((order.items || []).map(async (item) => {
+      let name = item.name;
+      let price = typeof item.price === 'number' ? item.price : parseFloat(item.price);
+      if (!name || isNaN(price)) {
+        try {
+          const dbProd = (await Product.findById(item.id)) || (await Product.findOne({ id: item.id }));
+          if (dbProd) {
+            name = name || dbProd.name;
+            if (isNaN(price)) price = dbProd.price;
+          }
+        } catch (e) {}
+      }
+      return {
+        ...item,
+        name: name || 'Produit Dynace',
+        price: !isNaN(price) ? price : 0,
+        quantity: item.quantity || 1
+      };
+    }));
+
+    const itemsHtml = enrichedItems.map(item => `
       <tr>
         <td style="padding: 12px 10px; border-bottom: 1px solid #e2e8f0; font-size: 14px; font-weight: 500;">${item.name}</td>
         <td style="padding: 12px 10px; border-bottom: 1px solid #e2e8f0; text-align: center; font-size: 14px;">x${item.quantity}</td>
-        <td style="padding: 12px 10px; border-bottom: 1px solid #e2e8f0; text-align: right; font-size: 14px; font-weight: 600;">${item.price.toFixed(2)} €</td>
+        <td style="padding: 12px 10px; border-bottom: 1px solid #e2e8f0; text-align: right; font-size: 14px; font-weight: 600;">${Number(item.price || 0).toFixed(2)} €</td>
       </tr>
     `).join('');
+
+    const subtotal = Number(order.subtotal || 0);
+    const shipping = Number(order.shipping || 0);
+    const total = Number(order.total || (subtotal + shipping));
 
     res.send(`
       <!DOCTYPE html>
@@ -985,15 +1034,15 @@ app.get('/api/orders/packing-slip/:orderNumber', async (req, res) => {
               ${itemsHtml}
               <tr>
                 <td colspan="2" style="text-align: right; font-weight: 600; border-top: 2px solid #e2e8f0; padding-top: 15px; color: #64748b;">Sous-total :</td>
-                <td style="text-align: right; font-weight: 600; border-top: 2px solid #e2e8f0; padding-top: 15px; color: #334155;">${order.subtotal.toFixed(2)} €</td>
+                <td style="text-align: right; font-weight: 600; border-top: 2px solid #e2e8f0; padding-top: 15px; color: #334155;">${subtotal.toFixed(2)} €</td>
               </tr>
               <tr>
                 <td colspan="2" style="text-align: right; color: #64748b; padding: 5px 10px;">Frais de livraison :</td>
-                <td style="text-align: right; color: #64748b; padding: 5px 10px;">${order.shipping === 0 ? 'Gratuit' : `${order.shipping.toFixed(2)} €`}</td>
+                <td style="text-align: right; color: #64748b; padding: 5px 10px;">${shipping === 0 ? 'Gratuit' : `${shipping.toFixed(2)} €`}</td>
               </tr>
               <tr>
                 <td colspan="2" style="text-align: right; font-size: 18px; font-weight: 800; color: #153A89; padding: 12px 10px 0 10px;">Montant total :</td>
-                <td style="text-align: right; font-size: 18px; font-weight: 800; color: #153A89; padding: 12px 10px 0 10px;">${order.total.toFixed(2)} €</td>
+                <td style="text-align: right; font-size: 18px; font-weight: 800; color: #153A89; padding: 12px 10px 0 10px;">${total.toFixed(2)} €</td>
               </tr>
             </tbody>
           </table>
@@ -1015,28 +1064,52 @@ app.get('/api/orders/invoice/:orderNumber', async (req, res) => {
       return res.status(404).send('<h1>Facture non trouvée</h1>');
     }
 
-    const itemsHtml = order.items.map(item => `
+    // Enrich items if name or price is missing (e.g. from Stripe checkout)
+    const enrichedItems = await Promise.all((order.items || []).map(async (item) => {
+      let name = item.name;
+      let price = typeof item.price === 'number' ? item.price : parseFloat(item.price);
+      if (!name || isNaN(price)) {
+        try {
+          const dbProd = (await Product.findById(item.id)) || (await Product.findOne({ id: item.id }));
+          if (dbProd) {
+            name = name || dbProd.name;
+            if (isNaN(price)) price = dbProd.price;
+          }
+        } catch (e) {}
+      }
+      return {
+        ...item,
+        name: name || 'Produit Dynace',
+        price: !isNaN(price) ? price : 0,
+        quantity: item.quantity || 1
+      };
+    }));
+
+    const itemsHtml = enrichedItems.map(item => `
       <tr>
         <td style="padding: 12px 10px; border-bottom: 1px solid #e2e8f0; font-size: 14px;">${item.name}</td>
         <td style="padding: 12px 10px; border-bottom: 1px solid #e2e8f0; text-align: center; font-size: 14px;">x${item.quantity}</td>
-        <td style="padding: 12px 10px; border-bottom: 1px solid #e2e8f0; text-align: right; font-size: 14px;">${item.price.toFixed(2)} €</td>
-        <td style="padding: 12px 10px; border-bottom: 1px solid #e2e8f0; text-align: right; font-size: 14px; font-weight: 600;">${(item.price * item.quantity).toFixed(2)} €</td>
+        <td style="padding: 12px 10px; border-bottom: 1px solid #e2e8f0; text-align: right; font-size: 14px;">${Number(item.price || 0).toFixed(2)} €</td>
+        <td style="padding: 12px 10px; border-bottom: 1px solid #e2e8f0; text-align: right; font-size: 14px; font-weight: 600;">${(Number(item.price || 0) * (item.quantity || 1)).toFixed(2)} €</td>
       </tr>
     `).join('');
 
-    const discountHtml = order.discount_amount > 0 ? `
+    const discountAmount = Number(order.discount_amount || 0);
+    const subtotal = Number(order.subtotal || 0);
+    const shipping = Number(order.shipping || 0);
+    const totalTtc = Number(order.total || (subtotal - discountAmount + shipping));
+
+    const discountHtml = discountAmount > 0 ? `
       <tr>
-        <td colspan="3" style="text-align: right; padding: 8px 10px; font-size: 14px; color: #64748b;">Réduction (${order.coupon_code}) :</td>
-        <td style="text-align: right; padding: 8px 10px; font-size: 14px; color: #10b981; font-weight: 600;">-${order.discount_amount.toFixed(2)} €</td>
+        <td colspan="3" style="text-align: right; padding: 8px 10px; font-size: 14px; color: #64748b;">Réduction (${order.coupon_code || 'CODE PROMO'}) :</td>
+        <td style="text-align: right; padding: 8px 10px; font-size: 14px; color: #10b981; font-weight: 600;">-${discountAmount.toFixed(2)} €</td>
       </tr>
     ` : '';
 
     const vatRate = 0.055;
-    const totalTtc = order.total;
-    const subtotalTtc = order.subtotal - order.discount_amount;
-    const shippingTtc = order.shipping;
-    const baseHt = (subtotalTtc + shippingTtc) / (1 + vatRate);
-    const vatAmount = (subtotalTtc + shippingTtc) - baseHt;
+    const subtotalTtc = Math.max(0, subtotal - discountAmount);
+    const baseHt = (subtotalTtc + shipping) / (1 + vatRate);
+    const vatAmount = (subtotalTtc + shipping) - baseHt;
 
     res.send(`
       <!DOCTYPE html>
@@ -1125,12 +1198,12 @@ app.get('/api/orders/invoice/:orderNumber', async (req, res) => {
           <table class="totals-table">
             <tr>
               <td style="color: #64748b;">Sous-total :</td>
-              <td style="text-align: right; font-weight: 500;">${order.subtotal.toFixed(2)} €</td>
+              <td style="text-align: right; font-weight: 500;">${subtotal.toFixed(2)} €</td>
             </tr>
             ${discountHtml}
             <tr>
               <td style="color: #64748b;">Livraison :</td>
-              <td style="text-align: right; font-weight: 500;">${order.shipping === 0 ? 'Offerte' : `${order.shipping.toFixed(2)} €`}</td>
+              <td style="text-align: right; font-weight: 500;">${shipping === 0 ? 'Offerte' : `${shipping.toFixed(2)} €`}</td>
             </tr>
             <tr>
               <td style="color: #64748b;">TVA (5.5%) :</td>
@@ -1482,6 +1555,21 @@ app.post('/api/payment/confirm-order', async (req, res) => {
     const user = await User.findOne({ email });
     const userId = user ? user._id : null;
 
+    const rawItems = JSON.parse(items);
+    const enrichedItems = await Promise.all(rawItems.map(async (i) => {
+      let dbProd = null;
+      try {
+        dbProd = (await Product.findById(i.id)) || (await Product.findOne({ id: i.id }));
+      } catch (e) {}
+      return {
+        id: i.id,
+        name: dbProd ? dbProd.name : (i.name || 'Produit Dynace'),
+        price: dbProd ? dbProd.price : (i.price || 0),
+        image: dbProd ? dbProd.image : (i.image || '/images/logo.svg'),
+        quantity: i.quantity || 1
+      };
+    }));
+
     const newOrder = new Order({
       order_number: orderNumber,
       user_id: userId,
@@ -1493,7 +1581,7 @@ app.post('/api/payment/confirm-order', async (req, res) => {
       postal_code: postalCode,
       city,
       country: country || 'France',
-      items: JSON.parse(items),
+      items: enrichedItems,
       subtotal: parseFloat(subtotal),
       shipping: parseFloat(shipping),
       discount_amount: parseFloat(discountAmount || '0'),
@@ -1517,7 +1605,7 @@ app.post('/api/payment/confirm-order', async (req, res) => {
     sendOrderNotificationEmail({
       orderId: orderNumber,
       user: { firstName, lastName, email },
-      items: JSON.parse(items),
+      items: enrichedItems,
       totalAmount: parseFloat(total),
       shippingAddress: { fullName: `${firstName} ${lastName}`, address, postalCode, city, country: country || 'France', phone: phone || '' }
     }).catch(err => console.error("Admin order notification email error:", err.message));

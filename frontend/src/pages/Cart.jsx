@@ -150,42 +150,33 @@ export default function Cart({ cartItems, onUpdateQty, onRemoveItem, onNavigate 
           </button>
         </div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr', lgGridTemplateColumns: '2fr 1fr', gap: '2.5rem', alignItems: 'flex-start' }} className="cart-grid-responsive">
+        <div className="cart-grid-responsive">
           {/* Items list */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             {cartItems.map((item) => (
               <div 
                 key={item.id}
-                style={{
-                  background: 'var(--bg-glass)',
-                  border: '1px solid var(--border-color)',
-                  borderRadius: '14px',
-                  padding: '1.25rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '1.5rem',
-                  flexWrap: 'wrap',
-                  position: 'relative'
-                }}
+                className="cart-item-card"
               >
                 {/* Product Image */}
-                <div style={{ width: '80px', height: '80px', backgroundColor: 'var(--bg-secondary)', borderRadius: '10px', padding: '0.5rem', overflow: 'hidden' }}>
+                <div className="cart-item-img-box">
                   <OptimizedImage src={item.image} alt={item.name} size="thumb" />
                 </div>
 
                 {/* Details */}
-                <div style={{ flex: '1 1 200px' }}>
-                  <h3 style={{ fontSize: '1.1rem', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '0.25rem' }}>{item.name}</h3>
-                  <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                <div className="cart-item-details-box">
+                  <h3 style={{ fontSize: '1.05rem', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '0.25rem' }}>{item.name}</h3>
+                  <span style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                     Prix unitaire : {Number(item.price).toFixed(2)} €
                   </span>
                 </div>
 
                 {/* Quantity Controls */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', border: '1px solid var(--border-color)', borderRadius: '30px', padding: '0.25rem 0.75rem', backgroundColor: 'var(--bg-primary)' }}>
+                <div className="cart-item-qty-box">
                   <button 
                     onClick={() => onUpdateQty(item.id, item.quantity - 1)}
                     style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: '0.25rem' }}
+                    aria-label="Diminuer la quantité"
                   >
                     <Minus size={14} />
                   </button>
@@ -193,13 +184,14 @@ export default function Cart({ cartItems, onUpdateQty, onRemoveItem, onNavigate 
                   <button 
                     onClick={() => onUpdateQty(item.id, item.quantity + 1)}
                     style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: '0.25rem' }}
+                    aria-label="Augmenter la quantité"
                   >
                     <Plus size={14} />
                   </button>
                 </div>
 
                 {/* Price Total & Delete */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', marginLeft: 'auto' }}>
+                <div className="cart-item-actions-box">
                   <span style={{ fontSize: '1.15rem', fontWeight: '800', color: 'var(--primary-gold)' }}>
                     {(item.price * item.quantity).toFixed(2)} €
                   </span>
@@ -209,6 +201,7 @@ export default function Cart({ cartItems, onUpdateQty, onRemoveItem, onNavigate 
                     onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
                     onMouseLeave={(e) => e.currentTarget.style.opacity = '0.7'}
                     title="Retirer cet article"
+                    aria-label="Retirer cet article"
                   >
                     <Trash2 size={18} />
                   </button>
@@ -219,15 +212,7 @@ export default function Cart({ cartItems, onUpdateQty, onRemoveItem, onNavigate 
 
           {/* Checkout Summary Box */}
           <div 
-            style={{
-              background: 'var(--bg-glass)',
-              border: '1.5px solid var(--primary-gold)',
-              borderRadius: '16px',
-              padding: '2rem',
-              boxShadow: 'var(--shadow-premium)',
-              color: 'var(--text-primary)',
-              position: 'relative'
-            }}
+            className="cart-summary-box"
           >
             <h2 style={{ fontSize: '1.4rem', fontWeight: '800', borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem', marginBottom: '1.5rem' }}>
               Résumé de la commande

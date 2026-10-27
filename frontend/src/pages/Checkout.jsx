@@ -479,6 +479,34 @@ export default function Checkout({ cartItems, onClearCart, onBackToShopping, cur
           </div>
         </div>
 
+        <div style={{ display: 'flex', justifyContent: 'center', margin: '2rem 0 1rem', width: '100%' }}>
+          <a
+            href={`/api/orders/invoice/${orderNumber}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="invoice-download-btn-client"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.5rem',
+              color: 'var(--primary-gold)',
+              fontWeight: 'bold',
+              textDecoration: 'none',
+              fontSize: '0.95rem',
+              border: '1.5px solid var(--primary-gold)',
+              padding: '0.85rem 1.75rem',
+              borderRadius: '30px',
+              backgroundColor: 'rgba(212, 175, 55, 0.08)',
+              boxShadow: '0 4px 12px rgba(212, 175, 55, 0.15)',
+              transition: 'all 0.2s',
+              textAlign: 'center'
+            }}
+          >
+            📄 Télécharger ma Facture (PDF / Impression)
+          </a>
+        </div>
+
         <div className="success-actions">
           <button className="continue-shopping-btn" onClick={onBackToShopping}>
             Continuer mes achats

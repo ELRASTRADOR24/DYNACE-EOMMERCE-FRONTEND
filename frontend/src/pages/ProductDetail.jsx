@@ -364,15 +364,17 @@ export default function ProductDetail({ product, onBack, onAddToCart, onBuyNow, 
                       backgroundColor: 'var(--primary-green)',
                       color: '#fff',
                       border: 'none',
-                      padding: '0.55rem 0.95rem',
-                      borderRadius: '6px',
-                      fontSize: '0.82rem',
-                      fontWeight: '600',
+                      padding: '0.65rem 1rem',
+                      borderRadius: '8px',
+                      fontSize: '0.85rem',
+                      fontWeight: '700',
                       cursor: 'pointer',
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '0.35rem',
-                      boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                      justifyContent: 'center',
+                      gap: '0.4rem',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                      flex: '1 1 200px'
                     }}
                   >
                     <ShoppingBag size={15} /> Ajouter la cure ({Math.floor(targetKilos / 2) + 1} boîtes)

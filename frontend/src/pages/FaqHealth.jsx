@@ -120,6 +120,7 @@ export default function FaqHealth({ onNavigate }) {
             >
               <button
                 onClick={() => toggleFaq(index)}
+                className="faq-health-btn"
                 style={{
                   width: '100%',
                   padding: '1.25rem 1.5rem',
@@ -129,10 +130,11 @@ export default function FaqHealth({ onNavigate }) {
                   background: 'none',
                   border: 'none',
                   cursor: 'pointer',
-                  textAlign: 'left'
+                  textAlign: 'left',
+                  gap: '1rem'
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: 1, minWidth: 0 }}>
                   <div style={{
                     backgroundColor: 'rgba(16, 185, 129, 0.1)',
                     color: 'var(--primary-green)',
@@ -140,31 +142,27 @@ export default function FaqHealth({ onNavigate }) {
                     borderRadius: '8px',
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'center'
+                    justifyContent: 'center',
+                    flexShrink: 0
                   }}>
                     <IconComp size={20} />
                   </div>
-                  <div>
-                    <span style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--primary-green)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  <div style={{ minWidth: 0 }}>
+                    <span style={{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--primary-green)', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block' }}>
                       {item.category}
                     </span>
-                    <h3 style={{ fontSize: '1.05rem', fontWeight: '700', color: 'var(--text-primary)', marginTop: '0.2rem', margin: 0 }}>
+                    <h3 style={{ fontSize: '1.05rem', fontWeight: '700', color: 'var(--text-primary)', marginTop: '0.2rem', margin: 0, wordBreak: 'break-word' }}>
                       {item.question}
                     </h3>
                   </div>
                 </div>
-                {isOpen ? <ChevronUp size={20} style={{ color: 'var(--text-secondary)' }} /> : <ChevronDown size={20} style={{ color: 'var(--text-secondary)' }} />}
+                <div style={{ flexShrink: 0 }}>
+                  {isOpen ? <ChevronUp size={20} style={{ color: 'var(--text-secondary)' }} /> : <ChevronDown size={20} style={{ color: 'var(--text-secondary)' }} />}
+                </div>
               </button>
 
               {isOpen && (
-                <div style={{
-                  padding: '0 1.5rem 1.25rem 4.25rem',
-                  color: 'var(--text-secondary)',
-                  fontSize: '0.92rem',
-                  lineHeight: '1.7',
-                  borderTop: '1px dashed var(--border-color)',
-                  paddingTop: '1rem'
-                }}>
+                <div className="faq-health-answer">
                   {item.answer}
                 </div>
               )}
